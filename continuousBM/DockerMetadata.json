@@ -1,0 +1,10 @@
+[
+  {
+    "name": "tentris",
+    "repositoryName": "dicegroup/tentris_server",
+    "command": "curl https://registry.hub.docker.com/v1/repositories/dicegroup/tentris_server/tags",
+    "port": "9080",
+    "dataset": "sp2b.nt",
+    "queriesFilePath": "sp2b.txt"
+  }
+]
