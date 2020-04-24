@@ -1,0 +1,9 @@
+[
+{
+  "name": "Tentris",
+  "command": "curl https://api.github.com/repos/dice-group/tentris/tags",
+  "port": "9080",
+  "dataset": "sp2b.nt",
+  "queriesFilePath": "sp2b.txt"
+}
+]
