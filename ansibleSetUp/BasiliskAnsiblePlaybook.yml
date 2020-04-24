@@ -1,0 +1,50 @@
+---
+- hosts: basilisk
+  tasks:
+          - name: Download Basilisk.
+            git:
+                  repo: https://github.com/ranjithmasthikatte/Basilisk.git
+                  dest: /home/dss/testingAnsible/
+                  version: feature/DockerHook
+
+          - name: Download Iguana and unzip it.
+            unarchive:
+                    src: https://github.com/dice-group/IGUANA/releases/download/v3.0.0-alpha2/iguana-single-run.zip
+                    dest: /home/dss/testingAnsible/continuousBM/iguana/
+                    remote_src: yes
+                    extra_opts: "-j"
+
+          - name: Make jar file executable.
+            file:
+                    path: /home/dss/testingAnsible/continuousBM/iguana/iguana-run.jar
+                    mode: "u=rwx,g=rx,o=r"
+
+          - name: Create benchmarking workspace.
+            file:
+                    path: /home/dss/testingAnsible/continuousBM/bmWorkSpace/
+                    state: directory
+                    mode: "u=rwx,g=rwx,o=rx"
+
+          - name: Create results directory.
+            file:
+                    path: /home/dss/testingAnsible/continuousBM/results/
+                    state: directory
+                    mode: "u=rwx,g=rwx,o=rx"
+
+          - name: Create testdata directory.
+            file:
+                    path: /home/dss/testingAnsible/continuousBM/testDataSet/
+                    state: directory
+                    mode: "u=rwx,g=rwx,o=rx"
+
+          - name: Create log directory.
+            file:
+                    path: /home/dss/testingAnsible/logs/
+                    state: directory
+                    mode: "u=rwx,g=rwx,o=rx"
+
+          - name: Maven build.
+            shell: "mvn clean package"
+            register: mvn_result
+            args:
+                    chdir: /home/dss/testingAnsible/
