@@ -1,0 +1,6 @@
+de.upb.dss.basilisk
+de.upb.dss.basilisk.bll.applicationProperties
+de.upb.dss.basilisk.bll.benchmark
+de.upb.dss.basilisk.bll.dockerHook
+de.upb.dss.basilisk.bll.gitHook
+de.upb.dss.basilisk.controllers
