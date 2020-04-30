@@ -1,15 +1,16 @@
 package de.upb.dss.basilisk.bll.dockerHook;
 
+import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForDockerHook;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -81,26 +82,13 @@ public class ContinuousDeliveryDockerHook {
      * @throws IOException   If I/O error occurs while running the command to pull the docker image.
      */
     public void updateTagList() throws JSONException, IOException {
-        this.alreadyBenchmarkedTagList.add(this.currentBenchmarkedTag);
-        try {
-            for (int i = 0; i < this.dockerHookBenchmarkedFileData.length(); i++) {
-                JSONObject jsonObj = this.dockerHookBenchmarkedFileData.getJSONObject(i);
-                if (jsonObj.has(this.currentTripleStore)) {
-                    jsonObj.put(this.currentTripleStore, this.alreadyBenchmarkedTagList);
-                    this.dockerHookBenchmarkedFileData.put(i, jsonObj);
-                }
-            }
 
-            FileWriter f = new FileWriter(this.continuousBmPath + this.dockerHookBenchmarkedFileName, false);
-            f.write(this.dockerHookBenchmarkedFileData.toString(2));
-            f.close();
-        } catch (FileNotFoundException e) {
-            this.updateErrorLog("Benchmarked.json file could not updated", e.toString());
-            e.printStackTrace();
-        } catch (JSONException e) {
-            this.updateErrorLog("Could be a JSON file parsing issue", e.toString());
-            e.printStackTrace();
-        }
+        this.alreadyBenchmarkedTagList.add(this.currentBenchmarkedTag);
+
+        this.dockerHookBenchmarkedFileData = YamlUtils.addTagToDockerBenchmarkedAttempted(this.dockerHookBenchmarkedFileData,
+                this.currentBenchmarkedTag,
+                this.currentTripleStore);
+
         try {
             this.clearDockerEnv();
         } catch (Exception e) {
@@ -118,6 +106,7 @@ public class ContinuousDeliveryDockerHook {
         //Todo: Run the benchmarking process on the currently pulled docker image.
         BenchmarkForDockerHook.runBenchmarkForDockerHook(currentPortNum, currentTripleStore, currentDatasetFilePath,
                 currentQueriesFilePath, currentRepoName, currentBenchmarkedTag);
+        System.out.println("Running benchmark");
 
         try {
             this.updateTagList();
@@ -242,15 +231,9 @@ public class ContinuousDeliveryDockerHook {
      */
     public int forEachStore() throws InterruptedException {
         try {
-            this.dockerHookBenchmarkedFileData = new JSONArray(new String(
-                    Files.readAllBytes(
-                            Paths.get(this.continuousBmPath + this.dockerHookBenchmarkedFileName)),
-                    StandardCharsets.UTF_8));
+            this.dockerHookBenchmarkedFileData = YamlUtils.getDockerBenchmarkAttempted();
 
-            JSONArray metaDataFileArray = new JSONArray(new String(
-                    Files.readAllBytes(
-                            Paths.get(this.continuousBmPath + this.dockerHookMetadataFileName)),
-                    StandardCharsets.UTF_8));
+            JSONArray metaDataFileArray = YamlUtils.getDockerMetaData();
 
             for (int i = 0; i < metaDataFileArray.length(); i++) {
                 JSONObject singleStoreMetaData = metaDataFileArray.getJSONObject(i);
@@ -259,7 +242,6 @@ public class ContinuousDeliveryDockerHook {
                 this.currentPortNum = (String) singleStoreMetaData.get("port");
                 this.currentDatasetFilePath = (String) singleStoreMetaData.get("dataset");
                 this.currentQueriesFilePath = (String) singleStoreMetaData.get("queriesFilePath");
-                System.out.println(this.currentTripleStore);
                 System.out.println("Currently checking for this triple store: " + this.currentTripleStore);
                 this.alreadyBenchmarkedTagList = this.getBenchmarkedDetails(this.currentTripleStore);
                 JSONArray dockerHubTagsJsonArray = this.getDockerHubTags((String) singleStoreMetaData.get("command"));

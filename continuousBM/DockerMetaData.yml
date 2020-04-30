@@ -1,0 +1,16 @@
+# Metadata for the docker hook.
+---
+DockerMetaData:
+- name: "tentris"
+  repositoryName: "dicegroup/tentris_server"
+  command: "curl https://registry.hub.docker.com/v1/repositories/dicegroup/tentris_server/tags"
+  port: "9080"
+  dataset: "sp2b.nt"
+  queriesFilePath: "sp2b.txt"
+
+- name: "virtuoso"
+  repositoryName: "tenforce/virtuoso"
+  command: "curl https://registry.hub.docker.com/v1/repositories/tenforce/virtuoso/tags"
+  port: "1111"
+  dataset: "sp2b.nt"
+  queriesFilePath: "sp2b.txt"

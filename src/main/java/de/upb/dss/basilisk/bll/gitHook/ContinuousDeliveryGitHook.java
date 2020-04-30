@@ -1,25 +1,18 @@
 package de.upb.dss.basilisk.bll.gitHook;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Calendar;
-
+import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForGitHook;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * This is the hook for Git hub for Continuous benchmarking process(CPB).
@@ -97,25 +90,12 @@ public class ContinuousDeliveryGitHook {
      */
     public void updateVersionList() throws JSONException, IOException {
         this.alreadyBenchmarkedVersionsList.add(this.currentBenchmarkedVersion);
-        try {
-            for (int i = 0; i < this.gitHookBenchmarkedFileData.length(); i++) {
-                JSONObject jsonObj = this.gitHookBenchmarkedFileData.getJSONObject(i);
-                if (jsonObj.has(this.currentTripleStore)) {
-                    jsonObj.put(this.currentTripleStore, this.alreadyBenchmarkedVersionsList);
-                    this.gitHookBenchmarkedFileData.put(i, jsonObj);
-                }
-            }
+        YamlUtils.addVersionToGitBenchmarkedAttempted(
+                this.gitHookBenchmarkedFileData,
+                this.currentBenchmarkedVersion,
+                this.currentTripleStore
+        );
 
-            FileWriter f = new FileWriter(this.continuousBmPath + this.gitHookBenchmarkedFileName, false);
-            f.write(this.gitHookBenchmarkedFileData.toString(2));
-            f.close();
-        } catch (FileNotFoundException e) {
-            this.updateErrorLog("Benchmarked.json file could not updated", e.toString());
-            e.printStackTrace();
-        } catch (JSONException e) {
-            this.updateErrorLog("Could be a JSON file parsing issue", e.toString());
-            e.printStackTrace();
-        }
         try {
             this.delRepository();
         } catch (Exception e) {
@@ -141,6 +121,7 @@ public class ContinuousDeliveryGitHook {
                 obj.unzipGeneric(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath);
             }
 
+            System.out.println("Running benchmark");
             BenchmarkForGitHook.runBenchmark(this.currentPortNum, this.currentTripleStore, this.currentDatasetFilePath,
                     this.currentQueriesFilePath, this.currentBenchmarkedVersion.replace(" ", ""));
         } else {
@@ -199,6 +180,7 @@ public class ContinuousDeliveryGitHook {
         for (int i = 0; i < githubJsonArray.length(); i++) {
             try {
                 JSONObject versionObj = githubJsonArray.getJSONObject(i);
+                System.out.println("Redundant = " + benchmarkedVersionsList);
                 if (!benchmarkedVersionsList.contains(versionObj.get("name"))) {
                     this.delRepository();
                     this.currentBenchmarkedVersion = (String) versionObj.get("name");
@@ -290,15 +272,10 @@ public class ContinuousDeliveryGitHook {
     public int forEachStore() throws IOException, InterruptedException {
 
         try {
-            this.gitHookBenchmarkedFileData = new JSONArray(new String(
-                    Files.readAllBytes(
-                            Paths.get(this.continuousBmPath + this.gitHookBenchmarkedFileName)),
-                    StandardCharsets.UTF_8));
+            this.gitHookBenchmarkedFileData = YamlUtils.getGitBenchmarkAttempted();
 
-            JSONArray metadataFileArray = new JSONArray(new String(
-                    Files.readAllBytes(
-                            Paths.get(this.continuousBmPath + this.gitHookMetadataFileName)),
-                    StandardCharsets.UTF_8));
+            System.out.println(this.gitHookBenchmarkedFileData);
+            JSONArray metadataFileArray = YamlUtils.getGitMetaData();
 
             for (int i = 0; i < metadataFileArray.length(); i++) {
                 JSONObject jsonObj = metadataFileArray.getJSONObject(i);
@@ -308,6 +285,7 @@ public class ContinuousDeliveryGitHook {
                 this.currentQueriesFilePath = (String) jsonObj.get("queriesFilePath");
                 System.out.println("Currently checking for this triple store: " + this.currentTripleStore);
                 this.alreadyBenchmarkedVersionsList = this.getBenchmarkedDetails(this.currentTripleStore);
+                System.out.println(this.alreadyBenchmarkedVersionsList);
                 JSONArray githubJsonArray = this.getGithubTags((String) jsonObj.get("command"));
                 this.check(githubJsonArray, this.alreadyBenchmarkedVersionsList);
             }
