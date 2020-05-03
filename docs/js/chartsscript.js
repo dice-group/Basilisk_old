@@ -1,3 +1,6 @@
+/**
+ * Collapse and show menu to view graphs on full screen
+ */
 $(document).ready(function () {
   $("#close").click(function () {
     $("#menuId").slideUp("medium");
@@ -10,6 +13,12 @@ $(document).ready(function () {
     $("#close").show();
   });
 });
+
+/**
+ * Set the properties of the graphs
+ *
+ * @param {String} temp - contains the graph which is to display
+ */
 function move(temp) {
   if (temp == 'bar') {
     $("#boxplot_chart").slideUp("medium");
@@ -36,24 +45,44 @@ function move(temp) {
     $("#other_stats").slideDown("medium");
   }
 }
+
+
 var noofclients=["1","4","8","16","32"];
 var dataset_available=[];
 var connectionstring="http://131.234.28.165:3030";
     var datastore=""; //nodefault
     var postconnection="/sparql?query=";
+    /**
+     * Query to fetch the number of clients
+     */
     var queryclient="SELECT  ?client "+
                     "WHERE {"+
                     "?query <http://iguana-benchmark.eu/properties/noOfWorkers> ?client ."+
                     "}";
+
+    /**
+     * Query to fetch the QPS
+     */
     var queryavgqps="SELECT AVG( ?qps )"+
                     "WHERE {"+
                     "?query <http://iguana-benchmark.eu/properties/queriesPerSecond> ?qps ."+
                     "}";
+
+    /**
+     * Query to fetch the version number of dataset
+     */
     var queryVersionNo="SELECT ?name "+
                     "{"+
                     "?query <http://iguana-benchmark.eu/properties/connection> ?name ."+
                     "}";
+
+
 var counter;
+/**
+ * Generate the graphs based on CSV file
+ *
+ * @param {Function} createGraph - Generates the graphs
+ */
 function parseData(createGraph) {
 	Papa.parse("http://131.234.28.165:3000/expected_csv.csv", {
 		download: true,
@@ -63,6 +92,11 @@ function parseData(createGraph) {
 	});
 }
 
+/**
+ * Split the data into seperate arrays for every triple stores of each datasets
+ * and set properties of the graphs based on the results
+ * @param {Array} data - Results in form of 2D array
+ */
 function createGraph(data) {
   var triplestoreTentris = ['Tentris'];
   var triplestoreFuseki = ['Fuseki'];
@@ -137,9 +171,10 @@ function createGraph(data) {
     }
 
     }
-
-
-	}
+  }
+  /**
+   * Set properties of the bar chart
+   */
   var bar_chart = c3.generate({
     bindto: '#bar_chart',
     data: {
@@ -174,8 +209,6 @@ function createGraph(data) {
         width: {
             ratio: 0.5 // this makes bar width 50% of length between ticks
         }
-        // or
-        //width: 100 // this makes bar width 100px
     },
     tooltip: {
       format: {
@@ -184,6 +217,9 @@ function createGraph(data) {
   }
 });
 
+/**
+ * Set properties of the boxplot for SWDF dataset
+ */
 var areachart1 = c3.generate({
   bindto:"#boxplot_chart1",
   data: {
@@ -196,7 +232,6 @@ var areachart1 = c3.generate({
         Tentris: 'area-spline',
         Fuseki: 'area-spline',
         Virtuoso:'area-spline'
-          // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
       },
       groups: [['Tentris', 'Fuseki','Virtuoso']]
   },
@@ -225,8 +260,11 @@ var areachart1 = c3.generate({
         title: function (d) { return "No of clients " + noofclients[d] },
     }
 }
-
 });
+
+/**
+ * Set properties of the boxplot for DPpedia dataset
+ */
 var areachart2 = c3.generate({
   bindto:"#boxplot_chart2",
   data: {
@@ -239,7 +277,6 @@ var areachart2 = c3.generate({
         Tentris: 'area-spline',
         Fuseki: 'area-spline',
         Virtuoso:'area-spline'
-          // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
       },
       groups: [['Tentris', 'Fuseki','Virtuoso']]
   },
@@ -268,8 +305,11 @@ var areachart2 = c3.generate({
         title: function (d) { return "No of clients " + noofclients[d] },
     }
 }
-
 });
+
+/**
+ * Set properties of the boxplot for WatDiv dataset
+ */
 var areachart3 = c3.generate({
   bindto:"#boxplot_chart3",
   data: {
@@ -282,7 +322,6 @@ var areachart3 = c3.generate({
         Tentris: 'area-spline',
         Fuseki: 'area-spline',
         Virtuoso:'area-spline'
-          // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
       },
       groups: [['Tentris', 'Fuseki','Virtuoso']]
   },
@@ -311,9 +350,11 @@ var areachart3 = c3.generate({
         title: function (d) { return "No of clients " + noofclients[d] },
     }
 }
-
 });
 
+/**
+ * Set properties of the line for SWDF dataset
+ */
 var chart1 = c3.generate({
   bindto: '#line_chart1',
   title: {
@@ -344,6 +385,10 @@ var chart1 = c3.generate({
     }
   }
 });
+
+/**
+ * Set properties of the line chart for DBpedia
+ */
 var chart2 = c3.generate({
   bindto: '#line_chart2',
   title: {
@@ -374,6 +419,10 @@ var chart2 = c3.generate({
     }
   }
 });
+
+/**
+ * Set properties of the line chart for WatDiv dataset
+ */
 var chart3 = c3.generate({
   bindto: '#line_chart3',
   title: {
@@ -387,7 +436,6 @@ var chart3 = c3.generate({
           wattriplestoreTentris,
           wattriplestoreVirtuso,
           wattriplestoreFuseki
-
       ]
   },
   axis: {
@@ -416,17 +464,26 @@ var versionCheck = false;
 var versionIndex;
 var noOfClients;
 
-
+/**
+ * Download results as a csv file
+ */
 function downloadCsv(){
   window.open('../all_results.csv', 'Download');
-
   }
+
+  /**
+   * Download results as RDF file
+   */
   function downloadRdf(){
     window.open('../results_task_2-1-1.nt', 'Download');
-
     }
 
 
+  /**
+   * Retrieve available datasets
+   *
+   * @param {String} datasetstring - Datasets available on the server
+   */
   function datasets(datasetstring)
   {
     for(var i=0; i<=datasetstring.data.datasets.length-1; i++)
@@ -436,6 +493,10 @@ function downloadCsv(){
 
     getResults();
 
+
+  /**
+   * Run the query to get number of clients for all datasets
+   */
   function getResults()
   {
     var deferred = $.Deferred();
@@ -458,64 +519,84 @@ function downloadCsv(){
   }
 
 
-    async function runQueries(URL, datasetNo){
+  /**
+   * Runs query to get the version number
+   *
+   * @param {String} URL - Query converted into URL
+   * @param {Number} datasetNo - Number of dataset
+   */
+  async function runQueries(URL, datasetNo){
 
-      var querystringforVersion=connectionstring+dataset_available[datasetNo]+postconnection+encodeURI(queryVersionNo);
-      versionQueryResponse = await axios({
-        method: 'get',
-        url: querystringforVersion})
-      .then(res => {return res})
-      .catch(err => console.log(err));
+    var querystringforVersion=connectionstring+dataset_available[datasetNo]+postconnection+encodeURI(queryVersionNo);
+    versionQueryResponse = await axios({
+      method: 'get',
+      url: querystringforVersion})
+    .then(res => {return res})
+    .catch(err => console.log(err));
 
-      getVersion(versionQueryResponse);
+    getVersion(versionQueryResponse);
 
-      response = await axios({
-        method: 'get',
-        url: URL})
-      .then(res => {return res})
-      .catch(err => console.log(err));
+    response = await axios({
+      method: 'get',
+      url: URL})
+    .then(res => {return res})
+    .catch(err => console.log(err));
 
-      getClient(response);
+    getClient(response);
     }
 
-    }
+  }
 
-    function getVersion(res)
-    {
-      resultIs = res.data.results.bindings[0]["name"].value;
-      version = resultIs.substring(resultIs.lastIndexOf('/') + 1)
-      for(var i=0; i<arr.length; i++){
-        if(arr[i][0] == version){    //check if version already exists in 2D array
-          versionCheck = true;
-          versionIndex = i;
-          return;
-        }
+  /**
+   * Retrieve version number from the response and push it to the 2D array
+   *
+   * @param {Object} res - Response to the query to get verion number
+   */
+  function getVersion(res)
+  {
+    resultIs = res.data.results.bindings[0]["name"].value;
+    version = resultIs.substring(resultIs.lastIndexOf('/') + 1);
+    for(var i=0; i<arr.length; i++){
+      if(arr[i][0] == version){    //check if version already exists in 2D array
+        versionCheck = true;
+        versionIndex = i;
+        return;
       }
-
-      arr.push([]); //for a new version, add new row in the 2D array
-      recordIndex=recordIndex+1
-      arr[recordIndex][0] = version;
-      arr[recordIndex][1] = version.substring(0, version.lastIndexOf('$'));
-      versionCheck = true;
-      versionIndex = i;
     }
 
-    async function getClient(clients){
-        noOfClients = clients.data.results.bindings[0].client.value;
+    arr.push([]); //for a new version, add new row in the 2D array
+    recordIndex=recordIndex+1
+    arr[recordIndex][0] = version;
+    arr[recordIndex][1] = version.substring(0, version.lastIndexOf('$'));
+    versionCheck = true;
+    versionIndex = i;
+  }
 
-        var querystringforqps=connectionstring+dataset_available[counter]+postconnection+encodeURI(queryavgqps);
+  /**
+   * Retrieve number of clients from the query response and run QPS query
+   *
+   * @param {Object} clients - Response to the client's query
+   */
+  async function getClient(clients){
+    noOfClients = clients.data.results.bindings[0].client.value;
 
-        axios({
-          method: 'get',
-          url: querystringforqps})
-        .then(res => getQPS(res))
-        .catch(err => console.log(err));
-    }
+      var querystringforqps=connectionstring+dataset_available[counter]+postconnection+encodeURI(queryavgqps);
 
-    function getQPS(res) //get QPS and save it at the correct index in 2D array
-    {
+      axios({
+        method: 'get',
+        url: querystringforqps})
+      .then(res => getQPS(res))
+      .catch(err => console.log(err));
+  }
+
+  /**
+   * get QPS and save it at the correct index in 2D array
+   *
+   * @param {Object} res - Response to the QPS query
+   */
+  function getQPS(res)
+  {
       AQPS = res.data.results.bindings[0][".1"].value;
-      //console.log("version, arrayIndex of version, No of clients, AQPS:", version, versionIndex, noOfClients, AQPS)
       switch (noOfClients) {
         case "1":
           arr[versionIndex][2] = AQPS;
@@ -533,54 +614,37 @@ function downloadCsv(){
           arr[versionIndex][6] = AQPS
           break;
       }
+  }
 
+  /**
+   * Retrieve the list of datasets from the server
+   */
+  function get2dArray() {
+    var datasetsstring="http://131.234.28.165:3030/$/datasets";
 
-    }
+    axios({
+      method: 'get',
+      url: datasetsstring})
+    .then(res => datasets(res))
+    .catch(err => console.log(err));
+    setTimeout(function(){
+      console.log("array: ",arr);
+      return arr;
+    }, 5000);
 
-    function get2dArray() {
-      var datasetsstring="http://131.234.28.165:3030/$/datasets";
+  }
 
-      axios({
-          method: 'get',
-          url: datasetsstring})
-        .then(res => datasets(res))
-        .catch(err => console.log(err));
-      setTimeout(function(){
-        console.log("array: ",arr);
-        return arr;
-      }, 5000);
-
-    }
-
-    function displayGraph()
+  /**
+   * Display the graph for selected versions when user press 'Submit' button
+   */
+  function displayGraph()
     {
       var e = document.getElementById("TentrisVersion");
       var TentrisVersionSelected = e.options[e.selectedIndex].value;
-      if(TentrisVersionSelected=="")
-      {
-
-        alert("please select version for Tentris");
-      }
       TentrisVersionSelected="Tentris$"+TentrisVersionSelected;
-
-
-      /*var e = document.getElementById("FusekiVersion");
-      var FusekiVersionSelected = e.options[e.selectedIndex].value;
-      if(FusekiVersionSelected==null)
-      {
-
-        alert("please select version for Fuseki");
-      }
-      FusekiVersionSelected="fuseki$"+FusekiVersionSelected;*/
-
 
       var e = document.getElementById("VirtuosoVersion");
       var VirtuosoVersionSelected = e.options[e.selectedIndex].value;
-      if(VirtuosoVersionSelected=="")
-      {
-
-        alert("please select version for Virtuoso");
-      }
       VirtuosoVersionSelected="Virtuoso$"+VirtuosoVersionSelected;
 
       var TentrisArrayNumber=0;
@@ -601,31 +665,30 @@ function downloadCsv(){
           triplestoreVirtuso=arr[VirtuosoArrayNumber];
           triplestoreVirtuso=triplestoreVirtuso.slice(1,7);
 
-        }/*else
-        if(arr[i][0] == FusekiVersionSelected){
-          FusekiArrayNumber=i;
-          triplestoreFuseki=arr[FusekiArrayNumber];
-          triplestoreFuseki=triplestoreFuseki.slice(1,7);
-        }*/
+        }
       }
 
-      }
+    }
 
       console.log(FusekiArrayNumber+ "  "+ triplestoreFuseki);
 
-
       console.log(triplestoreVirtuso);
-
-
 
       generatebargraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki);
       generateareagraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki);
       generatelinegraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki);
 
-    }
-    function generatebargraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
-    {
+  }
 
+  /**
+   * Generates bar graph for the selected versions of dataset
+   *
+   * @param {Array} triplestoreTentris - Contains data related to tentris graph
+   * @param {Array} triplestoreVirtuso - Contains data related to Virtuoso graph
+   * @param {Array} triplestoreFuseki - Contains data related to Fuseki graph
+   */
+  function generatebargraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
+    {
 
       var bar_chart = c3.generate({
         bindto: '#bar_chart',
@@ -666,8 +729,6 @@ function downloadCsv(){
             width: {
                 ratio: 0.5 // this makes bar width 50% of length between ticks
             }
-            // or
-            //width: 100 // this makes bar width 100px
         },
         tooltip: {
           format: {
@@ -678,7 +739,15 @@ function downloadCsv(){
 
 
     }
-    function generateareagraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
+
+  /**
+  * Generates area graph for the selected versions of dataset
+  *
+  * @param {Array} triplestoreTentris - Contains data related to tentris graph
+  * @param {Array} triplestoreVirtuso - Contains data related to Virtuoso graph
+  * @param {Array} triplestoreFuseki - Contains data related to Fuseki graph
+  */
+  function generateareagraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
     {
       var areachart = c3.generate({
         bindto:"#boxplot_chart",
@@ -692,7 +761,7 @@ function downloadCsv(){
               Tentris: 'area',
               //fuseki: 'area-spline',
               Virtuoso:'area-spline'
-                // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
+              // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
             },
             groups: [['Tentris','Virtuoso']]
         },
@@ -730,7 +799,15 @@ function downloadCsv(){
       });
 
     }
-    function generatelinegraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
+
+  /**
+  * Generates line graph for the selected versions of dataset
+  *
+  * @param {Array} triplestoreTentris - Contains data related to tentris graph
+  * @param {Array} triplestoreVirtuso - Contains data related to Virtuoso graph
+  * @param {Array} triplestoreFuseki - Contains data related to Fuseki graph
+  */
+  function generatelinegraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
     {
       var chart1 = c3.generate({
         bindto: '#line_chart',
@@ -744,7 +821,6 @@ function downloadCsv(){
                 triplestoreTentris,
                 triplestoreVirtuso,
                 //triplestoreFuseki
-
             ]
         },
         size:{
@@ -769,12 +845,16 @@ function downloadCsv(){
       });
 
     }
-    function clearGraph()
-    {
-      window.location.reload()
-    }
 
-    get2dArray();
+  /**
+   * Reload the window to clear all the graphs
+   */
+  function clearGraph()
+  {
+    window.location.reload()
+  }
+
+  get2dArray();
 
 
 //parseData(createGraph);
