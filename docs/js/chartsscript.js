@@ -508,10 +508,11 @@ function downloadCsv(){
           runQueries(querystringforclient, i);
 
           i++;
-          setTimeout(nextStep, 200);
+          setTimeout(nextStep, 300);
         }
         else {
-            deferred.resolve(i);
+          arr.forEach(testData);
+          deferred.resolve(i);
         }
     }
     nextStep();
@@ -632,7 +633,30 @@ function downloadCsv(){
       return arr;
     }, 5000);
 
-  }
+   }
+
+   /**
+    * Checks if the data is completely loaded for all the triplestores
+    * If not, it will run the queries again to fill the missing data
+    *
+    * @param {Array} item - Array containing data related to dataset
+    * @param {Number} index - index of the array
+    */
+   function testData(item, index){
+     error = false;
+     for(var i=0; i<item.length; i++){
+       if(item[i] == null){
+         error = true;
+       }
+      }
+      if(error == true){
+        get2dArray();
+        return;
+      }
+      else{
+      }
+    }
+
 
   /**
    * Display the graph for selected versions when user press 'Submit' button
@@ -641,11 +665,11 @@ function downloadCsv(){
     {
       var e = document.getElementById("TentrisVersion");
       var TentrisVersionSelected = e.options[e.selectedIndex].value;
-      TentrisVersionSelected="Tentris$"+TentrisVersionSelected;
+      TentrisVersionSelected="tentris$"+TentrisVersionSelected;
 
       var e = document.getElementById("VirtuosoVersion");
       var VirtuosoVersionSelected = e.options[e.selectedIndex].value;
-      VirtuosoVersionSelected="Virtuoso$"+VirtuosoVersionSelected;
+      VirtuosoVersionSelected="virtuoso$"+VirtuosoVersionSelected;
 
       var TentrisArrayNumber=0;
       var VirtuosoArrayNumber=0;
@@ -670,9 +694,16 @@ function downloadCsv(){
 
     }
 
-      console.log(FusekiArrayNumber+ "  "+ triplestoreFuseki);
-
-      console.log(triplestoreVirtuso);
+      for(var i=0; i<=5; i++){
+        if(triplestoreTentris[i] == null || triplestoreVirtuso[i] == null){
+          var message = confirm("Data didn't loaded correctly! Do you want to refresh?")
+          if(message == true){
+            document.getElementById("myLoader").style.display = "flex"
+            get2dArray();
+            return;
+          }
+        }
+      }
 
       generatebargraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki);
       generateareagraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki);
@@ -758,9 +789,9 @@ function downloadCsv(){
               //triplestoreFuseki
             ],
             types: {
-              Tentris: 'area',
+              tentris: 'area-spline',
               //fuseki: 'area-spline',
-              Virtuoso:'area-spline'
+              virtuoso:'area-spline'
               // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
             },
             groups: [['Tentris','Virtuoso']]

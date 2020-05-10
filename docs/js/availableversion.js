@@ -78,7 +78,6 @@ async function getdetails(dataset)
  */
 function getversions(res)
 {
-    console.log("res", res)
     resultIs = res.data.results.bindings[0]["name"].value;
     version = resultIs.substring(resultIs.lastIndexOf('/') + 1)
     for(var i=0; i<available_version.length; i++){
