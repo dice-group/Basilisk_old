@@ -650,10 +650,12 @@ function downloadCsv(){
        }
       }
       if(error == true){
+        document.getElementById("myLoader").style.display = "flex"
         get2dArray();
         return;
       }
       else{
+        document.getElementById("myLoader").style.display = "none"
       }
     }
 
