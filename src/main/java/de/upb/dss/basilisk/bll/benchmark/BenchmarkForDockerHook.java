@@ -10,44 +10,35 @@ import java.util.logging.Logger;
  * This class runs the benchmark for the docker hub hook.
  */
 public class BenchmarkForDockerHook {
-    private static Logger logger;
-    private static File bmWorkSpace;
-    private static File iguanaPath;
     private static String logFilePath;
-    private static String configPath;
 
-    private static String tripleStoreName, port, testDataset, queryFile,
-            testDatasetPath, iguanaIdPath, repoName, tag;
+    private static String tripleStoreName;
+    private static String port;
+    private static String testDataset;
+    private static String repoName;
+    private static String tag;
 
     /**
      * This method runs the docker for the triple store and runs the benchmarking process.
      *
-     * @param argPort            Port number on which the triplpe store should run.
+     * @param argPort            Port number on which the triple store should run.
      * @param argTripleStoreName Triple store name.
      * @param argTestDataSet     Test dataset file name.
      * @param argQueryFile       Query file name.
      * @param argRepoName        Repository name.
      * @param argTag             Docker hub repository tag.
-     * @return Status code.
-     * @throws IOException          If fails to read the output of the commands.
-     * @throws InterruptedException If the process is interrupted.
+     * @return Exit code.
      */
     public static int runBenchmarkForDockerHook(String argPort, String argTripleStoreName, String argTestDataSet,
-                                                String argQueryFile, String argRepoName, String argTag) throws InterruptedException, IOException {
+                                                String argQueryFile, String argRepoName, String argTag) {
 
         ApplicationPropertiesUtils myAppUtils = new ApplicationPropertiesUtils();
-        bmWorkSpace = new File(myAppUtils.getBmWorkSpace());
-        iguanaPath = new File(myAppUtils.getIguanaPath());
         logFilePath = myAppUtils.getLogFilePath();
-        configPath = myAppUtils.getConfigPath();
-        testDatasetPath = myAppUtils.getTestDatasetPath();
-        iguanaIdPath = myAppUtils.getIguanaIdPath();
 
         //Set all the required info for running the benchmark.
         tripleStoreName = argTripleStoreName;
         port = argPort;
         testDataset = argTestDataSet;
-        queryFile = argQueryFile;
         repoName = argRepoName;
         tag = argTag;
 
@@ -56,7 +47,7 @@ public class BenchmarkForDockerHook {
 
         if(exitCode == 0) {
             try {
-                IguanaUtils.runIguana(repoName,tag,port,queryFile);
+                IguanaUtils.runIguana(repoName,tag,port, argQueryFile);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -67,20 +58,22 @@ public class BenchmarkForDockerHook {
     /**
      * This method runs the triple store in the docker and continues the benchmarking process.
      *
-     * @return Status code.
-     * @throws IOException          If fails to read the output of the command.
-     * @throws InterruptedException If the process is interrupted.
+     * @return Exit code.
      */
-    public static int runTripleStores() throws IOException, InterruptedException {
+    public static int runTripleStores() {
         int exitCode = 0;
 
         //Initialize the logger to log
-        logger = new LoggerUtils().getLogger(logFilePath, "DockerBenchmark");
+        Logger logger = new LoggerUtils().getLogger(logFilePath, "DockerBenchmark");
 
         logger.info("Running the docker container");
-        if (tripleStoreName.toLowerCase().equals("tentris"))
-            exitCode = DockerUtils.runTentrisDockerImage(port, testDatasetPath, testDataset, repoName,
-                    tag, bmWorkSpace);
+        if (tripleStoreName.toLowerCase().equals("tentris")) {
+            DockerUtils.runTentrisDocker(repoName,tag,port,testDataset);
+        }
+        else if(tripleStoreName.toLowerCase().equals("virtuoso")) {
+            //Todo: Implement Running Virtuoso docker.
+        }
+
 
         return exitCode;
     }

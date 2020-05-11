@@ -1,13 +1,10 @@
 package de.upb.dss.basilisk.bll.benchmark;
 
 import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -18,10 +15,13 @@ public class BenchmarkForGitHook {
     private static Logger logger;
     private static File dockerFile;
     private static File bmWorkSpace;
-    private static File iguanaPath;
-    private static String configPath;
 
-    private static String repoName, port, testDataset, queryFile, tag, testDatasetPath, iguanaIdPath;
+    private static String repoName;
+    private static String port;
+    private static String testDataset;
+    private static String queryFile;
+    private static String tag;
+    private static String testDatasetPath;
 
     /**
      * This method builds the docker image, runs the container and then runs the Iguana
@@ -42,11 +42,8 @@ public class BenchmarkForGitHook {
 
         dockerFile = new File(myAppUtils.getDockerFile());
         bmWorkSpace = new File(myAppUtils.getBmWorkSpace());
-        iguanaPath = new File(myAppUtils.getIguanaPath());
         String logFilePath = myAppUtils.getLogFilePath();
-        configPath = myAppUtils.getConfigPath();
         testDatasetPath = myAppUtils.getTestDatasetPath();
-        iguanaIdPath = myAppUtils.getIguanaIdPath();
 
         //Set all the required info for running the benchmark.
         repoName = argRepoName;
@@ -58,7 +55,7 @@ public class BenchmarkForGitHook {
         logger = myLoggerUtils.getLogger(logFilePath, "GitBenchmark");
 
         //Clear the docker, so that next benchmark can be run.
-        clearDocker();
+        DockerUtils.clearDocker();
 
         //Run the triple stores
         int exitCode = runTripleStores();
@@ -67,7 +64,7 @@ public class BenchmarkForGitHook {
         ResultFileProcessing.renameResults(repoName, tag);
 
         //Clear the docker, so that next benchmark can be run.
-        clearDocker();
+        DockerUtils.clearDocker();
         return exitCode;
     }
 
@@ -122,14 +119,7 @@ public class BenchmarkForGitHook {
 
                 if (repoName.toLowerCase().equals("tentris")) {
                     testDatasetPath = Paths.get(".").toAbsolutePath().normalize().toString() + testDatasetPath;
-                    DockerUtils.runTentrisDockerImage(
-                            port,
-                            testDatasetPath,
-                            testDataset,
-                            repoName,
-                            tag,
-                            bmWorkSpace
-                    );
+                    DockerUtils.runTentrisDocker(repoName,tag,port,testDataset);
                 } else if (repoName.toLowerCase().equals("fuseki")) {
                     DockerUtils.runFuesikiDockerImage(
                             port,
@@ -155,7 +145,8 @@ public class BenchmarkForGitHook {
                 String dockerId = myUnixUtils.getOutput();
 
                 if (dockerId.contains("running")) {
-                    int iguanaExitCode = IguanaUtils.runIguana(repoName,tag,port,queryFile);
+                    int iguanaExitCode = IguanaUtils
+                            .runIguana(repoName,tag,port,queryFile);
 
                     if (iguanaExitCode != 0)
                         return iguanaExitCode;
@@ -175,38 +166,5 @@ public class BenchmarkForGitHook {
             System.exit(-1);
         }
         return 0;
-    }
-
-    /**
-     * This method stops all the docker container and removes all the docker image.
-     */
-    protected static void clearDocker() {
-        try {
-            //Clear the complete docker, so that next benchamrk can be done.
-            //First kill the docker container we ran.
-            String cmd = "docker kill "
-                    + repoName + "_server";
-            Process p = Runtime.getRuntime().exec(cmd, null, iguanaPath);
-            p.waitFor();
-
-            //Second prune the docker system, so that all the stoped container will be removed.
-            cmd = "docker system prune";
-            p = Runtime.getRuntime().exec(cmd, null, iguanaPath);
-
-            //For the above command we will have to give a confirmation "y".
-            OutputStream out = p.getOutputStream();
-            out.write("y".getBytes());
-            out.close();
-            p.waitFor();
-
-            cmd = "docker image rm cbm:"
-                    + repoName;
-            p = Runtime.getRuntime().exec(cmd, null, iguanaPath);
-            p.waitFor();
-        } catch (Exception e) {
-            System.out.println("exception happened - here's what I know: ");
-            e.printStackTrace();
-            System.exit(-1);
-        }
     }
 }

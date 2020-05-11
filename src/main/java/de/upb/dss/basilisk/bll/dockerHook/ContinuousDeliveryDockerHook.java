@@ -2,6 +2,7 @@ package de.upb.dss.basilisk.bll.dockerHook;
 
 import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForDockerHook;
+import de.upb.dss.basilisk.bll.benchmark.DockerUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,6 +73,7 @@ public class ContinuousDeliveryDockerHook {
      */
     public void clearDockerEnv() {
         //Todo: Clear the docker enviornment. All the container and images remove process.
+        DockerUtils.clearDocker();
     }
 
     /**
@@ -123,15 +125,10 @@ public class ContinuousDeliveryDockerHook {
      * @return Status code.
      * @throws IOException If I/O error occurs while running the command to pull the docker image.
      */
-    public int pullDockerImage(String repoName, String tag) throws IOException {
-        Process p = Runtime.getRuntime().exec("docker pull " + repoName + ":" + tag);
+    public boolean pullDockerImage(String repoName, String tag) throws IOException {
+        boolean flag = DockerUtils.pullImage(repoName,tag);
 
-        try {
-            p.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return p.exitValue();
+        return flag;
     }
 
     /**
@@ -150,8 +147,8 @@ public class ContinuousDeliveryDockerHook {
                     this.clearDockerEnv();
                     this.currentBenchmarkedTag = (String) singleTagData.get("name");
                     System.out.println("Benchmarking will run for version: " + this.currentBenchmarkedTag);
-                    int flag = this.pullDockerImage(this.currentRepoName, (String) singleTagData.get("name"));
-                    if (flag == 0) {
+                    boolean flag = this.pullDockerImage(this.currentRepoName, (String) singleTagData.get("name"));
+                    if (flag) {
                         this.benchmark();
                     }
                 }

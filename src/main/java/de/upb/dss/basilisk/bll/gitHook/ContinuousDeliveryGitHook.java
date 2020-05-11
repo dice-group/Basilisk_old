@@ -90,7 +90,7 @@ public class ContinuousDeliveryGitHook {
      */
     public void updateVersionList() throws JSONException, IOException {
         this.alreadyBenchmarkedVersionsList.add(this.currentBenchmarkedVersion);
-        YamlUtils.addVersionToGitBenchmarkedAttempted(
+        this.gitHookBenchmarkedFileData = YamlUtils.addVersionToGitBenchmarkedAttempted(
                 this.gitHookBenchmarkedFileData,
                 this.currentBenchmarkedVersion,
                 this.currentTripleStore
