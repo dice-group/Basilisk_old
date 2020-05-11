@@ -11,10 +11,20 @@ import java.io.*;
 import java.util.Map;
 
 public class YamlUtils {
+
+    /**
+     * This class loads the YAML file into Map.
+     * @param ymlFileStream InputStream to the YAML file.
+     * @return YAML data in Map format.
+     */
     private static Map<String, Object> getYamlData(InputStream ymlFileStream) {
         return new Yaml().load(ymlFileStream);
     }
 
+    /**
+     * This method retrieves the data from DockerBenchmarkAttempted.yml file and convert it into JSONArray.
+     * @return Data from DockerBenchmarkAttempted.yml file in JSONArray format.
+     */
     public static JSONArray getDockerBenchmarkAttempted() {
 
         try {
@@ -31,6 +41,10 @@ public class YamlUtils {
         return new JSONArray("[]");
     }
 
+    /**
+     * This method retrieves the data from GitBenchmarkAttempted.yml file and convert it into JSONArray.
+     * @return Data from GitBenchmarkAttempted.yml file in JSONArray format.
+     */
     public static JSONArray getGitBenchmarkAttempted() {
 
         try {
@@ -47,6 +61,10 @@ public class YamlUtils {
         return new JSONArray("[]");
     }
 
+    /**
+     * This method retrieves the data from GitMetaData.yml file and convert it into JSONArray.
+     * @return Data from GitMetaData.yml file in JSONArray format.
+     */
     public static JSONArray getGitMetaData() {
 
         try {
@@ -63,6 +81,10 @@ public class YamlUtils {
         return new JSONArray("[]");
     }
 
+    /**
+     * This method retrieves the data from DockerMetaData.yml file and convert it into JSONArray.
+     * @return Data from DockerMetaData.yml file in JSONArray format.
+     */
     public static JSONArray getDockerMetaData() {
 
         try {
@@ -79,6 +101,14 @@ public class YamlUtils {
         return new JSONArray("[]");
     }
 
+    /**
+     * This method updates the YAML file.
+     * @param oldFileData Data from the YAML file before updating the file.
+     * @param newTag New Tag or Version to be added to the old data.
+     * @param tripleStoreName Triple Store name to which the new tag must be added.
+     * @param hook To which hook must be updated. 1 means Git hook. 2 means Docker hook.
+     * @return Returns the updated data.
+     */
     private static JSONArray updateYamlFile(JSONArray oldFileData, String newTag, String tripleStoreName, int hook) {
         JSONArray oldData = oldFileData;
 
@@ -127,10 +157,24 @@ public class YamlUtils {
         return oldData;
     }
 
+    /**
+     * This method updates the YAML file for Docker hook.
+     * @param oldData Data from the YAML file before updating the file.
+     * @param newTag New Tag or Version to be added to the old data.
+     * @param tripleStoreName Triple Store name to which the new tag must be added.
+     * @return Returns the updated data.
+     */
     public static JSONArray addTagToDockerBenchmarkedAttempted(JSONArray oldData, String newTag, String tripleStoreName) {
         return updateYamlFile(oldData, newTag, tripleStoreName, 2);
     }
 
+    /**
+     * This method updates the YAML file for Git hook.
+     * @param oldData Data from the YAML file before updating the file.
+     * @param newTag New Tag or Version to be added to the old data.
+     * @param tripleStoreName Triple Store name to which the new tag must be added.
+     * @return Returns the updated data.
+     */
     public static JSONArray addVersionToGitBenchmarkedAttempted(JSONArray oldData, String newTag, String tripleStoreName) {
         return updateYamlFile(oldData, newTag, tripleStoreName, 1);
     }
