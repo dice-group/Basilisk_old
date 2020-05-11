@@ -53,6 +53,14 @@ public class BenchmarkForDockerHook {
 
         //Run the triple stores
         int exitCode = runTripleStores();
+
+        if(exitCode == 0) {
+            try {
+                IguanaUtils.runIguana(repoName,tag,port,queryFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return exitCode;
     }
 
