@@ -84,14 +84,7 @@ public class BenchmarkForGitHook {
             logger.info("Trying to build the docker image.\n");
             System.out.println(dockerFile.getAbsoluteFile());
             if (dockerFile.exists()) {
-                //Command to build the docker
-                //docker build --tag cbm:${serverName} .
-                cmd = "docker build --tag "
-                        + repoName + ":" + tag
-                        + " .";
-
-                //Run the command through Process.
-                int exitCode = myUnixUtils.runUnixCommand(cmd, bmWorkSpace, true);
+                int exitCode = DockerUtils.buildImage(repoName,tag);
 
                 if (exitCode != 0) {
                     System.out.println("Something went wrong while building the docker");

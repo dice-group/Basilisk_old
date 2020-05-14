@@ -108,28 +108,43 @@ public class ContinuousDeliveryGitHook {
      * This method runs the benchmarking process on the currently downloaded git repository.
      *
      * @throws IOException          If I/O occurs while running the command.
-     * @throws InterruptedException If the process is interrupted.
      */
-    public void benchmark() throws IOException, InterruptedException {
+    public void benchmark() {
         File zipFile = new File(this.bmWorkspacePath + this.currentTripleStore + ".zip");
         String tempStore = this.currentTripleStore;
         if (zipFile.exists()) {
             Extraction obj = new Extraction();
             if (this.currentTripleStore.equalsIgnoreCase("Fuseki")) {
-                obj.unzipJena(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath);
+                try {
+                    obj.unzipJena(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else {
-                obj.unzipGeneric(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath);
+                try {
+                    obj.unzipGeneric(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             System.out.println("Running benchmark");
-            BenchmarkForGitHook.runBenchmark(this.currentPortNum, this.currentTripleStore, this.currentDatasetFilePath,
-                    this.currentQueriesFilePath, this.currentBenchmarkedVersion.replace(" ", ""));
+            try {
+                BenchmarkForGitHook.runBenchmark(this.currentPortNum, this.currentTripleStore, this.currentDatasetFilePath,
+                        this.currentQueriesFilePath, this.currentBenchmarkedVersion.replace(" ", ""));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
             this.updateErrorLog(tempStore + " zip file not found", "");
         }
 
         try {
-            this.updateVersionList();
+            try {
+                this.updateVersionList();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

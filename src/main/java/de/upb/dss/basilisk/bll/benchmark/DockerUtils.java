@@ -7,7 +7,9 @@ import com.github.dockerjava.api.command.ListImagesCmd;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.command.BuildImageResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
+import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +24,10 @@ public class DockerUtils {
     private static DefaultDockerClientConfig.Builder config = null;
     private static DockerClient dockerClient = null;
 
-    public static boolean pullImage(String repoName, String tag) {
+    /**
+     * This method sets up the docker java api be creating all the necessary object for docker java api.
+     */
+    private static void setUpDockerApi() {
         if(config == null) {
             config = DefaultDockerClientConfig.createDefaultConfigBuilder();
         }
@@ -32,6 +37,43 @@ public class DockerUtils {
                     .getInstance(config)
                     .build();
         }
+    }
+
+    /**
+     * This method builds the Docker image.
+     * @param repoName Repository name
+     * @param tag Tag
+     * @return Returns the Status code.
+     */
+    public static int buildImage(String repoName, String tag) {
+        setUpDockerApi();
+
+        String dockerFile = new ApplicationPropertiesUtils().getDockerFile();
+
+        try {
+            String imageId = dockerClient.buildImageCmd()
+                    .withDockerfile(new File(dockerFile))
+                    .withNoCache(true)
+                    .exec(new BuildImageResultCallback())
+                    .awaitImageId();
+
+            dockerClient.tagImageCmd(imageId, repoName, tag).exec();
+        } catch (Exception ex) {
+            System.out.println("Check this : ");
+            ex.printStackTrace();
+            return 100;
+        }
+        return 0;
+    }
+
+    /**
+     * This method pulls the docker image from the docker hub.
+     * @param repoName Image's repository name.
+     * @param tag Image's tag
+     * @return Boolean to indicate whether pull command is success or not.
+     */
+    public static boolean pullImage(String repoName, String tag) {
+        setUpDockerApi();
 
         boolean flag = false;
         try {
@@ -45,49 +87,60 @@ public class DockerUtils {
         return flag;
     }
 
+    /**
+     * This method removes all the container and images.
+     */
     public static void clearDocker() {
-        if(config == null) {
-            config = DefaultDockerClientConfig.createDefaultConfigBuilder();
-        }
+        setUpDockerApi();
 
-        if(dockerClient == null) {
-            dockerClient = DockerClientBuilder
-                    .getInstance(config)
-                    .build();
-        }
-
+        //Delete all the containers
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd();
-        List<Container> exec = listContainersCmd.exec();
+        List<Container> containerList = listContainersCmd.exec();
 
-        Iterator<Container> itr = exec.iterator();
+        Iterator<Container> containerItr = containerList.iterator();
 
-        while(itr.hasNext()) {
-            Container c = itr.next();
-            dockerClient.killContainerCmd(c.getId()).exec();
+        while(containerItr.hasNext()) {
+            Container container = containerItr.next();
+            dockerClient.killContainerCmd(container.getId()).exec();
+            dockerClient.removeContainerCmd(container.getId()).exec();
+        }
+
+        //Remove all the containers which are in exited state.
+        listContainersCmd = dockerClient.listContainersCmd().withStatusFilter("exited");
+        containerList = listContainersCmd.exec();
+
+        containerItr = containerList.iterator();
+
+        while(containerItr.hasNext()) {
+            Container c = containerItr.next();
             dockerClient.removeContainerCmd(c.getId()).exec();
         }
 
         ListImagesCmd listImageCmd = dockerClient.listImagesCmd();
-        List<Image> exe = listImageCmd.exec();
+        List<Image> imageList = listImageCmd.exec();
 
-        Iterator<Image> itrr = exe.iterator();
+        Iterator<Image> imageItr = imageList.iterator();
 
-        while(itrr.hasNext()) {
-            Image c = itrr.next();
+        while(imageItr.hasNext()) {
+            Image c = imageItr.next();
             System.out.println(c.getId());
-            dockerClient.removeImageCmd(c.getId()).exec();
+            try {
+                dockerClient.removeImageCmd(c.getId()).withNoPrune(false).withForce(true).exec();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
-    public static void runTentrisDocker(String repoName, String tag, String port, String dataSetName) {
-        if(config == null) {
-            config = DefaultDockerClientConfig.createDefaultConfigBuilder();
-        }
 
-        if(dockerClient == null) {
-            dockerClient = DockerClientBuilder
-                    .getInstance(config)
-                    .build();
-        }
+    /**
+     * This method runs the Tentris docker for the given tag.
+     * @param repoName Tentris's repository name
+     * @param tag Tentris's tag
+     * @param port Port number on which the Tentris should run.
+     * @param dataSetName Dataset name to load into the Tentris triple store.
+     */
+    public static void runTentrisDocker(String repoName, String tag, String port, String dataSetName) {
+        setUpDockerApi();
 
         ExposedPort tcp4444 = ExposedPort.tcp(Integer.parseInt(port));
 
