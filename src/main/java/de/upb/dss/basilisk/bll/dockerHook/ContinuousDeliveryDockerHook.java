@@ -1,8 +1,10 @@
 package de.upb.dss.basilisk.bll.dockerHook;
 
 import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
+import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForDockerHook;
 import de.upb.dss.basilisk.bll.benchmark.DockerUtils;
+import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +16,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.logging.Logger;
 
 /**
  * This is the hook for Docker hub for Continuous benchmarking process(CPB).
@@ -31,6 +34,7 @@ public class ContinuousDeliveryDockerHook {
     private String currentPortNum;
     private String currentDatasetFilePath;
     private String currentQueriesFilePath;
+    private Logger logger = null;
 
     /**
      * This constructs the ContinuousDeliveryDockerHook object.
@@ -108,8 +112,6 @@ public class ContinuousDeliveryDockerHook {
         //Todo: Run the benchmarking process on the currently pulled docker image.
         BenchmarkForDockerHook.runBenchmarkForDockerHook(currentPortNum, currentTripleStore, currentDatasetFilePath,
                 currentQueriesFilePath, currentRepoName, currentBenchmarkedTag);
-        System.out.println("Running benchmark");
-
         try {
             this.updateTagList();
         } catch (JSONException e) {
@@ -146,7 +148,7 @@ public class ContinuousDeliveryDockerHook {
                 if (!this.alreadyBenchmarkedTagList.contains(singleTagData.get("name"))) {
                     this.clearDockerEnv();
                     this.currentBenchmarkedTag = (String) singleTagData.get("name");
-                    System.out.println("Benchmarking will run for version: " + this.currentBenchmarkedTag);
+                    logger.info("Basilisk will run benchmarking process on : " + this.currentBenchmarkedTag);
                     boolean flag = this.pullDockerImage(this.currentRepoName, (String) singleTagData.get("name"));
                     if (flag) {
                         this.benchmark();
@@ -227,6 +229,7 @@ public class ContinuousDeliveryDockerHook {
      * @return Status code.
      */
     public int forEachStore() throws InterruptedException {
+        logger = new LoggerUtils().getLogger(new ApplicationPropertiesUtils().getLogFilePath(), "Git Hook");
         try {
             this.dockerHookBenchmarkedFileData = YamlUtils.getDockerBenchmarkAttempted();
 
@@ -239,7 +242,7 @@ public class ContinuousDeliveryDockerHook {
                 this.currentPortNum = (String) singleStoreMetaData.get("port");
                 this.currentDatasetFilePath = (String) singleStoreMetaData.get("dataset");
                 this.currentQueriesFilePath = (String) singleStoreMetaData.get("queriesFilePath");
-                System.out.println("Currently checking for this triple store: " + this.currentTripleStore);
+                logger.info("Currently checking for " + this.currentTripleStore + " triple store.");
                 this.alreadyBenchmarkedTagList = this.getBenchmarkedDetails(this.currentTripleStore);
                 JSONArray dockerHubTagsJsonArray = this.getDockerHubTags((String) singleStoreMetaData.get("command"));
                 this.checkAndRunCPB(dockerHubTagsJsonArray);
@@ -251,7 +254,7 @@ public class ContinuousDeliveryDockerHook {
             this.updateErrorLog("Could be a DockerHookMetadata.json or DockerHookBenchmarked.json file parsing issue", e.toString());
             e.printStackTrace();
         }
-        System.out.println("One run completed");
+        logger.info("Basilisk Benchmark process completed on Git hook.");
         return 0;
     }
 }

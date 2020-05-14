@@ -1,6 +1,7 @@
 package de.upb.dss.basilisk.controllers;
 
 import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
+import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
 import de.upb.dss.basilisk.bll.dockerHook.ContinuousDeliveryDockerHook;
 import de.upb.dss.basilisk.bll.gitHook.ContinuousDeliveryGitHook;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
+import java.util.logging.Logger;
 
 /**
  * This is the Basilisk Controller.
@@ -34,14 +36,18 @@ public class BasiliskAPIController {
     @RequestMapping("/runbenchmark")
     public String runBenchmark(@RequestParam(defaultValue = "2") int hook) {
         ApplicationPropertiesUtils myAppUtils = new ApplicationPropertiesUtils();
+        String logFilePath = myAppUtils.getLogFilePath();
+        Logger logger = new LoggerUtils().getLogger(logFilePath,"BasiliskMain");
 
         int exitcode = -1;
+        String resp = "";
 
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
         if (hook == 2) {
             try {
+                logger.info("Initiated Basilisk benchmark process on Docker hook.");
                 exitcode = new ContinuousDeliveryDockerHook(
                         myAppUtils.getContinuousBmPath(),
                         myAppUtils.getDockerMetadataFileName(),
@@ -49,13 +55,16 @@ public class BasiliskAPIController {
                         myAppUtils.getContinuousErrorLogFileName(),
                         myAppUtils.getContinuousBmPath())
                         .forEachStore();
+                resp = "Successfully ran Basilisk on Docker hook.";
             } catch (InterruptedException ex) {
+                logger.warning("Basilisk is interrupted.");
                 ex.printStackTrace(pw);
                 return sw.toString();
             }
             return "Done";
         } else if (hook == 1) {
             try {
+                logger.info("Initiated Basilisk benchmark process on Git hook.");
                 exitcode = new ContinuousDeliveryGitHook(
                         myAppUtils.getContinuousBmPath(),
                         myAppUtils.getGitMetaDataFileName(),
@@ -63,33 +72,28 @@ public class BasiliskAPIController {
                         myAppUtils.getContinuousErrorLogFileName(),
                         myAppUtils.getBmWorkSpace())
                         .forEachStore();
-            } catch (IOException | InterruptedException ex) {
+                resp = "Successfully ran Basilisk on Git hook.";
+            } catch (InterruptedException ex) {
+                logger.warning("Basilisk is interrupted.");
                 ex.printStackTrace(pw);
+                return sw.toString();
+            } catch (IOException e) {
+                logger.warning("Basilisk is interrupted.");
+                e.printStackTrace(pw);
                 return sw.toString();
             }
         } else {
-            return "Invalid value to the hook parameter. Please look at the below values to the hook parameter.\n" +
+            logger.info("Initiated Basilisk benchmark process on invalid hook.");
+            resp = "Invalid value to the hook parameter. Please look at the below values to the hook parameter.\n" +
                     "1 means run CPB for github hook\n" +
                     "2 means run CPB for docker hub hook\n";
         }
 
-        try {
-            File file = new File("/home/dss/continuousBM/log/start-benchmarking.err");
-            BufferedReader br = new BufferedReader(new FileReader(file));
-
-            String message = " ";
-            String msg;
-            while ((msg = br.readLine()) != null) {
-                message += msg + "\n";
-            }
-
-            return message;
-        } catch (Exception e) {
-            if (exitcode == 0) {
-                return "Ran successfully\n";
-            } else {
-                return "Something went wrong.\n";
-            }
+        if(exitcode == 0) {
+            return resp;
+        } else {
+            return "Problem encountered while running Basilisk. Please try again.";
         }
+
     }
 }
