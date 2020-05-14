@@ -7,8 +7,8 @@ GitMetaData:
   dataset: "sp2b.nt"
   queriesFilePath: "sp2b.txt"
 
-- name: "fuseki",
-  command: "curl https://api.github.com/repos/apache/jena/tags",
-  port: "9999",
-  dataset: "sp2b.nt",
+- name: "fuseki"
+  command: "curl https://api.github.com/repos/apache/jena/tags"
+  port: "9999"
+  dataset: "sp2b.nt"
   queriesFilePath: "sp2b.txt"
