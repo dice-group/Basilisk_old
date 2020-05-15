@@ -148,9 +148,9 @@ public class DockerUtils {
 
         CreateContainerResponse container
                 = dockerClient.createContainerCmd(repoName + ":" + tag)
-                .withCmd(repoName + " -f /datasets/" + dataSetName + " -p " + port)
+                .withCmd(repoName + ":" + tag + " -f /datasets/" + dataSetName + " -p " + port)
                 .withName("tentris_server")
-                .withHostName("testing_server")
+                .withHostName("tentris_server")
                 .withPortBindings(portBindings)
                 .withExposedPorts(new ExposedPort(Integer.parseInt(port)))
                 .withBinds(Bind.parse(testDataSetPath + ":/datasets")).exec();
