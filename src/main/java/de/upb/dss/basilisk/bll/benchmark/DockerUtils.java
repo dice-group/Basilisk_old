@@ -1,9 +1,7 @@
 package de.upb.dss.basilisk.bll.benchmark;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.ListContainersCmd;
-import com.github.dockerjava.api.command.ListImagesCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -139,8 +137,9 @@ public class DockerUtils {
      * @param port Port number on which the Tentris should run.
      * @param dataSetName Dataset name to load into the Tentris triple store.
      */
-    public static void runTentrisDocker(String repoName, String tag, String port, String dataSetName) {
+    public static int runTentrisDocker(String repoName, String tag, String port, String dataSetName) {
         setUpDockerApi();
+        String testDataSetPath = new ApplicationPropertiesUtils().getTestDatasetPath();
 
         ExposedPort tcp4444 = ExposedPort.tcp(Integer.parseInt(port));
 
@@ -154,9 +153,21 @@ public class DockerUtils {
                 .withHostName("testing_server")
                 .withPortBindings(portBindings)
                 .withExposedPorts(new ExposedPort(Integer.parseInt(port)))
-                .withBinds(Bind.parse("dataset:/dataset")).exec();
+                .withBinds(Bind.parse(testDataSetPath + ":/datasets")).exec();
 
         dockerClient.startContainerCmd(container.getId()).exec();
+        try {
+            TimeUnit.MINUTES.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        InspectContainerResponse i = dockerClient.inspectContainerCmd(container.getId()).exec();
+        System.out.println(i);
+        int Ext = i.getState().getExitCode();
+        System.out.println("Exited code = " + Ext);
+
+        return Ext;
     }
 
     public static int runVirtuosoDockerImage(String port, String testDatasetPath, String testDataset,
