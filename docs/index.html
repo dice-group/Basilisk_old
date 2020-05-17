@@ -94,6 +94,14 @@
       margin-bottom: 40px;
     }
 
+    .container li{
+      background-color: #fff;
+      color: #15568f;;
+      width: 200px;
+      padding-left: 3px;
+      padding-right: 3px;
+    }
+
     .button{
       background: #001030;
       padding: 10px 15px;
@@ -187,6 +195,14 @@
       color: black;
     }
 
+    .fa.fa-trash-o.de {
+      float: right;
+    }
+
+    .fa.fa-trash-o.de::before {
+      content: 'x';
+    }
+
     .loader {
       margin: auto;
       margin-top: 100px;
@@ -211,38 +227,20 @@
   <div class="menu" id="menuId">
     <div class="logo" style="width: 60px;"><img src="img/Basilisk_Logo_ShivamBahedia.png" height="150" width="150" /></div>
     <div class="menu-1" id="stores">
-      <form>
-        <table style="padding: 10px 10px 10px 10px;">
-          <tr>
-            <td>Tentris</td>
-            <td>
-              <select id="TentrisVersion">
-                <option selected="selected" value="" disabled>select version</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>Virtuoso</td>
-            <td>
-              <select id="VirtuosoVersion">
-                <option selected="selected" value="" disabled>select version</option>
-              </select>
-            </td>
-          </tr>
-          <td></td>
-
-          <tr>
-
-            <td><label class="btn btn-light btn-sm" style="margin-left: 0px" onClick="displayGraph()">Submit</label></td>
-            <td><label class="btn btn-outline-light btn-sm" style="margin-left: 55px" onClick="clearGraph()">Clear all</label></td>
-          </tr>
-          <tr><td colspan="2">
-            <a href="newstorage.html" class="btn btn-outline-light btn-sm btn-block">Add New Storage</a>
-          </td></tr>
-        </table>
-      </form>
+      <div class="container menu-1">
+        <div class="row" style="height: auto; width: 300px; margin-left: 200px; text-align: left;">
+          <div class="col" style="width: 250px; position: relative;">
+            <select id="AvailableVersions" onchange="versionSelected()" style="margin-top: 10px; width: 200px;">
+              <option selected="selected" value="" disabled>select version</option>
+            </select>
+            <ul id="myList" style="height: 90px; width: 218px; overflow: auto; list-style: none; padding: 0; list-style-type: none;">
+            </ul>
+            <label class="btn btn-light btn-sm" style="margin-left: 0px; bottom: 0; position: center; width: 97px;" onClick="onSubmit()">Submit</label>
+            <label class="btn btn-outline-light btn-sm" style="margin-left: 0px; width: 97px;" onClick="clearGraph()">Clear all</label>
+          </div>
+        </div>
+      </div>
     </div>
-
 
     <div class="menu-2">
       <table style=" padding: 10px 10px 10px 10px;">

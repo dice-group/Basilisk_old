@@ -1,9 +1,6 @@
 var datasetsstring="http://131.234.28.165:3030/$/datasets";
 var index=0;
 var available_version=[];
-var tentrisversions=[];
-var fusekiversions=[];
-var virtuosoversions=[];
 
 /**
  * Get all the datasets from the fuseki server
@@ -44,29 +41,6 @@ async function getdetails(dataset)
       getversions(versionQueryResponse);
 
     }
-
-    for(var i=0;i<available_version.length;i++)
-    {
-        if(available_version[i].search("tentris")!=-1)
-        {
-            tentrisversions.push(available_version[i]);
-        }
-        else{
-            if(available_version[i].search("virtuoso")!=-1)
-                {
-                    virtuosoversions.push(available_version[i]);
-                }
-            else{
-                if(available_version[i].search("fuseki")!=-1)
-                    {
-                        fusekiversions.push(available_version[i]);
-                    }
-
-                }
-            }
-
-    }
-
     getbuttons();
 }
 
@@ -93,24 +67,10 @@ function getversions(res)
  */
 function getbuttons()
 {
-    var select = document.getElementById("TentrisVersion");
-    for(var i = 0; i <tentrisversions.length; i++) {
+    var select = document.getElementById("AvailableVersions");
+    for(var i = 0; i <available_version.length; i++) {
         var option = document.createElement('option');
-        option.text = option.value = tentrisversions[i].substring(8,tentrisversions[i].length);
-        select.add(option, 0);
-    }
-
-    var select = document.getElementById("FusekiVersion");
-    for(var i = 0; i <fusekiversions.length; i++) {
-        var option = document.createElement('option');
-        option.text = option.value = fusekiversions[i].substring(7,fusekiversions[i].length);
-        select.add(option, 0);
-    }
-
-    var select = document.getElementById("VirtuosoVersion");
-    for(var i = 0; i <virtuosoversions.length; i++) {
-        var option = document.createElement('option');
-        option.text = option.value = virtuosoversions[i].substring(9,virtuosoversions[i].length);
+        option.text = option.value = available_version[i];
         select.add(option, 0);
     }
 }

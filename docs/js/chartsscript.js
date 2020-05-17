@@ -463,6 +463,7 @@ var version = "";
 var versionCheck = false;
 var versionIndex;
 var noOfClients;
+selectedVersions = []
 
 /**
  * Download results as a csv file
@@ -508,7 +509,7 @@ function downloadCsv(){
           runQueries(querystringforclient, i);
 
           i++;
-          setTimeout(nextStep, 300);
+          setTimeout(nextStep, 500);
         }
         else {
           arr.forEach(testData);
@@ -661,74 +662,62 @@ function downloadCsv(){
 
 
   /**
-   * Display the graph for selected versions when user press 'Submit' button
-   */
-  function displayGraph()
-    {
-      var e = document.getElementById("TentrisVersion");
-      var TentrisVersionSelected = e.options[e.selectedIndex].value;
-      TentrisVersionSelected="tentris$"+TentrisVersionSelected;
+ * Runs everytime a version of a triple store is selected
+ */
+function versionSelected() {
+  selectedVersions.push(document.getElementById("AvailableVersions").value);
+  var node = document.createElement("LI");
+  var textnode = document.createTextNode(document.getElementById("AvailableVersions").value);
+  var icon = document.createElement('i')
+  icon.className = 'fa fa-trash-o de'
+  node.appendChild(textnode);
+  node.appendChild(icon);
+  document.getElementById("myList").appendChild(node);
+}
 
-      var e = document.getElementById("VirtuosoVersion");
-      var VirtuosoVersionSelected = e.options[e.selectedIndex].value;
-      VirtuosoVersionSelected="virtuoso$"+VirtuosoVersionSelected;
-
-      var TentrisArrayNumber=0;
-      var VirtuosoArrayNumber=0;
-      var FusekiArrayNumber=null;
-      var triplestoreTentris=[];
-      var triplestoreFuseki=[];
-      var triplestoreVirtuso=[];
-
-      for(var i=0; i<arr.length; i++){
-        if(arr[i][0] == TentrisVersionSelected){
-          TentrisArrayNumber=i;
-          triplestoreTentris=arr[TentrisArrayNumber];
-          triplestoreTentris=triplestoreTentris.slice(1,7);
-        }else{
-        if(arr[i][0] == VirtuosoVersionSelected){
-          VirtuosoArrayNumber=i;
-          triplestoreVirtuso=arr[VirtuosoArrayNumber];
-          triplestoreVirtuso=triplestoreVirtuso.slice(1,7);
-
-        }
+selectedTripleStores = [];
+/**
+ * Calls when the 'Submit' button is clicked by user
+ * Display graphs for the selected versions
+ */
+function onSubmit() {
+  for(var i=0; i<arr.length; i++){
+    selectedVersions.forEach(element => {
+      if(arr[i][0] == element){
+        tripleStore=arr[i];
+        tripleStore.splice(1,1);
+        selectedTripleStores.push(tripleStore);
       }
-
-    }
-
-      for(var i=0; i<=5; i++){
-        if(triplestoreTentris[i] == null || triplestoreVirtuso[i] == null){
-          var message = confirm("Data didn't loaded correctly! Do you want to refresh?")
-          if(message == true){
-            document.getElementById("myLoader").style.display = "flex"
-            get2dArray();
-            return;
-          }
-        }
-      }
-
-      generatebargraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki);
-      generateareagraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki);
-      generatelinegraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki);
-
+    })
   }
+  generatebargraph(selectedTripleStores);
+  generateareagraph(selectedTripleStores);
+  generatelinegraph(selectedTripleStores);
+}
+
+/**
+ * Clears all selected versions of the triple stores
+ */
+function clearGraph(){
+  selectedVersions = [];
+  document.getElementById("myList").innerHTML = "";
+}
 
   /**
    * Generates bar graph for the selected versions of dataset
    *
-   * @param {Array} triplestoreTentris - Contains data related to tentris graph
-   * @param {Array} triplestoreVirtuso - Contains data related to Virtuoso graph
-   * @param {Array} triplestoreFuseki - Contains data related to Fuseki graph
+   * @param {Array} tripleStoreArray - Contains data related to Fuseki graph
    */
-  function generatebargraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
+  function generatebargraph(tripleStoreArray)
     {
 
       var bar_chart = c3.generate({
         bindto: '#bar_chart',
         data: {
             columns: [
-                triplestoreTentris,
-                triplestoreVirtuso,
+              tripleStoreArray[0],
+              tripleStoreArray[1],
+              tripleStoreArray[2]
                 //triplestoreFuseki
             ],
             type: 'bar'
@@ -776,27 +765,25 @@ function downloadCsv(){
   /**
   * Generates area graph for the selected versions of dataset
   *
-  * @param {Array} triplestoreTentris - Contains data related to tentris graph
-  * @param {Array} triplestoreVirtuso - Contains data related to Virtuoso graph
-  * @param {Array} triplestoreFuseki - Contains data related to Fuseki graph
+  * @param {Array} tripleStoreArray - Contains data related to Fuseki graph
   */
-  function generateareagraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
+  function generateareagraph(tripleStoreArray)
     {
       var areachart = c3.generate({
         bindto:"#boxplot_chart",
         data: {
             columns: [
-              triplestoreTentris,
-              triplestoreVirtuso,
-              //triplestoreFuseki
+              tripleStoreArray[0],
+              tripleStoreArray[1],
+              tripleStoreArray[2]
             ],
             types: {
               tentris: 'area-spline',
-              //fuseki: 'area-spline',
-              virtuoso:'area-spline'
+              fuseki: 'area-spline',
+              virtuoso:'area-spline',
               // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
             },
-            groups: [['Tentris','Virtuoso']]
+            groups: [['Tentris','Virtuoso', 'Fuseki']]
         },
         title: {
           text: 'Area-Chart'
@@ -836,11 +823,9 @@ function downloadCsv(){
   /**
   * Generates line graph for the selected versions of dataset
   *
-  * @param {Array} triplestoreTentris - Contains data related to tentris graph
-  * @param {Array} triplestoreVirtuso - Contains data related to Virtuoso graph
-  * @param {Array} triplestoreFuseki - Contains data related to Fuseki graph
+  * @param {Array} tripleStoreArray - Contains data related to Fuseki graph
   */
-  function generatelinegraph(triplestoreTentris,triplestoreVirtuso,triplestoreFuseki)
+  function generatelinegraph(tripleStoreArray)
     {
       var chart1 = c3.generate({
         bindto: '#line_chart',
@@ -850,10 +835,10 @@ function downloadCsv(){
         data: {
             x: 'x',
             columns: [
-                ['x', 1, 4, 8, 16, 32],
-                triplestoreTentris,
-                triplestoreVirtuso,
-                //triplestoreFuseki
+              ["x", 1, 2, 3, 4, 5],
+              tripleStoreArray[0],
+              tripleStoreArray[1],
+              tripleStoreArray[2]
             ]
         },
         size:{
@@ -888,6 +873,3 @@ function downloadCsv(){
   }
 
   get2dArray();
-
-
-//parseData(createGraph);
