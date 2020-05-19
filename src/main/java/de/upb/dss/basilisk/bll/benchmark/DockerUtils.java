@@ -146,14 +146,15 @@ public class DockerUtils {
         Ports portBindings = new Ports();
         portBindings.bind(tcp4444, Ports.Binding.bindPort(Integer.parseInt(port)));
 
+        Bind b = new Bind(new File(testDataSetPath).getAbsolutePath(),new Volume("/datasets"), AccessMode.rw);
         CreateContainerResponse container
                 = dockerClient.createContainerCmd(repoName + ":" + tag)
-                .withCmd(repoName + ":" + tag + " -f /datasets/" + dataSetName + " -p " + port)
+                .withCmd("-f", "/datasets/" + dataSetName, "-p", port)
                 .withName("tentris_server")
                 .withHostName("tentris_server")
                 .withPortBindings(portBindings)
                 .withExposedPorts(new ExposedPort(Integer.parseInt(port)))
-                .withBinds(Bind.parse(testDataSetPath + ":/datasets")).exec();
+                .withBinds(b).exec();
 
         dockerClient.startContainerCmd(container.getId()).exec();
         try {
