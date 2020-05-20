@@ -60,8 +60,8 @@ public class BenchmarkForGitHook {
         //Run the triple stores
         int exitCode = runTripleStores();
 
-        //Move the results to results folder and rename it.
-        ResultFileProcessing.renameResults(repoName, tag);
+        //Store the results into Fuseki server and Move the results to results folder and rename it.
+        ResultStoringFusekiUtils.processResultFIle(repoName, repoName, tag);
 
         //Clear the docker, so that next benchmark can be run.
         DockerUtils.clearDocker();

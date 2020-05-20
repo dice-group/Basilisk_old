@@ -254,7 +254,7 @@ public class ContinuousDeliveryDockerHook {
             this.updateErrorLog("Could be a DockerHookMetadata.json or DockerHookBenchmarked.json file parsing issue", e.toString());
             e.printStackTrace();
         }
-        logger.info("Basilisk Benchmark process completed on Git hook.");
+        logger.info("Basilisk Benchmark process completed on Docker hook.");
         return 0;
     }
 }
