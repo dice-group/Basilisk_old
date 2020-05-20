@@ -45,9 +45,11 @@ public class ResultStoringFusekiUtils {
         String graphName = "";
 
         if("dicegroup/tentris_server".equals(repoName)) {
-            graphName = "dockerTentris";
+            graphName = "dockertentris";
         } else if("tentris".equals(repoName)) {
-            graphName = "gitTentris";
+            graphName = "gittentris";
+        } else if("openlink/virtuoso-opensource-7".equals(repoName)) {
+            graphName = "dockervirtuoso";
         }
 
         connection.load(graphName + ":" + tag + "$" + prefix, model);
@@ -60,23 +62,23 @@ public class ResultStoringFusekiUtils {
         File[] files = getFileList();
 
         String suffix = "";
-        for (int i = 0; i < files.length; i++) {
-            if(files[i].toString().endsWith("-1.nt")) {
+        for (File file : files) {
+            if (file.toString().endsWith("-1.nt")) {
                 suffix = "1worker";
-            } else if(files[i].toString().endsWith("-2.nt")) {
+            } else if (file.toString().endsWith("-2.nt")) {
                 suffix = "4workers";
-            } else if(files[i].toString().endsWith("-3.nt")) {
+            } else if (file.toString().endsWith("-3.nt")) {
                 suffix = "8workers";
-            } else if(files[i].toString().endsWith("-4.nt")) {
+            } else if (file.toString().endsWith("-4.nt")) {
                 suffix = "16workers";
             } else {
                 suffix = "32workers";
             }
 
-            loadNtFile(tripleStoreName, repoName, tag, files[i].getAbsolutePath(), suffix);
+            loadNtFile(tripleStoreName, repoName, tag, file.getAbsolutePath(), suffix);
             try {
-                Files.move(Paths.get(files[i].getAbsolutePath()),
-                        Paths.get("./results/" + files[i].getName()));
+                Files.move(Paths.get(file.getAbsolutePath()),
+                        Paths.get("./results/" + file.getName()));
             } catch (IOException e) {
                 e.printStackTrace();
             }

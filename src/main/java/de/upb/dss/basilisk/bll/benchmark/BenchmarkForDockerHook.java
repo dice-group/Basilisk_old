@@ -72,8 +72,7 @@ public class BenchmarkForDockerHook {
             return DockerUtils.runTentrisDocker(repoName,tag,port,testDataset);
         }
         else if(tripleStoreName.toLowerCase().equals("virtuoso")) {
-            //Todo: Implement Running Virtuoso docker.
-            return 100;
+            return DockerUtils.runVirtuosoDocker(repoName, tag, port, testDataset);
         }
 
 
