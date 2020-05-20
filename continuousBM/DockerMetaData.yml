@@ -9,8 +9,8 @@ DockerMetaData:
   queriesFilePath: "sp2b.txt"
 
 - name: "virtuoso"
-  repositoryName: "tenforce/virtuoso"
-  command: "curl https://https://registry.hub.docker.com/v1/repositories/openlink/virtuoso-opensource-7/tags"
+  repositoryName: "openlink/virtuoso-opensource-7"
+  command: "curl https://registry.hub.docker.com/v1/repositories/openlink/virtuoso-opensource-7/tags"
   port: "8890"
   dataset: "sp2b.nt"
   queriesFilePath: "sp2b.txt"
