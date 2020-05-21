@@ -16,7 +16,8 @@ export class MenuComponent implements OnInit {
 
   listOfAllDatasets=[];
   listOfAllVersions=[];
-  listOFUniqueVersions=[];
+  listOfUniqueVersions=[];
+  selectedVersions=[];
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
 
@@ -30,8 +31,6 @@ export class MenuComponent implements OnInit {
       url: this.allDatasets})
     .then(res => this.getDatasets(res))
     .catch(err => console.log(err));
-    setTimeout(function(){
-    }, 10);
   }
 
   /**
@@ -63,14 +62,28 @@ export class MenuComponent implements OnInit {
   }
 
   /**
+   * This function is called once for each dataset
    * Goes through each element of the object and extract version names
    *
    * @param response - json object containing response of to the version query
    */
   getVersions(response){
-    console.log(response.data.results.bindings);
     response.data.results.bindings.forEach(element => {
-      console.log(element.g.value)
+      this.listOfAllVersions.push(element);
+      if(response.data.results.bindings.indexOf(element)%5 == 1){
+        var name = element.g.value;
+        this.listOfUniqueVersions.push(name.slice(0, name.indexOf('$')));
+      }
     });
+    console.log(this.listOfUniqueVersions)
+  }
+
+  /**
+   * Creates an array of selected versions
+   *
+   * @param {String} version - Version selected by user
+   */
+  versionSelected(version){
+    this.selectedVersions.push(version);
   }
 }

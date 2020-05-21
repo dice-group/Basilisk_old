@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <div class="menu" id="menuId">
     <div class="logo" style="width: 60px;">
       <img src=".\assets\Images\Basilisk_Logo.png" height="150" width="150" />
@@ -9,10 +8,17 @@
             <div class="container menu-1">
               <div class="row" style="height: auto; width: 300px; text-align: left">
                 <div class="col" style="width: 250px">
-                  <select id="AvailableVersions" onchange="versionSelected()" style="margin-top: 10px; width: 200px;">
-                   <option selected="selected" value="" disabled>select version</option>
-                  </select>
-                 <ul id="myList" style="height: 90px; width: 218px; overflow: auto; list-style: none; padding: 0; list-style-type: none;"></ul>
+                  <div class="form-group">
+                    <select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
+                            style="max-width: 200px; border-radius: 4px;">
+                      <option *ngFor="let version of listOfUniqueVersions" value="{{version}}">
+                        {{version}}
+                      </option>
+                    </select>
+                  </div>
+                 <ul id="myList" style="height: 90px; width: 218px; overflow: auto; list-style: none; padding: 0; list-style-type: none;">
+                  <li *ngFor="let version of selectedVersions">{{version}}</li>
+                </ul>
                  <tr>
                   <td><label class="btn btn-sm " style="margin-left: 0px" onClick="">Submit</label></td>
                   <td><label class="btn btn-sm " style="margin-left: 55px" onClick="">Clear all</label></td>
@@ -56,63 +62,3 @@
         </table>
       </div>
   </div>
-=======
-<div class="menu" id="menuId">
-  <div class="logo" style="width: 60px;">
-    <img src="assets\Images\Basilisk_Logo.png" height="150" width="150" />
-  </div>
-    <div class="menu-1" id="stores">
-      <form>
-        <table style="padding: 10px 10px 10px 10px;">
-          <div class="container menu-1">
-            <div class="row" style="height: auto; width: 300px; text-align: left">
-              <div class="col" style="width: 250px">
-                <select id="AvailableVersions" onchange="versionSelected()" style="margin-top: 10px; width: 200px;">
-                 <option selected="selected" value="" disabled>select version</option>
-                </select>
-               <ul id="myList" style="height: 90px; width: 218px; overflow: auto; list-style: none; padding: 0; list-style-type: none;"></ul>
-               <tr>
-                <td><label class="btn btn-sm " style="margin-left: 0px" onClick="">Submit</label></td>
-                <td><label class="btn btn-sm " style="margin-left: 55px" onClick="">Clear all</label></td>
-               </tr>
-               </div>
-            </div>
-          </div>
-        </table>
-      </form>
-    </div>       
-  
-          
-
-    <div class="menu-2">
-      <table style=" padding: 10px 10px 10px 10px;">
-        <tr>
-          <td>
-            <form class="color1">
-              <input class="rad" type="radio" value="bar" name="chart" onclick="" checked> Bar chart<br>
-              <input class="rad" type="radio" value="box" name="chart" onclick=""> Area Chart<br>
-              <input class="rad" type="radio" value="line" name="chart" onclick=""> Line chart<br>
-            </form>
-          </td>
-        </tr>
-        
-        <tr>
-          <td class="color1">Download Results: &nbsp;
-              <label class="btn btn-sm" style="margin-left: 0px" onclick="">RDF Format</label>
-              &nbsp;&nbsp;
-              <label class="btn btn-sm"  onclick="">CSV Format</label>
-          </td>
-        </tr>
-        
-        <tr>
-          <td>
-            <a href="#" class="btn btn-sm" id="login-button">Login</a>
-            &nbsp;&nbsp;
-            <a href="#" class="btn btn-sm" id="signup-button">Signup</a>
-          </td>
-        </tr>
-      </table>
-    </div>
-</div>
-    
->>>>>>> c3d0a3e3434dabc6be365775a7ea155c07fd1db3
