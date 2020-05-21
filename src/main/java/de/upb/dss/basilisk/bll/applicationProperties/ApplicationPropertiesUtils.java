@@ -11,7 +11,6 @@ public class ApplicationPropertiesUtils {
     private final String logFilePath;
     private final String configPath;
     private final String testDatasetPath;
-    private final String iguanaIdPath;
     private final String continuousBmPath;
     private final String iguanaPath;
     private final String bmWorkSpace;
@@ -23,8 +22,18 @@ public class ApplicationPropertiesUtils {
     private final String gitBenchmarkedFileName;
     private final String dockerMetadataFileName;
     private final String dockerBenchmarkedFileName;
+    private final String logDirectory;
 
     Properties appProps;
+
+    /**
+     * Getter method for log directory.
+     *
+     * @return Log directory.
+     */
+    public String getLogDirectory() {
+        return logDirectory;
+    }
 
     /**
      * Getter method for benchmarking process workspace directory.
@@ -69,15 +78,6 @@ public class ApplicationPropertiesUtils {
      */
     public String getTestDatasetPath() {
         return testDatasetPath;
-    }
-
-    /**
-     * Getter method for Iguana suite ID path.
-     *
-     * @return path of Iguana suite id.
-     */
-    public String getIguanaIdPath() {
-        return iguanaIdPath;
     }
 
     /**
@@ -170,7 +170,6 @@ public class ApplicationPropertiesUtils {
         dockerFile = appProps.getProperty("dockerFile");
         bmWorkSpace = appProps.getProperty("bmWorkSpace");
         iguanaPath = appProps.getProperty("iguanaPath");
-        iguanaIdPath = appProps.getProperty("iguanaIdPath");
         testDatasetPath = appProps.getProperty("testDatasetPath");
         logFilePath = appProps.getProperty("logFilePath");
         configPath = appProps.getProperty("configPath");
@@ -181,5 +180,6 @@ public class ApplicationPropertiesUtils {
         dockerMetadataFileName = appProps.getProperty("dockerMetadataFileName");
         dockerBenchmarkedFileName = appProps.getProperty("dockerBenchmarkedFileName");
         continuousErrorLogFileName = appProps.getProperty("continuousErrorLogFileName");
+        logDirectory = appProps.getProperty("logDirectory");
     }
 }

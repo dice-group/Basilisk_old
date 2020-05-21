@@ -14,6 +14,7 @@ public class YamlUtils {
 
     /**
      * This class loads the YAML file into Map.
+     *
      * @param ymlFileStream InputStream to the YAML file.
      * @return YAML data in Map format.
      */
@@ -23,6 +24,7 @@ public class YamlUtils {
 
     /**
      * This method retrieves the data from DockerBenchmarkAttempted.yml file and convert it into JSONArray.
+     *
      * @return Data from DockerBenchmarkAttempted.yml file in JSONArray format.
      */
     public static JSONArray getDockerBenchmarkAttempted() {
@@ -43,6 +45,7 @@ public class YamlUtils {
 
     /**
      * This method retrieves the data from GitBenchmarkAttempted.yml file and convert it into JSONArray.
+     *
      * @return Data from GitBenchmarkAttempted.yml file in JSONArray format.
      */
     public static JSONArray getGitBenchmarkAttempted() {
@@ -63,6 +66,7 @@ public class YamlUtils {
 
     /**
      * This method retrieves the data from GitMetaData.yml file and convert it into JSONArray.
+     *
      * @return Data from GitMetaData.yml file in JSONArray format.
      */
     public static JSONArray getGitMetaData() {
@@ -83,6 +87,7 @@ public class YamlUtils {
 
     /**
      * This method retrieves the data from DockerMetaData.yml file and convert it into JSONArray.
+     *
      * @return Data from DockerMetaData.yml file in JSONArray format.
      */
     public static JSONArray getDockerMetaData() {
@@ -103,10 +108,11 @@ public class YamlUtils {
 
     /**
      * This method updates the YAML file.
-     * @param oldFileData Data from the YAML file before updating the file.
-     * @param newTag New Tag or Version to be added to the old data.
+     *
+     * @param oldFileData     Data from the YAML file before updating the file.
+     * @param newTag          New Tag or Version to be added to the old data.
      * @param tripleStoreName Triple Store name to which the new tag must be added.
-     * @param hook To which hook must be updated. 1 means Git hook. 2 means Docker hook.
+     * @param hook            To which hook must be updated. 1 means Git hook. 2 means Docker hook.
      * @return Returns the updated data.
      */
     private static JSONArray updateYamlFile(JSONArray oldFileData, String newTag, String tripleStoreName, int hook) {
@@ -117,7 +123,7 @@ public class YamlUtils {
 
             if (jsonObj.has(tripleStoreName)) {
                 JSONArray arr = jsonObj.getJSONArray(tripleStoreName);
-                arr.put(arr.length(),newTag);
+                arr.put(arr.length(), newTag);
                 jsonObj.put(tripleStoreName, arr);
             }
             oldData.put(i, jsonObj);
@@ -126,14 +132,14 @@ public class YamlUtils {
 
         JSONObject newData = new JSONObject();
 
-        if(hook == 1)
-            newData.put("GitBenchmarkedAttempted",oldData);
+        if (hook == 1)
+            newData.put("GitBenchmarkedAttempted", oldData);
         else
-            newData.put("DockerBenchmarkedAttempted",oldData);
+            newData.put("DockerBenchmarkedAttempted", oldData);
 
         ObjectMapper mapper = new ObjectMapper();
         try {
-            Map<String,Object> myMap = mapper.readValue(newData.toString(),
+            Map<String, Object> myMap = mapper.readValue(newData.toString(),
                     new TypeReference<Map<String, Object>>() {
                     });
 
@@ -145,12 +151,12 @@ public class YamlUtils {
             Yaml output = new Yaml(options);
 
             FileWriter fw = null;
-            if(hook == 1)
+            if (hook == 1)
                 fw = new FileWriter("continuousBM/GitBenchmarkedAttempted.yml");
             else
                 fw = new FileWriter("continuousBM/DockerBenchmarkedAttempted.yml");
 
-            output.dump(myMap,fw);
+            output.dump(myMap, fw);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -159,8 +165,9 @@ public class YamlUtils {
 
     /**
      * This method updates the YAML file for Docker hook.
-     * @param oldData Data from the YAML file before updating the file.
-     * @param newTag New Tag or Version to be added to the old data.
+     *
+     * @param oldData         Data from the YAML file before updating the file.
+     * @param newTag          New Tag or Version to be added to the old data.
      * @param tripleStoreName Triple Store name to which the new tag must be added.
      * @return Returns the updated data.
      */
@@ -170,8 +177,9 @@ public class YamlUtils {
 
     /**
      * This method updates the YAML file for Git hook.
-     * @param oldData Data from the YAML file before updating the file.
-     * @param newTag New Tag or Version to be added to the old data.
+     *
+     * @param oldData         Data from the YAML file before updating the file.
+     * @param newTag          New Tag or Version to be added to the old data.
      * @param tripleStoreName Triple Store name to which the new tag must be added.
      * @return Returns the updated data.
      */

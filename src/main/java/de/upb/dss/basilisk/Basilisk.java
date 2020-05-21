@@ -1,13 +1,11 @@
 package de.upb.dss.basilisk;
 
-import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.FileInputStream;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 /**
  * The main class of the Basilisk Spring application.
@@ -15,9 +13,11 @@ import java.util.logging.Logger;
 @SpringBootApplication
 public class Basilisk {
     public static Properties applicationProperties;
+    private static final String logPrefix = "BasiliskMain";
 
     /**
      * The main method of the Basilisk Spring application.
+     *
      * @param args Arguments to the Basilisk application.
      */
     public static void main(String[] args) {
@@ -34,12 +34,10 @@ public class Basilisk {
             return;
         }
 
-        String logPath = new ApplicationPropertiesUtils().getLogFilePath();
-        Logger logger = new LoggerUtils().getLogger(logPath,"BasiliskMain");
         SpringApplication app = new SpringApplication(Basilisk.class);
         app.run(args);
         printWelcomeMessage();
-        logger.info("Basilisk is running");
+        LoggerUtils.logForBasilisk(logPrefix, "Basilisk is running", 1);
     }
 
     private static void printWelcomeMessage() {

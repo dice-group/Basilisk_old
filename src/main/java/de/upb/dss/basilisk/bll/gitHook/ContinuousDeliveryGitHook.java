@@ -1,7 +1,9 @@
 package de.upb.dss.basilisk.bll.gitHook;
 
 import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
+import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForGitHook;
+import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -12,7 +14,6 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /**
  * This is the hook for Git hub for Continuous benchmarking process(CPB).
@@ -22,73 +23,44 @@ public class ContinuousDeliveryGitHook {
     private JSONArray gitHookBenchmarkedFileData;
     private String currentBenchmarkedVersion, currentTripleStore;
     private ArrayList<String> alreadyBenchmarkedVersionsList;
-    private final String continuousBmPath;
-    private final String gitHookMetadataFileName;
-    private final String gitHookBenchmarkedFileName;
-    private final String errorLogFileName;
     private final String bmWorkspacePath;
     private String currentPortNum;
     private String currentDatasetFilePath;
     private String currentQueriesFilePath;
+    private static final String logPrefix = "Git Hook";
 
     /**
      * This constructs the ContinuousDeliveryGitHook object.
-     *
-     * @param continuousBmPath           Path to the continuousBM directory.
-     * @param gitHookMetadataFileName    Git meta data file name.
-     * @param gitHookBenchmarkedFileName Git already benchmarked file name.
-     * @param errorLogFileName           Error log file name.
-     * @param bmWorkspacePath            Path to the bmWorkSpace directory.
      */
-    public ContinuousDeliveryGitHook(String continuousBmPath, String gitHookMetadataFileName, String gitHookBenchmarkedFileName,
-                                     String errorLogFileName, String bmWorkspacePath) {
+    public ContinuousDeliveryGitHook() {
         super();
-        this.continuousBmPath = continuousBmPath;
-        this.gitHookMetadataFileName = gitHookMetadataFileName;
-        this.gitHookBenchmarkedFileName = gitHookBenchmarkedFileName;
-        this.errorLogFileName = errorLogFileName;
-        this.bmWorkspacePath = bmWorkspacePath;
-    }
-
-    /**
-     * This method updates the log file.
-     *
-     * @param GeneralDesc      General description.
-     * @param ExceptionMessage Exception message.
-     */
-    public void updateErrorLog(String GeneralDesc, String ExceptionMessage) {
-        try {
-            FileWriter er = new FileWriter(this.continuousBmPath + this.errorLogFileName, true);
-            er.write(Calendar.getInstance().getTime() + "~" + this.currentTripleStore + "~" + GeneralDesc + "~"
-                    + ExceptionMessage + "~" + Calendar.getInstance().getTimeInMillis() + "\n");
-            er.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.bmWorkspacePath = new ApplicationPropertiesUtils().getBmWorkSpace();
     }
 
     /**
      * This method deletes the downloaded zip file and clears the benchmarking workspace for the next run.
-     *
-     * @throws IOException If fails to clear the bmWorkSpace directory.
      */
-    public void delRepository() throws IOException {
+    public void delRepository() {
+        //Delete the zip file.
         File file = new File(this.bmWorkspacePath + this.currentTripleStore + ".zip");
         file.delete();
+
+        //Clear the bmWorkSpace directory for next run.
         if (new File(this.bmWorkspacePath).isDirectory()) {
-            // FileUtils.cleanDirectory(new File(this.bmWorkspacePath));
-            FileUtils.deleteDirectory(new File(this.bmWorkspacePath));
+            try {
+                FileUtils.deleteDirectory(new File(this.bmWorkspacePath));
+            } catch (IOException e) {
+                LoggerUtils.logForBasilisk(logPrefix, "Could not clear bmWorkSpace directory got an IOException", 4);
+                e.printStackTrace();
+            }
             new File(this.bmWorkspacePath).mkdir();
         }
     }
 
     /**
-     * This method updates the GitHookBenchmarked.json file to keep track of the already benchmarked versions.
-     *
-     * @throws JSONException If fails to parse the Json data.
-     * @throws IOException   If fails to update the already benchmarked file.
+     * This method updates the GitBenchmarkedAttempted.yml file to keep track of the already benchmarked versions.
      */
-    public void updateVersionList() throws JSONException, IOException {
+    public void updateVersionList() {
         this.alreadyBenchmarkedVersionsList.add(this.currentBenchmarkedVersion);
         this.gitHookBenchmarkedFileData = YamlUtils.addVersionToGitBenchmarkedAttempted(
                 this.gitHookBenchmarkedFileData,
@@ -96,58 +68,40 @@ public class ContinuousDeliveryGitHook {
                 this.currentTripleStore
         );
 
-        try {
-            this.delRepository();
-        } catch (Exception e) {
-            this.updateErrorLog("Zip file could not be deleted successfully", e.toString());
-            e.printStackTrace();
-        }
+        this.delRepository();
     }
 
     /**
-     * This method runs the benchmarking process on the currently downloaded git repository.
-     *
-     * @throws IOException          If I/O occurs while running the command.
+     * This method unzips the zip file downloaded for the current triple store.
      */
-    public void benchmark() {
+    public int unzipGitFile() {
         File zipFile = new File(this.bmWorkspacePath + this.currentTripleStore + ".zip");
         String tempStore = this.currentTripleStore;
+
         if (zipFile.exists()) {
             Extraction obj = new Extraction();
+
             if (this.currentTripleStore.equalsIgnoreCase("Fuseki")) {
                 try {
                     obj.unzipJena(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return -1;
                 }
             } else {
                 try {
                     obj.unzipGeneric(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return -1;
                 }
             }
-
-            System.out.println("Running benchmark");
-            try {
-                BenchmarkForGitHook.runBenchmark(this.currentPortNum, this.currentTripleStore, this.currentDatasetFilePath,
-                        this.currentQueriesFilePath, this.currentBenchmarkedVersion.replace(" ", ""));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         } else {
-            this.updateErrorLog(tempStore + " zip file not found", "");
+            LoggerUtils.logForBasilisk(logPrefix, "zip file not found for: " + tempStore, 4);
+            return -1;
         }
 
-        try {
-            try {
-                this.updateVersionList();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        return 0;
     }
 
     /**
@@ -156,24 +110,26 @@ public class ContinuousDeliveryGitHook {
      *
      * @param url URL to the git repository.
      * @return Status code whether successfully downloaded the repository from the git or not.
-     * @throws IOException If I/O occurs while running the command.
      */
-    public int downloadRepo(String url) throws IOException {
-        System.out.println("Downloading of the release(.zip) will start ..");
+    public int downloadRepo(String url) {
+        LoggerUtils.logForBasilisk(logPrefix, "Downloading of the release(.zip) will start....", 1);
+
         try (BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
              FileOutputStream fileOutputStream = new FileOutputStream(
                      this.bmWorkspacePath + this.currentTripleStore + ".zip")) {
-            byte dataBuffer[] = new byte[1024];
+            byte[] dataBuffer = new byte[1024];
             int bytesRead;
+
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
+
             return 1;
         } catch (FileNotFoundException e) {
-            this.updateErrorLog("Exception occurred in saving code repository", e.toString());
+            LoggerUtils.logForBasilisk(logPrefix, "Exception occurred in saving code repository", 4);
             e.printStackTrace();
         } catch (IOException e) {
-            this.updateErrorLog("Exception occurred in downloading code repository", e.toString());
+            LoggerUtils.logForBasilisk(logPrefix, "Exception occurred in downloading code repository", 4);
             e.printStackTrace();
         }
         return 0;
@@ -186,27 +142,42 @@ public class ContinuousDeliveryGitHook {
      *
      * @param githubJsonArray         List of all the version for a single triple store.
      * @param benchmarkedVersionsList List of all version already benchmarked.
-     * @throws JSONException        If fails in processing the Json data.
-     * @throws IOException          If I/O occurs while running the command.
-     * @throws InterruptedException If the process is interrupted.
      */
-    public void check(JSONArray githubJsonArray, ArrayList<String> benchmarkedVersionsList)
-            throws JSONException, IOException, InterruptedException {
+    public void checkAndRunCPB(JSONArray githubJsonArray, ArrayList<String> benchmarkedVersionsList) {
         for (int i = 0; i < githubJsonArray.length(); i++) {
             try {
                 JSONObject versionObj = githubJsonArray.getJSONObject(i);
-                System.out.println("Redundant = " + benchmarkedVersionsList);
-                if (!benchmarkedVersionsList.contains(versionObj.get("name"))) {
+
+                String version = (String) versionObj.get("name");
+
+                if (!benchmarkedVersionsList.contains(version)) {
+                    //Delete the previous zip file if exist and clear the bmWorkSpace directory.
                     this.delRepository();
-                    this.currentBenchmarkedVersion = (String) versionObj.get("name");
-                    System.out.println("Benchmarking will run for version: " + this.currentBenchmarkedVersion);
+
+                    this.currentBenchmarkedVersion = version;
+
                     int flag = this.downloadRepo((String) versionObj.get("zipball_url"));
+
                     if (flag == 1) {
-                        this.benchmark();
+                        int code = this.unzipGitFile();
+
+                        if (code == 0) {
+                            try {
+                                LoggerUtils.logForBasilisk(logPrefix, "Benchmarking will run for version: " + this.currentBenchmarkedVersion, 1);
+
+                                BenchmarkForGitHook.runBenchmark(this.currentPortNum, this.currentTripleStore, this.currentDatasetFilePath,
+                                        this.currentQueriesFilePath, this.currentBenchmarkedVersion.replace(" ", ""));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            //Add the current verion to the already benchmarked file.
+                            this.updateVersionList();
+                        }
                     }
                 }
             } catch (JSONException e) {
-                this.updateErrorLog("Could be a JSON file parsing issue", e.toString());
+                LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
                 e.printStackTrace();
             }
         }
@@ -218,31 +189,40 @@ public class ContinuousDeliveryGitHook {
      *
      * @param command Command to get the version from the git hub for a particular triple store.
      * @return List of all the version available in the docker hub.
-     * @throws IOException   If I/O error occurs while running the given command.
-     * @throws JSONException If fails in processing the Json data.
      */
-    public JSONArray getGithubTags(String command) throws IOException, JSONException {
+    public JSONArray getGithubTags(String command) {
         ProcessBuilder pb = new ProcessBuilder(command.split(" "));
         Process p;
-        JSONArray jArr = null;
+        JSONArray jArr;
 
-        p = pb.start();
-        InputStream is = p.getInputStream();
-        String s = IOUtils.toString(is, StandardCharsets.UTF_8);
+        String s;
+
+        try {
+            p = pb.start();
+
+            InputStream is = p.getInputStream();
+            s = IOUtils.toString(is, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while trying to fetch the list of tags from Docker hub.", 4);
+            e.printStackTrace();
+            return new JSONArray("[]");
+        }
+
         if (s.length() != 0) {
             if (s.charAt(0) == '[') {
                 jArr = new JSONArray(s);
+
                 p.destroy();
+
                 return jArr;
             } else {
-                this.updateErrorLog(
-                        "Cannot connect to github to fetch tags or curl command incorrect causing JSON parsing issue",
-                        "");
+                LoggerUtils.logForBasilisk(logPrefix, "Cannot connect to github to fetch tags or curl " +
+                        "command incorrect causing JSON parsing issue", 4);
                 return new JSONArray("[]");
             }
         } else {
-            this.updateErrorLog(
-                    "Cannot connect to github to fetch tags or curl command incorrect causing JSON parsing issue", "");
+            LoggerUtils.logForBasilisk(logPrefix, "Cannot connect to github to fetch tags or curl " +
+                    "command incorrect causing JSON parsing issue", 4);
             return new JSONArray("[]");
         }
     }
@@ -253,15 +233,13 @@ public class ContinuousDeliveryGitHook {
      *
      * @param tripleStoreName Triple store name.
      * @return List of all the version already tried benchmarking process for the given triple store name.
-     * @throws JSONException If fails in processing the Json data.
-     * @throws IOException   If I/O error occurs while running the given command.
      */
-    public ArrayList<String> getBenchmarkedDetails(String tripleStoreName) throws JSONException, IOException {
+    public ArrayList<String> getBenchmarkedDetails(String tripleStoreName) {
         try {
             for (int i = 0; i < this.gitHookBenchmarkedFileData.length(); i++) {
                 JSONObject currentBenchmarkedFileObject = this.gitHookBenchmarkedFileData.getJSONObject(i);
                 if (currentBenchmarkedFileObject.has(tripleStoreName)) {
-                    ArrayList<String> list = new ArrayList<String>();
+                    ArrayList<String> list = new ArrayList<>();
                     JSONArray jsonArray = (JSONArray) currentBenchmarkedFileObject.get(tripleStoreName);
                     for (int i1 = 0; i1 < jsonArray.length(); i1++) {
                         list.add(jsonArray.get(i1).toString());
@@ -270,48 +248,52 @@ public class ContinuousDeliveryGitHook {
                 }
             }
         } catch (JSONException e) {
-            this.updateErrorLog("Could be a JSON file parsing issue", e.toString());
+            LoggerUtils.logForBasilisk(logPrefix, "Could be a JSON file parsing issue", 4);
             e.printStackTrace();
         }
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     /**
      * This method runs for the Tentris and fuesiki triple stores, which downloads the git repo from the git hub
      * and runs the benchmarking process on the respective triple store.
      *
-     * @return Status code.
-     * @throws IOException          If I/O error occurs while running the given command.
-     * @throws InterruptedException If the process is interrupted.
+     * @return Exit code.
      */
-    public int forEachStore() throws IOException, InterruptedException {
-
+    public int forEachStore() {
         try {
             this.gitHookBenchmarkedFileData = YamlUtils.getGitBenchmarkAttempted();
 
-            System.out.println(this.gitHookBenchmarkedFileData);
             JSONArray metadataFileArray = YamlUtils.getGitMetaData();
 
             for (int i = 0; i < metadataFileArray.length(); i++) {
                 JSONObject jsonObj = metadataFileArray.getJSONObject(i);
+
                 this.currentTripleStore = (String) jsonObj.get("name");
                 this.currentPortNum = (String) jsonObj.get("port");
                 this.currentDatasetFilePath = (String) jsonObj.get("dataset");
                 this.currentQueriesFilePath = (String) jsonObj.get("queriesFilePath");
-                System.out.println("Currently checking for this triple store: " + this.currentTripleStore);
+
+                LoggerUtils.logForBasilisk(logPrefix, "Currently checking for this triple store: " + this.currentTripleStore, 1);
+
+                //Get the list of all the tag of the current triple store that is already benchmarked in Git hook.
                 this.alreadyBenchmarkedVersionsList = this.getBenchmarkedDetails(this.currentTripleStore);
-                System.out.println(this.alreadyBenchmarkedVersionsList);
+
+                //Get the list of all tags from the git hub for the current triple store.
                 JSONArray githubJsonArray = this.getGithubTags((String) jsonObj.get("command"));
-                this.check(githubJsonArray, this.alreadyBenchmarkedVersionsList);
+
+                /*
+                Check all the tags from the git hub and run the benchmark process
+                for the tags that is not yet benchmarked.
+                 */
+                this.checkAndRunCPB(githubJsonArray, this.alreadyBenchmarkedVersionsList);
             }
-        } catch (IOException e) {
-            this.updateErrorLog("GitMetadata.json or GitBenchmarked.json file could not found", e.toString());
-            e.printStackTrace();
         } catch (JSONException e) {
-            this.updateErrorLog("Could be a GitMetadata.json or GitBenchmarked.json file parsing issue", e.toString());
+            LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
             e.printStackTrace();
         }
-        System.out.println("One run completed");
+
+        LoggerUtils.logForBasilisk(logPrefix, "Basilisk completed benchmark process  on Git hook.", 1);
         return 0;
     }
 }

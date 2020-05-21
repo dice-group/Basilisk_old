@@ -1,7 +1,6 @@
 package de.upb.dss.basilisk.bll.dockerHook;
 
 import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
-import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForDockerHook;
 import de.upb.dss.basilisk.bll.benchmark.DockerUtils;
 import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
@@ -10,13 +9,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.logging.Logger;
 
 /**
  * This is the hook for Docker hub for Continuous benchmarking process(CPB).
@@ -26,111 +22,26 @@ public class ContinuousDeliveryDockerHook {
     private JSONArray dockerHookBenchmarkedFileData;
     private String currentBenchmarkedTag, currentTripleStore, currentRepoName;
     private ArrayList<String> alreadyBenchmarkedTagList;
-    private final String continuousBmPath;
-    private final String dockerHookMetadataFileName;
-    private final String dockerHookBenchmarkedFileName;
-    private final String errorLogFileName;
-    private final String bmWorkspacePath;
     private String currentPortNum;
     private String currentDatasetFilePath;
     private String currentQueriesFilePath;
-    private Logger logger = null;
+    private static final String logPrefix = "Docker Hook";
+
 
     /**
-     * This constructs the ContinuousDeliveryDockerHook object.
-     *
-     * @param continuousBmPath    Path to the continuousBM directory.
-     * @param metadataFileName    Docker meta data file name.
-     * @param benchmarkedFileName Docker already benchmarked file name.
-     * @param errorLogFileName    Error log file name.
-     * @param bmWorkspacePath     Path to the bmWorkSpace directory.
-     */
-    public ContinuousDeliveryDockerHook(String continuousBmPath, String metadataFileName, String benchmarkedFileName,
-                                        String errorLogFileName, String bmWorkspacePath) {
-        super();
-        this.continuousBmPath = continuousBmPath;
-        this.dockerHookMetadataFileName = metadataFileName;
-        this.dockerHookBenchmarkedFileName = benchmarkedFileName;
-        this.errorLogFileName = errorLogFileName;
-        this.bmWorkspacePath = bmWorkspacePath;
-    }
-
-    /**
-     * This method updates the log.
-     *
-     * @param GeneralDesc      General description.
-     * @param ExceptionMessage Exception message.
-     */
-    public void updateErrorLog(String GeneralDesc, String ExceptionMessage) {
-        try {
-            FileWriter er = new FileWriter(this.continuousBmPath + this.errorLogFileName, true);
-            er.write(Calendar.getInstance().getTime() + "~" + this.currentTripleStore + "~" + GeneralDesc + "~"
-                    + ExceptionMessage + "~" + Calendar.getInstance().getTimeInMillis() + "\n");
-            er.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Clears the docker environment.
-     */
-    public void clearDockerEnv() {
-        //Todo: Clear the docker enviornment. All the container and images remove process.
-        DockerUtils.clearDocker();
-    }
-
-    /**
-     * This method updates the DockerHookBenchmarked.json file to keep track of the already
+     * This method updates the DockerBenchmarkedAttempted.yml file to keep track of the already
      * benchmarked tags.
-     *
-     * @throws JSONException If fails to parse the Json data.
-     * @throws IOException   If I/O error occurs while running the command to pull the docker image.
      */
-    public void updateTagList() throws JSONException, IOException {
-
+    public void updateTagList() {
         this.alreadyBenchmarkedTagList.add(this.currentBenchmarkedTag);
 
-        this.dockerHookBenchmarkedFileData = YamlUtils.addTagToDockerBenchmarkedAttempted(this.dockerHookBenchmarkedFileData,
+        this.dockerHookBenchmarkedFileData = YamlUtils.addTagToDockerBenchmarkedAttempted(
+                this.dockerHookBenchmarkedFileData,
                 this.currentBenchmarkedTag,
                 this.currentTripleStore);
 
-        try {
-            this.clearDockerEnv();
-        } catch (Exception e) {
-            this.updateErrorLog("Zip file could not be deleted successfully", e.toString());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * This method runs the benchmarking process on the currently pulled docker image.
-     *
-     * @throws IOException If I/O error occurs while running the command to pull the docker image.
-     */
-    public void benchmark() throws IOException, InterruptedException {
-        //Todo: Run the benchmarking process on the currently pulled docker image.
-        BenchmarkForDockerHook.runBenchmarkForDockerHook(currentPortNum, currentTripleStore, currentDatasetFilePath,
-                currentQueriesFilePath, currentRepoName, currentBenchmarkedTag);
-        try {
-            this.updateTagList();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * This method pulls the docker images from the docker hub.
-     *
-     * @param repoName Repository name.
-     * @param tag      Tag.
-     * @return Status code.
-     * @throws IOException If I/O error occurs while running the command to pull the docker image.
-     */
-    public boolean pullDockerImage(String repoName, String tag) throws IOException {
-        boolean flag = DockerUtils.pullImage(repoName,tag);
-
-        return flag;
+        //Clears the docker environment for the next iteration.
+        DockerUtils.clearDocker();
     }
 
     /**
@@ -139,26 +50,48 @@ public class ContinuousDeliveryDockerHook {
      * the tags in the dockerHubTagsJsonArray parameter.
      *
      * @param dockerHubTagsJsonArray List of all the tags for a single triple store.
-     * @throws IOException If I/O error occurs while running the command to pull the docker image.
+     * @throws InterruptedException If Basilisk is interrupted.
      */
-    public void checkAndRunCPB(JSONArray dockerHubTagsJsonArray) throws InterruptedException, IOException {
-        for (int i = 0; i < dockerHubTagsJsonArray.length(); i++) {
-            try {
+    public void checkAndRunCPB(JSONArray dockerHubTagsJsonArray) throws InterruptedException {
+        try {
+            for (int i = 0; i < dockerHubTagsJsonArray.length(); i++) {
                 JSONObject singleTagData = dockerHubTagsJsonArray.getJSONObject(i);
-                if (!this.alreadyBenchmarkedTagList.contains(singleTagData.get("name"))) {
-                    this.clearDockerEnv();
-                    this.currentBenchmarkedTag = (String) singleTagData.get("name");
-                    logger.info("Basilisk will run benchmarking process on : " + this.currentBenchmarkedTag);
-                    boolean flag = this.pullDockerImage(this.currentRepoName, (String) singleTagData.get("name"));
+
+                String tag = (String) singleTagData.get("name");
+
+                if (!this.alreadyBenchmarkedTagList.contains(tag)) {
+                    //Clears the docker environment before starting the benchmark process.
+                    DockerUtils.clearDocker();
+
+                    this.currentBenchmarkedTag = tag;
+
+                    boolean flag = DockerUtils.pullImage(this.currentRepoName, tag);
+
                     if (flag) {
-                        this.benchmark();
+                        LoggerUtils.logForBasilisk(logPrefix,
+                                currentRepoName + ":" + this.currentBenchmarkedTag +
+                                        ": Basilisk will run benchmarking process on.",
+                                1);
+
+                        //Calls the Benchmarking process on the currently pulled triple store.
+                        BenchmarkForDockerHook.runBenchmarkForDockerHook(currentPortNum, currentTripleStore, currentDatasetFilePath,
+                                currentQueriesFilePath, currentRepoName, currentBenchmarkedTag);
+
+                        //Add the current triple store in the already benchmarked file.
+                        this.updateTagList();
+                    } else {
+                        LoggerUtils.logForBasilisk(logPrefix,
+                                "Basilisk failed to pull the docker image for: " + currentRepoName + ":" +
+                                        this.currentBenchmarkedTag,
+                                1);
                     }
                 }
-            } catch (JSONException e) {
-                this.updateErrorLog("Could be a JSON file parsing issue", e.toString());
-                e.printStackTrace();
             }
+        } catch (JSONException e) {
+            LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
+            e.printStackTrace();
         }
+
     }
 
     /**
@@ -167,29 +100,45 @@ public class ContinuousDeliveryDockerHook {
      *
      * @param command Command to get the tags from the docker hub for a particular triple store.
      * @return List of all the tags available in the docker hub.
-     * @throws IOException If I/O error occurs while running the given command.
      */
-    public JSONArray getDockerHubTags(String command) throws IOException {
-        JSONArray dockerHubTags = null;
+    public JSONArray getDockerHubTags(String command) {
+        JSONArray dockerHubTags;
         ProcessBuilder pb = new ProcessBuilder(command.split(" "));
 
-        Process p = pb.start();
-        InputStream processIS = p.getInputStream();
-        String s = IOUtils.toString(processIS, StandardCharsets.UTF_8);
+        String s = "";
+        Process p = null;
+        try {
+            p = pb.start();
+
+            InputStream processIS = p.getInputStream();
+            s = IOUtils.toString(processIS, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LoggerUtils.logForBasilisk(logPrefix,
+                    "Something went wrong while trying to fetch the list of tags from Docker hub.",
+                    4);
+            e.printStackTrace();
+            return new JSONArray("[]");
+        }
+
         if (s.length() != 0) {
             if (s.charAt(0) == '[') {
                 dockerHubTags = new JSONArray(s);
+
                 p.destroy();
+
                 return dockerHubTags;
             } else {
-                this.updateErrorLog(
-                        "Cannot connect to docker hub to fetch tags or curl command incorrect causing JSON parsing issue",
-                        "");
+                LoggerUtils.logForBasilisk(logPrefix,
+                        "Cannot connect to docker hub to fetch tags or curl command incorrect causing" +
+                                "JSON parsing issue",
+                        4);
                 return new JSONArray("[]");
             }
         } else {
-            this.updateErrorLog(
-                    "Cannot connect to docker hub to fetch tags or curl command incorrect causing JSON parsing issue", "");
+            LoggerUtils.logForBasilisk(logPrefix,
+                    "Cannot connect to docker hub to fetch tags or curl command incorrect causing" +
+                            "JSON parsing issue",
+                    4);
             return new JSONArray("[]");
         }
     }
@@ -207,7 +156,7 @@ public class ContinuousDeliveryDockerHook {
             for (int i = 0; i < this.dockerHookBenchmarkedFileData.length(); i++) {
                 JSONObject singleTripleStoreData = this.dockerHookBenchmarkedFileData.getJSONObject(i);
                 if (singleTripleStoreData.has(tripleStoreName)) {
-                    ArrayList<String> list = new ArrayList<String>();
+                    ArrayList<String> list = new ArrayList<>();
                     JSONArray currentBenchmarkedData = singleTripleStoreData.getJSONArray(tripleStoreName);
                     for (int j = 0; j < currentBenchmarkedData.length(); j++) {
                         list.add(currentBenchmarkedData.get(j).toString());
@@ -216,45 +165,56 @@ public class ContinuousDeliveryDockerHook {
                 }
             }
         } catch (JSONException e) {
-            this.updateErrorLog("Could be a JSON file parsing issue", e.toString());
+            LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
             e.printStackTrace();
         }
-        return new ArrayList<String>();
+
+        return new ArrayList<>();
     }
 
     /**
      * This method runs for the Tentris and Virtuoso triple stores, which pulls the each docker image from the
      * docker hub and runs the benchmarking process on the respective triple stores.
      *
-     * @return Status code.
+     * @return Exit code.
+     * @throws InterruptedException If Basilisk is interrupted.
      */
     public int forEachStore() throws InterruptedException {
-        logger = new LoggerUtils().getLogger(new ApplicationPropertiesUtils().getLogFilePath(), "Git Hook");
-        try {
-            this.dockerHookBenchmarkedFileData = YamlUtils.getDockerBenchmarkAttempted();
 
+        this.dockerHookBenchmarkedFileData = YamlUtils.getDockerBenchmarkAttempted();
+
+        try {
             JSONArray metaDataFileArray = YamlUtils.getDockerMetaData();
 
             for (int i = 0; i < metaDataFileArray.length(); i++) {
                 JSONObject singleStoreMetaData = metaDataFileArray.getJSONObject(i);
+
                 this.currentTripleStore = (String) singleStoreMetaData.get("name");
                 this.currentRepoName = (String) singleStoreMetaData.get("repositoryName");
                 this.currentPortNum = (String) singleStoreMetaData.get("port");
                 this.currentDatasetFilePath = (String) singleStoreMetaData.get("dataset");
                 this.currentQueriesFilePath = (String) singleStoreMetaData.get("queriesFilePath");
-                logger.info("Currently checking for " + this.currentTripleStore + " triple store.");
+
+                LoggerUtils.logForBasilisk(logPrefix, "Currently checking for " + this.currentTripleStore + " triple store.", 1);
+
+                //Get the list of all the tag of the current triple store that is already benchmarked in Docker hook.
                 this.alreadyBenchmarkedTagList = this.getBenchmarkedDetails(this.currentTripleStore);
+
+                //Get the list of all tags from the docker hub for the current triple store.
                 JSONArray dockerHubTagsJsonArray = this.getDockerHubTags((String) singleStoreMetaData.get("command"));
+
+                /*
+                Check all the tags from the docker hub and run the benchmark process
+                for the tags that is not yet benchmarked.
+                 */
                 this.checkAndRunCPB(dockerHubTagsJsonArray);
             }
-        } catch (IOException e) {
-            this.updateErrorLog("DockerHookMetadata.json or DockerHookBenchmarked.json file could not found", e.toString());
-            e.printStackTrace();
         } catch (JSONException e) {
-            this.updateErrorLog("Could be a DockerHookMetadata.json or DockerHookBenchmarked.json file parsing issue", e.toString());
+            LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
             e.printStackTrace();
         }
-        logger.info("Basilisk Benchmark process completed on Docker hook.");
+
+        LoggerUtils.logForBasilisk(logPrefix, "Basilisk completed benchmark process  on Docker hook.", 1);
         return 0;
     }
 }

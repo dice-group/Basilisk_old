@@ -1,12 +1,9 @@
 package de.upb.dss.basilisk.bll.benchmark;
 
-import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.logging.Logger;
 
 /**
  * This is a utility class to support the unix commands execution.
@@ -50,8 +47,6 @@ public class UnixUtils {
         String s = "";
         String err = "";
 
-        Logger logger = myLoggerUtils.getLogger(new ApplicationPropertiesUtils().getLogFilePath(), "UnixLog");
-        logger.info("Running the command: " + cmd);
         //Run the command through Process.
         Process p = Runtime.getRuntime().exec(cmd, null, path);
 
@@ -60,19 +55,15 @@ public class UnixUtils {
         BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
         System.out.println("Output of the command is :\n");
-        logger.info("Output of the command is :\n");
         while ((s = stdInput.readLine()) != null) {
             log = log + "\n" + s;
-            logger.info(log);
         }
 
         cmdOut = log;
 
         System.out.println("Error/Warning of the command :\n");
-        logger.info("Error/Warning of the command :\n");
         while ((s = stdError.readLine()) != null) {
             err = err + "\n" + s;
-            logger.info(err);
         }
 
         cmdErr = log;

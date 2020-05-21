@@ -16,12 +16,13 @@ public class Extraction {
     private static final int BUFFER_SIZE = 4096;
     private String storeName;
 
-	/**
-	 * This method extracts the fuesiki zip file.
-	 * @param zipFilePath Path to the fuesiki zip file.
-	 * @param destDirectory Destination.
-	 * @throws IOException If fails to unzip the file.
-	 */
+    /**
+     * This method extracts the fuesiki zip file.
+     *
+     * @param zipFilePath   Path to the fuesiki zip file.
+     * @param destDirectory Destination.
+     * @throws IOException If fails to unzip the file.
+     */
     public void unzipJena(String zipFilePath, String destDirectory) throws IOException {
 
         ZipFile zipFile = new ZipFile(zipFilePath);
@@ -48,12 +49,13 @@ public class Extraction {
         zipFile.close();
     }
 
-	/**
-	 * This method extracts the generic zip file.
-	 * @param zipFilePath Path to the generic zip file.
-	 * @param destDirectory1 Destination.
-	 * @throws IOException If fails to unzip the file.
-	 */
+    /**
+     * This method extracts the generic zip file.
+     *
+     * @param zipFilePath    Path to the generic zip file.
+     * @param destDirectory1 Destination.
+     * @throws IOException If fails to unzip the file.
+     */
     public void unzipGeneric(String zipFilePath, String destDirectory1) throws IOException {
         ZipFile zipFile = new ZipFile(zipFilePath);
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
