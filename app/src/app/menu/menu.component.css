@@ -107,10 +107,29 @@ body {
     color: white;
   }
 
-  li{
+  .selectv{
     background-color: #fff;
     color: #15568f;;
     width: 200px;
     padding-left: 3px;
     padding-right: 3px;
   }
+
+  ul li {
+    border: 1px solid #ddd;
+    margin-top: -1px; /* Prevent double borders */
+    background-color: #f6f6f6;
+    padding: 12px;
+    text-decoration: none;
+    font-size: 18px;
+    color: black;
+    display: block;
+    position: relative;
+  }
+
+  .close {
+    cursor: pointer;
+    
+  }
+  
+  .close:hover {background: white;}

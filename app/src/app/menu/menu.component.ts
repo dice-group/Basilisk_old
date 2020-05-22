@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import axios from 'axios';
+import { version } from 'punycode';
 
 @Component({
   selector: 'app-menu',
@@ -18,6 +19,7 @@ export class MenuComponent implements OnInit {
   listOfAllVersions=[];
   listOfUniqueVersions=[];
   selectedVersions=[];
+  
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
 
@@ -86,4 +88,17 @@ export class MenuComponent implements OnInit {
   versionSelected(version){
     this.selectedVersions.push(version);
   }
+
+  
+  versiondeleted(version)
+  {
+    const index=this.selectedVersions.indexOf(version);
+    if(index>-1)
+    {
+     this.selectedVersions.splice(index,1);
+    }
+  }
+  
 }
+
+
