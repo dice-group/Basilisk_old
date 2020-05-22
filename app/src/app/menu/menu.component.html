@@ -16,9 +16,9 @@
                       </option>
                     </select>
                   </div>
-                 <ul id="myList" style="height: 90px; width: 218px; overflow: auto; list-style: none; padding: 0; list-style-type: none;">
-                  <li *ngFor="let version of selectedVersions">{{version}}</li>
-                </ul>
+                  <ul id="myList"  style="height: 90px; width: 218px; overflow: auto; list-style: none; padding: 0; list-style-type: none;">
+                  <li class="selectv" *ngFor="let version of selectedVersions">{{version}}<span class="close" name="deselectVersion" (click)=" versiondeleted(version)">&times;</span></li>
+                  </ul>
                  <tr>
                   <td><label class="btn btn-sm " style="margin-left: 0px" onClick="">Submit</label></td>
                   <td><label class="btn btn-sm " style="margin-left: 55px" onClick="">Clear all</label></td>
