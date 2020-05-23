@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import axios from 'axios';
 import { version } from 'punycode';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-menu',
@@ -19,7 +20,7 @@ export class MenuComponent implements OnInit {
   listOfAllVersions=[];
   listOfUniqueVersions=[];
   selectedVersions=[];
-  
+
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
 
@@ -89,8 +90,13 @@ export class MenuComponent implements OnInit {
     this.selectedVersions.push(version);
   }
 
-  
-  versiondeleted(version)
+
+  /**
+   * Deletes the respective version from the list when clicked on cross icon
+   *
+   * @param {String} version - version to be deleted
+   */
+  versionDeleted(version)
   {
     const index=this.selectedVersions.indexOf(version);
     if(index>-1)
@@ -98,7 +104,7 @@ export class MenuComponent implements OnInit {
      this.selectedVersions.splice(index,1);
     }
   }
-  
+
 }
 
 

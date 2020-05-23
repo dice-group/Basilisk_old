@@ -2,37 +2,35 @@
     <div class="logo" style="width: 60px;">
       <img src=".\assets\Images\Basilisk_Logo.png" height="150" width="150" />
     </div>
-      <div class="menu-1" id="stores">
-        <form>
-          <table style="padding: 10px 10px 10px 10px;">
-            <div class="container menu-1">
-              <div class="row" style="height: auto; width: 300px; text-align: left">
-                <div class="col" style="width: 300px">
-                  <div class="form-group">
-                    <select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
-                            style="max-width: 200px; border-radius: 4px;">
-                      <option *ngFor="let version of listOfUniqueVersions" value="{{version}}">
-                        {{version}}
-                      </option>
-                    </select>
-                  </div>
-                  <ul id="myList"  style="height: 90px; width: 218px; overflow: auto; list-style: none; padding: 0; list-style-type: none;">
-                  <li class="selectv" *ngFor="let version of selectedVersions">{{version}}<span class="close" name="deselectVersion" (click)=" versiondeleted(version)">&times;</span></li>
-                  </ul>
-                 <tr>
-                  <td><label class="btn btn-sm " style="margin-left: 0px" onClick="">Submit</label></td>
-                  <td><label class="btn btn-sm " style="margin-left: 55px" onClick="">Clear all</label></td>
-                 </tr>
-                </div>
-              </div>
-            </div>
-          </table>
-        </form>
+
+      <div class="row menu-1" style="margin-bottom: 10px;">
+        <div class="col-6" style="padding: 10px 10px; display: flex; float:left;">
+          <div class="form-group" style="margin-top: -10px; position: relative; height: 20px; display: block; text-align: left; margin-bottom: 2px; width: inherit;">
+            <select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
+                    style="width: 400px; border-radius: 4px;">
+              <option *ngFor="let version of listOfUniqueVersions" value="{{version}}">
+                {{version}}
+              </option>
+            </select>
+          </div>
+          <div class="row">
+            <ul id="myList" class="list-group" style="height: 110px; margin-left: -393px; margin-top: 20px; display: block; margin-bottom: -25px !important; overflow-x: hidden; width: 400px; overflow-y: auto; list-style: none; padding: 0; list-style-type: none;">
+              <li class="list-group-item" *ngFor="let version of selectedVersions"  style="text-overflow: ellipsis !important; white-space: nowrap;">{{version}}<span class="close" style="float:right;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-6" style="display: flex; background-color:blueviolet;">
+
+          <!-- your code here -->
+
+          <label class="btn btn-sm" style="height: 20px; margin-left: 0px" onClick="">Submit</label>
+          <label class="btn btn-sm" style="height: 20px; margin-left: 150px; " onClick="">Clear all</label>
+        </div>
       </div>
 
 
 
-      <div class="menu-2">
+      <div class="menu-2" style="padding-left: 20px;">
         <table style=" padding: 10px 10px 10px 10px;">
           <tr>
             <td>
