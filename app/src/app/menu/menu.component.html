@@ -5,7 +5,7 @@
 
       <div class="row menu-1" style="margin-bottom: 10px;">
         <div class="col-6" style="padding: 10px 10px; display: flex; float:left;">
-          <div class="form-group" style="margin-top: -10px; position: relative; height: 20px; display: block; text-align: left; margin-bottom: 2px; width: inherit;">
+          <div class="form-group" id="selectVersionDiv">
             <select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
                     style="width: 400px; border-radius: 4px;">
               <option *ngFor="let version of listOfUniqueVersions" value="{{version}}">
@@ -14,8 +14,11 @@
             </select>
           </div>
           <div class="row">
-            <ul id="myList" class="list-group" style="height: 110px; margin-left: -393px; margin-top: 20px; display: block; margin-bottom: -25px !important; overflow-x: hidden; width: 400px; overflow-y: auto; list-style: none; padding: 0; list-style-type: none;">
-              <li class="list-group-item" *ngFor="let version of selectedVersions"  style="text-overflow: ellipsis !important; white-space: nowrap;">{{version}}<span class="close" style="float:right;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span></li>
+            <ul cdkDropList (cdkDropListDropped)="dragDrop($event)" id="myList" class="list-group">
+              <li cdkDrag class="list-group-item" *ngFor="let version of selectedVersions">
+                {{version}}
+                <span class="close" style="float:right;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span>
+              </li>
             </ul>
           </div>
         </div>

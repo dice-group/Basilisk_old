@@ -120,6 +120,9 @@ body {
   }
 
   ul li {
+    cursor: grabbing;
+    text-overflow: ellipsis !important;
+    white-space: nowrap;
     border: 1px solid #ddd;
     margin-top: -1px; /* Prevent double borders */
     background-color: #f6f6f6;
@@ -127,8 +130,30 @@ body {
     text-decoration: none;
     font-size: 18px;
     color: black;
-    /* display: block;
-    position: relative; */
+  }
+
+  ul {
+    height: 110px;
+    margin-left: -393px;
+    margin-top: 20px;
+    display: block;
+    margin-bottom: -25px !important;
+    overflow-x: hidden;
+    width: 400px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    list-style-type: none;
+  }
+
+  #selectVersionDiv{
+    margin-top: -10px;
+    position: relative;
+    height: 20px;
+    display: block;
+    text-align: left;
+    margin-bottom: 2px;
+    width: inherit;
   }
 
   .close {

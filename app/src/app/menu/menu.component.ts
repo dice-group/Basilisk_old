@@ -105,6 +105,15 @@ export class MenuComponent implements OnInit {
     }
   }
 
+  /**
+   * Changes the position of the selected versions in the array when an item is dragged
+   *
+   * @param {Event} event - event containing index of draged items
+   */
+  dragDrop(event: CdkDragDrop<string[]>){
+    moveItemInArray(this.selectedVersions, event.previousIndex, event.currentIndex);
+  }
+
 }
 
 
