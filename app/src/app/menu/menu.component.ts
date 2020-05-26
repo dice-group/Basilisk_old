@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import axios from 'axios';
 import { version } from 'punycode';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { getLocaleDateFormat } from '@angular/common';
+import { element } from 'protractor';
 
 @Component({
   selector: 'app-menu',
@@ -20,9 +22,23 @@ export class MenuComponent implements OnInit {
   listOfAllVersions=[];
   listOfUniqueVersions=[];
   selectedVersions=[];
+  size = 0.0;
 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
+
+  querySelectPart = "SELECT ?query ?property ?value \n"
+  queryWherePart = "WHERE {" +
+    "VALUES ?property { <http://iguana-benchmark.eu/properties/connection>" +
+    "<http://iguana-benchmark.eu/properties/noOfWorkers>" +
+    "<http://iguana-benchmark.eu/properties/queriesPerSecond>" +
+    "<http://iguana-benchmark.eu/properties/queryMixes>" +
+    "<http://iguana-benchmark.eu/properties/totalTime>" +
+    "<http://iguana-benchmark.eu/properties/failed>" +
+    "<http://iguana-benchmark.eu/properties/wrongCodes>}" +
+
+    "?query ?property ?value ." +
+  "}"
 
   /**
    * This function calls imediately when the component is created
@@ -60,7 +76,7 @@ export class MenuComponent implements OnInit {
     axios({
       method: 'get',
       url: getVersionsQuery})
-    .then(res => this.getVersions(res))
+    .then(res => this.getVersions(res, dataset))
     .catch(err => console.log(err));
   }
 
@@ -70,16 +86,32 @@ export class MenuComponent implements OnInit {
    *
    * @param response - json object containing response of to the version query
    */
-  getVersions(response){
+  getVersions(response, dataset){
     response.data.results.bindings.forEach(element => {
-      this.listOfAllVersions.push(element);
+      this.listOfAllVersions.push([element.g.value, dataset]);
       if(response.data.results.bindings.indexOf(element)%5 == 1){
         var name = element.g.value;
         this.listOfUniqueVersions.push(name.slice(0, name.indexOf('$')));
       }
     });
-    console.log(this.listOfUniqueVersions)
+    //this.getAllData();
   }
+
+  getAllData(){
+    this.listOfAllVersions.forEach(element => {
+      var queryFromPart = "FROM <" + element[0] + "> \n";
+      var queryAllParts = this.querySelectPart + queryFromPart + this.queryWherePart;
+      let queryForAllData = this.connectionString + element[1] + this.postConnectionString + encodeURIComponent(queryAllParts);
+      console.log(queryForAllData);
+
+      axios({
+        method: 'get',
+        url: queryForAllData})
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+    })
+  }
+
 
   /**
    * Creates an array of selected versions
