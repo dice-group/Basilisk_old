@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import axios from 'axios';
 import { version } from 'punycode';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { getLocaleDateFormat } from '@angular/common';
-import { element } from 'protractor';
+import * as d3 from 'd3'
 
 @Component({
   selector: 'app-menu',
@@ -22,7 +21,9 @@ export class MenuComponent implements OnInit {
   listOfAllVersions=[];
   listOfUniqueVersions=[];
   selectedVersions=[];
-  size = 0.0;
+  selectXaxis=[1, 4, 8];
+  selectYaxis= ["qps", "qmph"]
+
 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
@@ -147,5 +148,8 @@ export class MenuComponent implements OnInit {
   }
 
 }
+
+
+
 
 

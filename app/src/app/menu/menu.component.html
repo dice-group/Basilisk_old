@@ -22,12 +22,33 @@
             </ul>
           </div>
         </div>
-        <div class="col-6" style="display: flex; background-color:blueviolet;">
+        <div class="col-6" style=" display:inline-block; background-color:blueviolet;">
+          <select id="xAxisVal" style="width: 180px; border-radius: 4px; height: 30px;">
+            <option *ngFor="let xAxis of selectXaxis">No. of Clients:
+              {{xAxis}}
+            </option>
+          </select>
+          &nbsp;&nbsp;
+          <select id="yAxisVal" style="width: 180px; border-radius: 4px; height: 30px;">
+            <option *ngFor="let yAxis of selectYaxis">Select Y-axis:
+              {{yAxis}} 
+            </option>
+          </select>
+          <div>
+            <select id="graphVal" style="border-radius: 4px; height: 30px; width: 380px; margin-top: 20px">
+              <option *ngFor="let bars of selectYaxis">Select Graph: 
+              </option>
+            </select>
+          </div>
 
-          <!-- your code here -->
+          
+          <div>
+              <label class="btn btn-sm" style="height: 20px; margin-top: 30px; width: 180px;" onClick="">Submit</label>
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              <label class="btn btn-sm" style="height: 20px; margin-top: 30px; width: 180px;" onClick="">Clear all</label>  
+          </div>
 
-          <label class="btn btn-sm" style="height: 20px; margin-left: 0px" onClick="">Submit</label>
-          <label class="btn btn-sm" style="height: 20px; margin-left: 150px; " onClick="">Clear all</label>
+          
         </div>
       </div>
 
