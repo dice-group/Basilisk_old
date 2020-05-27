@@ -23,8 +23,18 @@ public class ApplicationPropertiesUtils {
     private final String dockerMetadataFileName;
     private final String dockerBenchmarkedFileName;
     private final String logDirectory;
+    private final String resultStoringFusekiEndPoint;
 
     Properties appProps;
+
+    /**
+     * Getter method for Fuseki server endpoint to store the results of the benchmark.
+     *
+     * @return Fuseki server endpoint to store the results of the benchmark.
+     */
+    public String getResultStoringFusekiEndPoint() {
+        return resultStoringFusekiEndPoint;
+    }
 
     /**
      * Getter method for log directory.
@@ -181,5 +191,6 @@ public class ApplicationPropertiesUtils {
         dockerBenchmarkedFileName = appProps.getProperty("dockerBenchmarkedFileName");
         continuousErrorLogFileName = appProps.getProperty("continuousErrorLogFileName");
         logDirectory = appProps.getProperty("logDirectory");
+        resultStoringFusekiEndPoint = appProps.getProperty("resultStoringFusekiEndPoint");
     }
 }

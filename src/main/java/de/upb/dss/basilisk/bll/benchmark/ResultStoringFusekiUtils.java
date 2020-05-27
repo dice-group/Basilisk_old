@@ -45,7 +45,9 @@ public class ResultStoringFusekiUtils {
      */
     private static void loadNtFile(String tripleStoreName, String repoName, String tag, String ntFile, String prefix) {
         RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination("http://131.234.28.165:3030/" + tripleStoreName);
+                .destination(
+                        new ApplicationPropertiesUtils().getResultStoringFusekiEndPoint()
+                                + tripleStoreName);
 
         RDFConnection connection = builder.build();
 
