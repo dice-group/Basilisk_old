@@ -22,6 +22,9 @@ export class MenuComponent implements OnInit {
   listOfAllVersions=[];
   listOfUniqueVersions=[];
   selectedVersions=[];
+  dataInSelectedVersions=[];
+  listOfWorkers=["$1worker", "$4workers", "$8workers", "$16workers", "$32workers"]
+  dic = {};
   size = 0.0;
 
 
@@ -61,9 +64,8 @@ export class MenuComponent implements OnInit {
     for(var i=0; i<response.data.datasets.length; i++){
       var datasetName = response.data.datasets[i]["ds.name"];
       this.listOfAllDatasets.push(datasetName);
-      this.runVersionQuery(datasetName);
+      this.runVersionQuery(datasetName, i);
     }
-    console.log(this.listOfAllDatasets);
   }
 
   /**
@@ -71,12 +73,12 @@ export class MenuComponent implements OnInit {
    *
    * @param {String} dataset - Name of the dataset
    */
-  runVersionQuery(dataset){
+  runVersionQuery(dataset, datasetNo){
     var getVersionsQuery = this.connectionString + dataset + this.postConnectionString + encodeURIComponent(this.queryForAllGraphs);
     axios({
       method: 'get',
       url: getVersionsQuery})
-    .then(res => this.getVersions(res, dataset))
+    .then(res => this.getVersions(res, dataset, datasetNo))
     .catch(err => console.log(err));
   }
 
@@ -86,7 +88,7 @@ export class MenuComponent implements OnInit {
    *
    * @param response - json object containing response of to the version query
    */
-  getVersions(response, dataset){
+  getVersions(response, dataset, datasetNo){
     response.data.results.bindings.forEach(element => {
       this.listOfAllVersions.push([element.g.value, dataset]);
       if(response.data.results.bindings.indexOf(element)%5 == 1){
@@ -94,22 +96,36 @@ export class MenuComponent implements OnInit {
         this.listOfUniqueVersions.push(name.slice(0, name.indexOf('$')));
       }
     });
-    //this.getAllData();
+    if(datasetNo == 2){
+      this.getAllData();
+    }
   }
 
+  /**
+   * Runs queries to get data for all version of triple stores
+   */
   getAllData(){
     this.listOfAllVersions.forEach(element => {
       var queryFromPart = "FROM <" + element[0] + "> \n";
       var queryAllParts = this.querySelectPart + queryFromPart + this.queryWherePart;
       let queryForAllData = this.connectionString + element[1] + this.postConnectionString + encodeURIComponent(queryAllParts);
-      console.log(queryForAllData);
 
       axios({
         method: 'get',
         url: queryForAllData})
-      .then(res => console.log(res))
+      .then(res => this.sortData(res.data.results.bindings, element[0]))
       .catch(err => console.log(err));
     })
+  }
+
+  /**
+   *sorts data with respect to the version and store them in the form of dictionary
+   *
+   * @param {Array} data - data in the form of array for each triple store
+   * @param {String} element - contains name of version and no. of workers
+   */
+  sortData(data, element){
+    this.dic[element] = data;
   }
 
 
@@ -120,6 +136,12 @@ export class MenuComponent implements OnInit {
    */
   versionSelected(version){
     this.selectedVersions.push(version);
+    var allWrokersData = [version];
+    this.listOfWorkers.forEach(worker => {
+      allWrokersData.push(this.dic[version + worker]);
+    })
+    this.dataInSelectedVersions.push(allWrokersData);
+    console.log(this.dataInSelectedVersions)
   }
 
 
