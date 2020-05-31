@@ -52,6 +52,10 @@ export class MenuComponent implements OnInit {
       url: this.allDatasets})
     .then(res => this.getDatasets(res))
     .catch(err => console.log(err));
+
+    for(var i = 0; i <= 12; i++){ //populate queryId
+      this.queryId.push("sparql" + i);
+    }
   }
 
   /**
@@ -127,9 +131,30 @@ export class MenuComponent implements OnInit {
 
     var qm = []
     var arr4d = [];
+    var arr3d = [];
+    this.queryId.forEach(id => {
+      var arr2d = [id, [], [], [], []]
+      arr3d.push(arr2d);
+    })
 
     data.forEach(item => {
-      if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queryMixes") {
+      if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queriesPerSecond") {
+        var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
+        arr3d[index][1].push(item.value.value)
+      }
+      else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "totalTime") {
+        var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
+        arr3d[index][2].push(item.value.value)
+      }
+      else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "failed") {
+        var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
+        arr3d[index][3].push(item.value.value)
+      }
+      else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "wrongCodes") {
+        var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
+        arr3d[index][4].push(item.value.value)
+      }
+      else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queryMixes") {
         qm.push(item.value.value)
       }
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "noOfWorkers") {
@@ -138,6 +163,7 @@ export class MenuComponent implements OnInit {
     });
 
     arr4d.push(qm);
+    arr4d.push(arr3d);
     this.dataDictionary[element] = arr4d;
   }
 
