@@ -18,14 +18,13 @@ export class MenuComponent implements OnInit {
   connectionString="http://131.234.28.165:3030";
   postConnectionString="/sparql?query=";
 
-  listOfAllDatasets=[];
-  listOfAllVersions=[];
-  listOfUniqueVersions=[];
-  selectedVersions=[];
-  dataInSelectedVersions=[];
+  listOfAllDatasets=[]; //contains names of available datasets
+  listOfAllVersions=[]; //contains all versions w.r.t noOfWorkers
+  listOfUniqueVersions=[]; //contains all versions of triple stores available
+  selectedVersions=[]; //containes versions selected by user
   listOfWorkers=["$1worker", "$4workers", "$8workers", "$16workers", "$32workers"]
-  dic = {};
-  size = 0.0;
+  queryId=[];  //contains all queryIds
+  dataDictionary = {}; //contains all data
 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
@@ -125,7 +124,21 @@ export class MenuComponent implements OnInit {
    * @param {String} element - contains name of version and no. of workers
    */
   sortData(data, element){
-    this.dic[element] = data;
+
+    var qm = []
+    var arr4d = [];
+
+    data.forEach(item => {
+      if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queryMixes") {
+        qm.push(item.value.value)
+      }
+      else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "noOfWorkers") {
+        arr4d.push(item.value.value)
+      }
+    });
+
+    arr4d.push(qm);
+    this.dataDictionary[element] = arr4d;
   }
 
 
@@ -136,12 +149,6 @@ export class MenuComponent implements OnInit {
    */
   versionSelected(version){
     this.selectedVersions.push(version);
-    var allWrokersData = [version];
-    this.listOfWorkers.forEach(worker => {
-      allWrokersData.push(this.dic[version + worker]);
-    })
-    this.dataInSelectedVersions.push(allWrokersData);
-    console.log(this.dataInSelectedVersions)
   }
 
 
@@ -166,6 +173,16 @@ export class MenuComponent implements OnInit {
    */
   dragDrop(event: CdkDragDrop<string[]>){
     moveItemInArray(this.selectedVersions, event.previousIndex, event.currentIndex);
+  }
+
+  /**
+   * When user clicks on 'Submit' button
+   */
+  onSubmit(){
+    var newArray = [];
+    for (const [key, value] of Object.entries(this.dataDictionary)) {
+      console.log(key, value);
+    }
   }
 
 }
