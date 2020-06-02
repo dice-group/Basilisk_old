@@ -22,34 +22,40 @@
             </ul>
           </div>
         </div>
-        <div class="col-6" style=" display:inline-block; background-color:blueviolet;">
-          <select id="xAxisVal" style="width: 180px; border-radius: 4px; height: 30px;">
-            <option *ngFor="let xAxis of selectXaxis">No. of Clients:
-              {{xAxis}}
-            </option>
-          </select>
+        <div class="col-6" style=" display:inline-block;">
+          <button mat-button [matMenuTriggerFor]="xaxis" id="xAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white;">Select X-axis</button>
+          <mat-menu #xaxis="matMenu">
+            <button mat-menu-item [matMenuTriggerFor]="noofclient">No. of Clients</button>
+            <button mat-menu-item [matMenuTriggerFor]="queryId">Query ID</button>
+            <button mat-menu-item [matMenuTriggerFor]="result_size">Result Size</button>
+          </mat-menu>
+          <mat-menu #noofclient="matMenu" xPosition="before">
+            <button mat-menu-item *ngFor="let list of listOfWorkers">{{list}}</button>   
+          </mat-menu>
+          
           &nbsp;&nbsp;
-          <select id="yAxisVal" style="width: 180px; border-radius: 4px; height: 30px;">
-            <option *ngFor="let yAxis of selectYaxis">Select Y-axis:
-              {{yAxis}} 
-            </option>
-          </select>
+          
+          <button mat-button [matMenuTriggerFor]="" id="yAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white;">
+            Select Y-axis</button>
+     
           <div>
-            <select id="graphVal" style="border-radius: 4px; height: 30px; width: 380px; margin-top: 20px">
-              <option *ngFor="let bars of selectYaxis">Select Graph: 
-              </option>
-            </select>
+            <button mat-button [matMenuTriggerFor]="selectgraph" id="graphVal" style="border-radius: 4px; height: 30px; width: 380px; margin-top: 20px; background-color: white;">
+              Select Graph</button>
+              <mat-menu #selectgraph="matMenu" >
+                <button mat-menu-item style="width: 380px">Bar Chart</button>
+                <button mat-menu-item style="width: 380px">Area Chart</button>
+                <button mat-menu-item style="width: 380px">Line Chart</button>
+                <button mat-menu-item style="width: 380px">Box Plot</button>
+                <button mat-menu-item style="width: 380px">Scatter Pot</button>  
+              </mat-menu>
           </div>
 
           
           <div>
-              <label class="btn btn-sm" style="height: 20px; margin-top: 30px; width: 180px;" onClick="">Submit</label>
+              <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 180px; font-weight:inherit" (click)="onSubmit()">Submit</button>
               &nbsp;&nbsp;&nbsp;&nbsp;
-              <label class="btn btn-sm" style="height: 20px; margin-top: 30px; width: 180px;" onClick="">Clear all</label>  
+              <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 180px; font-weight:inherit" onClick="">Clear all</button>  
           </div>
-
-          <label class="btn btn-sm" style="height: 20px; margin-left: 0px" (click)="onSubmit()">Submit</label>
-          <label class="btn btn-sm" style="height: 20px; margin-left: 150px; " onClick="">Clear all</label>
         </div>
       </div>
 
@@ -69,17 +75,17 @@
 
           <tr>
             <td class="color1">Download Results: &nbsp;
-                <label class="btn btn-sm" style="margin-left: 0px" onclick="">RDF Format</label>
+                <label class="btn btn-sm" style="margin-left: 0px; font-weight:inherit" onclick="">RDF Format</label>
                 &nbsp;&nbsp;
-                <label class="btn btn-sm"  onclick="">CSV Format</label>
+                <label class="btn btn-sm" style="font-weight:inherit" onclick="">CSV Format</label>
             </td>
           </tr>
 
           <tr>
             <td>
-              <a href="#" class="btn btn-sm" id="login-button">Login</a>
+              <a href="#" class="btn btn-sm" style="font-weight:inherit" id="login-button">Login</a>
               &nbsp;&nbsp;
-              <a href="#" class="btn btn-sm" id="signup-button">Signup</a>
+              <a href="#" class="btn btn-sm" style="font-weight:inherit" id="signup-button">Signup</a>
             </td>
           </tr>
         </table>

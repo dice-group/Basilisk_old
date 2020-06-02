@@ -4,6 +4,7 @@ import { version } from 'punycode';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import * as d3 from 'd3'
 
+
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
@@ -24,6 +25,8 @@ export class MenuComponent implements OnInit {
   listOfWorkers=["$1worker", "$4workers", "$8workers", "$16workers", "$32workers"]
   queryId=[];  //contains all queryIds
   dataDictionary = {}; //contains all data
+  result_size=[]
+  
 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
@@ -211,6 +214,8 @@ export class MenuComponent implements OnInit {
   }
 
 }
+
+
 
 
 
