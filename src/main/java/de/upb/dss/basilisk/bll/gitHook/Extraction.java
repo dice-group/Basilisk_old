@@ -45,8 +45,12 @@ public class Extraction {
                 continue;
             }
         }
-        stream.close();
-        zipFile.close();
+
+        if(stream != null)
+            stream.close();
+
+        if(zipFile != null)
+            zipFile.close();
     }
 
     /**
