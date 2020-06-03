@@ -26,16 +26,22 @@
           <button mat-button [matMenuTriggerFor]="xaxis" id="xAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white;">Select X-axis</button>
           <mat-menu #xaxis="matMenu">
             <button mat-menu-item [matMenuTriggerFor]="noofclient">No. of Clients</button>
-            <button mat-menu-item [matMenuTriggerFor]="queryId">Query ID</button>
-            <button mat-menu-item [matMenuTriggerFor]="result_size">Result Size</button>
+            <button mat-menu-item [matMenuTriggerFor]="qid">Query Id</button>
+            <button mat-menu-item [matMenuTriggerFor]="rsize">Result Size</button>
           </mat-menu>
           <mat-menu #noofclient="matMenu" xPosition="before">
             <button mat-menu-item *ngFor="let list of listOfWorkers">{{list}}</button>   
           </mat-menu>
+          <mat-menu #qid="matMenu" xPosition="before">
+            <button mat-menu-item *ngFor="let query of queryId">{{query}}</button>   
+          </mat-menu>
+          <mat-menu #rsize="matMenu" xPosition="before">
+            <button mat-menu-item *ngFor="let result of result_size">{{result}}</button>   
+          </mat-menu>
           
           &nbsp;&nbsp;
           
-          <button mat-button [matMenuTriggerFor]="" id="yAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white;">
+          <button mat-button id="yAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white;">
             Select Y-axis</button>
      
           <div>

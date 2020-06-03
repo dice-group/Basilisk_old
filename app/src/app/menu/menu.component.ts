@@ -25,7 +25,7 @@ export class MenuComponent implements OnInit {
   listOfWorkers=["$1worker", "$4workers", "$8workers", "$16workers", "$32workers"]
   queryId=[];  //contains all queryIds
   dataDictionary = {}; //contains all data
-  result_size=[]
+  result_size=[1, 2, 3]
   
 
 
