@@ -1,10 +1,11 @@
 GitBenchmarkedAttempted:
 - tentris:
   - initialTempKickOffData
+  - v1.0.1
+  - v1.0.0
   - pinwheel
   - firecracker
   - brick
-  - v1.0.0
   - 1.0.5.1
   - 1.0.5
   - 1.0.4
@@ -25,6 +26,8 @@ GitBenchmarkedAttempted:
   - jena-csv-1.0.0
   - jena-core-2.7.0-incubating
   - jena-arq-2.9.0-incubating
+  - jena-3.15.0
+  - jena-3.14.0
   - jena-3.13.1
   - jena-3.13.0
   - jena-3.12.0
@@ -41,4 +44,3 @@ GitBenchmarkedAttempted:
   - jena-3.6.0-rc1
   - jena-3.5.0
   - jena-3.5.0-rc2
-  - jena-3.5.0-rc1
