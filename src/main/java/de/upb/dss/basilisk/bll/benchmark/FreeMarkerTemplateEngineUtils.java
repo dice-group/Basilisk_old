@@ -1,5 +1,6 @@
 package de.upb.dss.basilisk.bll.benchmark;
 
+import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
@@ -130,6 +131,63 @@ public class FreeMarkerTemplateEngineUtils {
                 LoggerUtils.logForBasilisk(logPrefix, scriptFile + " file Created", 1);
             } else {
                 LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while creating the file " + scriptFile, 1);
+                return -1;
+            }
+        } catch (Exception e) {
+            LoggerUtils.logForBasilisk(logPrefix, "Something went wrong", 4);
+            System.err.println(e);
+        }
+        return 0;
+    }
+
+    /**
+     * This method creates the Dockerfile for fuseki triple store.
+     *
+     * @return Exit code.
+     */
+    public static int setDockerfileForFuseki(String port) {
+
+        //Get the freemarker configuration
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+        LoggerUtils.logForBasilisk(logPrefix, "Creating the Dockerfile for fuseki triple store", 1);
+
+        try {
+            //Set up the free marker configuration, with template loading class and path.
+            cfg.setClassForTemplateLoading(FreeMarkerTemplateEngineUtils.class, "/");
+            cfg.setDefaultEncoding("UTF-8");
+
+            //Get the Iguana configuration template.
+            Template template = cfg.getTemplate("dockerfileForFuseki.ftl");
+
+            //Port number and query file to insert into benchmark template
+            Map<String, Object> templateData = new HashMap<>();
+            templateData.put("port", port);
+
+            //Write port number and query file in to template
+            StringWriter out = new StringWriter();
+            template.process(templateData, out);
+            out.flush();
+
+            //Dump that configuration into a configuration file called benchmark.config
+
+            File dockerfile = new File(new ApplicationPropertiesUtils().getBmWorkSpace() + "Dockerfile");
+
+            if (dockerfile.exists()) {
+                if (!dockerfile.delete()) {
+                    LoggerUtils.logForBasilisk(logPrefix, "Could not generate the Dockerfile file returning....", 4);
+                    return -1;
+                }
+            }
+
+            if (dockerfile.createNewFile()) {
+                dockerfile.setExecutable(true, false);
+                FileOutputStream fos = new FileOutputStream(dockerfile);
+                fos.write(out.toString().getBytes());
+                fos.flush();
+                fos.close();
+                LoggerUtils.logForBasilisk(logPrefix, dockerfile + " file Created", 1);
+            } else {
+                LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while creating the file " + dockerfile, 1);
                 return -1;
             }
         } catch (Exception e) {
