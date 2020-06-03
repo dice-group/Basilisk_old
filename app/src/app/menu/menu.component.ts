@@ -23,10 +23,11 @@ export class MenuComponent implements OnInit {
   listOfUniqueVersions=[]; //contains all versions of triple stores available
   selectedVersions=[]; //containes versions selected by user
   listOfWorkers=["$1worker", "$4workers", "$8workers", "$16workers", "$32workers"]
+  noOfClients=["1", "4", "8", "16", "32", "All"]
   queryId=[];  //contains all queryIds
   dataDictionary = {}; //contains all data
-  result_size=[]
-  
+  result_size=[1, 2, 3]
+
 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
@@ -39,7 +40,8 @@ export class MenuComponent implements OnInit {
     "<http://iguana-benchmark.eu/properties/queryMixes>" +
     "<http://iguana-benchmark.eu/properties/totalTime>" +
     "<http://iguana-benchmark.eu/properties/failed>" +
-    "<http://iguana-benchmark.eu/properties/wrongCodes>}" +
+    "<http://iguana-benchmark.eu/properties/wrongCodes>" +
+    "<http://iguana-benchmark.eu/properties/resultSize>}" +
 
     "?query ?property ?value ." +
   "}"
@@ -135,7 +137,7 @@ export class MenuComponent implements OnInit {
     var arr4d = [];
     var arr3d = [];
     this.queryId.forEach(id => {
-      var arr2d = [id, [], [], [], []]
+      var arr2d = [id, [], [], [], [], []]
       arr3d.push(arr2d);
     })
 
@@ -155,6 +157,10 @@ export class MenuComponent implements OnInit {
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "wrongCodes") {
         var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
         arr3d[index][4].push(item.value.value)
+      }
+      else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "resultSize") {
+        var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
+        arr3d[index][5].push(item.value.value)
       }
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queryMixes") {
         qm.push(item.value.value)
