@@ -24,8 +24,18 @@ public class ApplicationPropertiesUtils {
     private final String dockerBenchmarkedFileName;
     private final String logDirectory;
     private final String resultStoringFusekiEndPoint;
+    private final String basiliskEndPoint;
 
     Properties appProps;
+
+    /**
+     * Getter method for Basilisk server endpoint.
+     *
+     * @return Basilisk server endpoint.
+     */
+    public String getBasiliskEndPoint() {
+        return basiliskEndPoint;
+    }
 
     /**
      * Getter method for Fuseki server endpoint to store the results of the benchmark.
@@ -192,5 +202,6 @@ public class ApplicationPropertiesUtils {
         continuousErrorLogFileName = appProps.getProperty("continuousErrorLogFileName");
         logDirectory = appProps.getProperty("logDirectory");
         resultStoringFusekiEndPoint = appProps.getProperty("resultStoringFusekiEndPoint");
+        basiliskEndPoint = appProps.getProperty("basiliskEndPoint");
     }
 }
