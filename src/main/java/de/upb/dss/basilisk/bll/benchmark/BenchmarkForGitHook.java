@@ -1,10 +1,26 @@
 package de.upb.dss.basilisk.bll.benchmark;
 
 import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class runs the benchmarking process for the git hub hook.
@@ -95,13 +111,11 @@ public class BenchmarkForGitHook {
                     dockerStatusCode = DockerUtils.runTentrisDocker(repoName, tag, port, testDataset);
                 } else if (repoName.toLowerCase().equals("fuseki")) {
                     //Todo:This outdated. Update the code for fuseki triple store.
-                    DockerUtils.runFuesikiDocker(
-                            port,
-                            testDatasetPath,
-                            testDataset,
-                            repoName,
-                            bmWorkSpace
-                    );
+                    DockerUtils.runFuesikiDocker(repoName, tag, port, testDataset);
+                    if (createTestDataSetInFuseki() != 0)
+                        return -180;
+
+                    loadTestDataInFuseki();
                 }
 
                 if (dockerStatusCode == 0) {
@@ -111,7 +125,7 @@ public class BenchmarkForGitHook {
                     if (iguanaExitCode != 0)
                         return iguanaExitCode;
                 } else {
-                    LoggerUtils.logForBasilisk(logPrefix, repoName + ":"+ tag +
+                    LoggerUtils.logForBasilisk(logPrefix, repoName + ":" + tag +
                             "Could not run docker. Exit code of docker = " + exitCode, 4);
                     return -100;
                 }
@@ -125,5 +139,58 @@ public class BenchmarkForGitHook {
             return -180;
         }
         return 0;
+    }
+
+    /**
+     * Creates a Dataset in the currently running Fuseki triple store to load the test data.
+     *
+     * @return Exit code.
+     */
+    private static int createTestDataSetInFuseki() {
+        HttpClient httpclient = HttpClients.createDefault();
+        HttpPost httppost = new HttpPost(
+                new ApplicationPropertiesUtils().getBasiliskEndPoint() + port + "/$/datasets");
+
+        try {
+            List<NameValuePair> params = new ArrayList<NameValuePair>(2);
+            params.add(new BasicNameValuePair("dbType", "tdb"));
+            params.add(new BasicNameValuePair("dbName", "sparql"));
+            httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+            HttpResponse response = httpclient.execute(httppost);
+            HttpEntity entity = response.getEntity();
+
+            if (entity != null) {
+                try (InputStream instream = entity.getContent()) {
+                    // do something useful
+                    System.out.println(instream.toString());
+                }
+            }
+        } catch (Exception ex) {
+            LoggerUtils.logForBasilisk(logPrefix, "Something went wrong", 4);
+            ex.printStackTrace();
+            return -180;
+        }
+        return 0;
+    }
+
+    /**
+     * This loads the test data into the Fuseki triple store.
+     */
+    private static void loadTestDataInFuseki() {
+        ApplicationPropertiesUtils myAppProp = new ApplicationPropertiesUtils();
+        RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                .destination(myAppProp.getBasiliskEndPoint() + port + "/sparql");
+
+        RDFConnection connection = builder.build();
+
+        Model model = ModelFactory.createDefaultModel();
+        model.read(myAppProp.getTestDatasetPath() + "/" + testDataset);
+
+
+        connection.load(model);
+
+        connection.commit();
+        connection.close();
     }
 }

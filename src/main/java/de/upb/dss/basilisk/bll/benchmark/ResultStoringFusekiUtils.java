@@ -26,9 +26,11 @@ public class ResultStoringFusekiUtils {
 
         File f = new File(iguanaPath);
 
-        FilenameFilter filter = (f1, name) -> {
-            // We want to find only .c files
-            return name.matches("results_task.*.nt");
+        FilenameFilter filter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.matches("results_task.*.nt");
+            }
         };
 
         return f.listFiles(filter);
@@ -63,6 +65,8 @@ public class ResultStoringFusekiUtils {
             graphName = "gittentris";
         } else if ("openlink/virtuoso-opensource-7".equals(repoName)) {
             graphName = "dockervirtuoso";
+        } else if ("fuseki".equals(repoName)) {
+            graphName = "gitfuseki";
         }
 
         LoggerUtils.logForBasilisk(logPrefix, "Loading " + ntFile + " into the Fuseki server.", 1);

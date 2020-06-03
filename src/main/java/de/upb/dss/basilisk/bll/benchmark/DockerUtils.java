@@ -253,33 +253,32 @@ public class DockerUtils {
     /**
      * This method runs the Fuseki docker.
      *
-     * @param port
-     * @param testDatasetPath
-     * @param testDataset
-     * @param serverName
-     * @param path
-     * @return
-     * @throws IOException
+     * @param port Port number
+     * @return Exit code
      * @throws InterruptedException If Basilisk is interrupted.
      */
-    public static int runFuesikiDocker(String port, String testDatasetPath, String testDataset,
-                                       String serverName, File path) throws InterruptedException {
-        //Todo: This is outdated. update the code for fuseki.
-        String command = "docker run -p "
-                + port + ":3030"
-                + " -v "
-                + testDatasetPath
-                + ":/staging --name "
-                + serverName + "_server cbm:" + serverName
-                + " /jena-fuseki/fuseki-server --file /staging/"
-                + testDataset + " /sparql";
+    public static int runFuesikiDocker(String repoName, String tag, String port, String dataSetName) throws InterruptedException {
+        setUpDockerApi();
 
-        try {
-            return new UnixUtils().runUnixCommand(command, path, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ExposedPort tcpPort = ExposedPort.tcp(Integer.parseInt(port));
 
-        return -100;
+        Ports portBindings = new Ports();
+        portBindings.bind(tcpPort, Ports.Binding.bindPort(Integer.parseInt(port)));
+
+        CreateContainerResponse container
+                = dockerClient.createContainerCmd(repoName + ":" + tag)
+                .withName("fuseki_server")
+                .withHostName("fuseki_server")
+                .withPortBindings(portBindings)
+                .withExposedPorts(new ExposedPort(Integer.parseInt(port)))
+                .exec();
+
+        dockerClient.startContainerCmd(container.getId()).exec();
+
+        TimeUnit.SECONDS.sleep(15);
+
+        InspectContainerResponse i = dockerClient.inspectContainerCmd(container.getId()).exec();
+
+        return i.getState().getExitCode();
     }
 }
