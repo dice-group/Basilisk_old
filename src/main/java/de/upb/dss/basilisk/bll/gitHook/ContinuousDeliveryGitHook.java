@@ -3,6 +3,7 @@ package de.upb.dss.basilisk.bll.gitHook;
 import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
 import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForGitHook;
+import de.upb.dss.basilisk.bll.benchmark.FreeMarkerTemplateEngineUtils;
 import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -161,6 +162,15 @@ public class ContinuousDeliveryGitHook {
                     if (flag == 1) {
                         int code = this.unzipGitFile();
 
+                        if(currentTripleStore.equals("fuseki")) {
+                            FreeMarkerTemplateEngineUtils.setDockerfileForFuseki(currentPortNum);
+
+                            FileUtils.copyFile(
+                                    new File(new ApplicationPropertiesUtils().getContinuousBmPath() + "shiro.ini"),
+                                    new File(new ApplicationPropertiesUtils().getBmWorkSpace() + "shiro.ini")
+                            );
+                        }
+
                         if (code == 0) {
                             try {
                                 LoggerUtils.logForBasilisk(logPrefix, "Benchmarking will run for version: " + this.currentBenchmarkedVersion, 1);
@@ -176,6 +186,9 @@ public class ContinuousDeliveryGitHook {
                         }
                     }
                 }
+            } catch (IOException ex) {
+                LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while copying shiro.ini file", 4);
+                ex.printStackTrace();
             } catch (JSONException e) {
                 LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
                 e.printStackTrace();
