@@ -29,7 +29,6 @@ export class MenuComponent implements OnInit {
   result_size=[1, 2, 3]
 
 
-
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
 
   querySelectPart = "SELECT ?query ?property ?value \n"
