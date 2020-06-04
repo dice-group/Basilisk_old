@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * This class runs the current triple store from Git hook and then runs the Iguana for benchmarking the triple store.
@@ -151,6 +152,7 @@ public class BenchmarkForGitHook {
      * @return Exit code.
      */
     private static int createTestDataSetInFuseki() {
+        LoggerUtils.logForBasilisk(logPrefix, "Creating a dataset in Fuseki triple store.", 1);
         HttpClient httpclient = HttpClients.createDefault();
         HttpPost httppost = new HttpPost(
                 new ApplicationPropertiesUtils().getBasiliskEndPoint() + port + "/$/datasets");
@@ -162,19 +164,20 @@ public class BenchmarkForGitHook {
             httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 
             HttpResponse response = httpclient.execute(httppost);
-            HttpEntity entity = response.getEntity();
+            int code = response.getStatusLine().getStatusCode();
 
-            if (entity != null) {
-                try (InputStream instream = entity.getContent()) {
-                    // do something useful
-                    System.out.println(instream.toString());
-                }
+            if (code != 200) {
+                LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while creating dataset in " +
+                        "fuseki triple store. HTTP responce code = " + code, 4);
+
+                return code;
             }
         } catch (Exception ex) {
             LoggerUtils.logForBasilisk(logPrefix, "Something went wrong", 4);
             ex.printStackTrace();
             return -180;
         }
+        LoggerUtils.logForBasilisk(logPrefix, "Successfully created a dataset in Fuseki triple store.", 1);
         return 0;
     }
 
@@ -182,6 +185,7 @@ public class BenchmarkForGitHook {
      * This loads the test data into the Fuseki triple store.
      */
     private static void loadTestDataInFuseki() {
+        LoggerUtils.logForBasilisk(logPrefix, "Loading the test data in Fuseki triple store.", 1);
         ApplicationPropertiesUtils myAppProp = new ApplicationPropertiesUtils();
         RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(myAppProp.getBasiliskEndPoint() + port + "/sparql");
@@ -196,5 +200,6 @@ public class BenchmarkForGitHook {
 
         connection.commit();
         connection.close();
+        LoggerUtils.logForBasilisk(logPrefix, "Successfully loaded the test data in Fuseki triple store.", 1);
     }
 }

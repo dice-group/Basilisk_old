@@ -232,7 +232,7 @@ public class DockerUtils {
     private static int loadTestDataIntoVirtuoso(String testDataset, String containerId, String port) throws InterruptedException {
         int code = FreeMarkerTemplateEngineUtils.setLoadingScript(testDataset, containerId, port);
 
-        if(code != 0)
+        if (code != 0)
             return code;
 
         LoggerUtils.logForBasilisk(logPrefix,
