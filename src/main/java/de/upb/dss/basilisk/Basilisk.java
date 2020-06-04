@@ -1,5 +1,6 @@
 package de.upb.dss.basilisk;
 
+import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,6 +10,16 @@ import java.util.Properties;
 
 /**
  * The main class of the Basilisk Spring application.
+ * <p>
+ * Basilisk is a Continuous Benchmarking Platform to benchmark the Triple Stores.
+ * Currently Basilisk runs CPB on Git hook and Docker hook for the below three Triple stores.
+ * <p>
+ * 1. Tentris by Dice group (Both in Git and Docker hooks)
+ * 2. Fuseki by Apache Jena (in Git hook)
+ * 3. Virtuoso by OpenLink (in Docker hook)
+ *
+ * @author Ranjith Krishnamurthy
+ * @author Samrat Dutta
  */
 @SpringBootApplication
 public class Basilisk {
@@ -40,9 +51,13 @@ public class Basilisk {
         LoggerUtils.logForBasilisk(logPrefix, "Basilisk is running", 1);
     }
 
+    /**
+     * This method prints the Basilisk's welcome message once the Basilisk spring boot is up.
+     */
     private static void printWelcomeMessage() {
+        String basiliskVersion = new ApplicationPropertiesUtils().getBasiliskVersion();
         String blankLines = "                                 ";
-        String WelcomeMessage = "     Basilisk: version 1.0.0     ";
+        String WelcomeMessage = "     Basilisk: version " + basiliskVersion + "     ";
 
         final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
         final String ANSI_RESET = "\u001B[0m";

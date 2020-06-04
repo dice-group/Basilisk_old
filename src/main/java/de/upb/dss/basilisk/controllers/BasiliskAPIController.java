@@ -12,28 +12,34 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * This is the Basilisk Controller.
+ * This is the Basilisk's Rest Controller.
+ *
+ * @author Ranjith Krishnamurthy
+ * @author Samrat Dutta
  */
 @RestController
 public class BasiliskAPIController {
     private static final String logPrefix = "BasiliskMain";
 
     /**
-     * Index root of the Basilisk API.
+     * Index of the Basilisk that returns information of other mappings.
      *
-     * @return Returns the String Basilisk is running...
+     * @return Returns the information of other mappings.
      */
     @RequestMapping("/")
     public String index() {
-        return "Basilisk is running...";
+        return "Basilisk is running...\n" +
+                "To run the CPB on Git hook use: http://131.234.28.165:8080/runbenchmark?hook=1\n" +
+                "To run the CPB on Docker hook use: http://131.234.28.165:8080/runbenchmark?hook=2\n";
     }
 
     /**
-     * This runs the benchmark based on the parameter hook
+     * This runs the benchmark based on the value of the parameter hook.
      *
      * @param hook Integer parameter to indicate where to run the benchmark.
-     *             1 means run on git hook 2 means run on docker hook.
-     * @return Returns the status of the benchmark as a string.
+     *             1 means run on git hook
+     *             2 means run on docker hook.
+     * @return Returns the status of the benchmarking process as a string.
      */
     @RequestMapping("/runbenchmark")
     public String runBenchmark(@RequestParam(defaultValue = "2") int hook) throws InterruptedException {

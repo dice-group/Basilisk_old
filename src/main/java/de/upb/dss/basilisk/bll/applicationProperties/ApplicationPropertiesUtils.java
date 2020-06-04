@@ -6,6 +6,8 @@ import java.util.Properties;
 
 /**
  * This is a utility class to get the information from the application.properties file.
+ *
+ * @author Ranjith Krishnamurthy
  */
 public class ApplicationPropertiesUtils {
     private final String logFilePath;
@@ -16,8 +18,6 @@ public class ApplicationPropertiesUtils {
     private final String bmWorkSpace;
     private final String basiliskVersion;
     private final String dockerFile;
-    private final String resultPrefix;
-    private final String continuousErrorLogFileName;
     private final String gitMetaDataFileName;
     private final String gitBenchmarkedFileName;
     private final String dockerMetadataFileName;
@@ -128,24 +128,6 @@ public class ApplicationPropertiesUtils {
     }
 
     /**
-     * Getter method for benchmarking result prefix.
-     *
-     * @return
-     */
-    public String getResultPrefix() {
-        return resultPrefix;
-    }
-
-    /**
-     * Getter method for error log file name for the continuous delivery.
-     *
-     * @return Error log file name for CD.
-     */
-    public String getContinuousErrorLogFileName() {
-        return continuousErrorLogFileName;
-    }
-
-    /**
      * Getter method for Metadata file name for git hook.
      *
      * @return Metadata file name for git hook.
@@ -193,13 +175,11 @@ public class ApplicationPropertiesUtils {
         testDatasetPath = appProps.getProperty("testDatasetPath");
         logFilePath = appProps.getProperty("logFilePath");
         configPath = appProps.getProperty("configPath");
-        resultPrefix = appProps.getProperty("result");
         continuousBmPath = appProps.getProperty("continuousBmPath");
         gitMetaDataFileName = appProps.getProperty("gitMetadataFileName");
         gitBenchmarkedFileName = appProps.getProperty("gitBenchmarkedFileName");
         dockerMetadataFileName = appProps.getProperty("dockerMetadataFileName");
         dockerBenchmarkedFileName = appProps.getProperty("dockerBenchmarkedFileName");
-        continuousErrorLogFileName = appProps.getProperty("continuousErrorLogFileName");
         logDirectory = appProps.getProperty("logDirectory");
         resultStoringFusekiEndPoint = appProps.getProperty("resultStoringFusekiEndPoint");
         basiliskEndPoint = appProps.getProperty("basiliskEndPoint");

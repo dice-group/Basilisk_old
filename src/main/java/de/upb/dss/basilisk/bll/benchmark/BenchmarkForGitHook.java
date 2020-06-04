@@ -23,11 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class runs the benchmarking process for the git hub hook.
+ * This class runs the current triple store from Git hook and then runs the Iguana for benchmarking the triple store.
+ *
+ * @author Ranjith Krishnamurthy
+ * @author Rahul Sethi
  */
 public class BenchmarkForGitHook {
     private static File dockerFile;
-    private static File bmWorkSpace;
 
     private static String repoName;
     private static String port;
@@ -46,15 +48,12 @@ public class BenchmarkForGitHook {
      * @param argTestDataSet   Test dataset file name.
      * @param argQueryFile     Query file name.
      * @param argVersionNumber Git repository version.
-     * @return Status of the benchmarking process.
      * @throws IOException If fails to rename the results file.
      */
-    public static int runBenchmark(String argPort, String argRepoName, String argTestDataSet, String argQueryFile, String argVersionNumber) throws IOException {
+    public static void runBenchmark(String argPort, String argRepoName, String argTestDataSet, String argQueryFile, String argVersionNumber) throws IOException {
         ApplicationPropertiesUtils myAppUtils = new ApplicationPropertiesUtils();
 
         dockerFile = new File(myAppUtils.getDockerFile());
-        bmWorkSpace = new File(myAppUtils.getBmWorkSpace());
-        String logFilePath = myAppUtils.getLogFilePath();
         testDatasetPath = myAppUtils.getTestDatasetPath();
 
         //Set all the required info for running the benchmark.
@@ -71,18 +70,21 @@ public class BenchmarkForGitHook {
         int exitCode = runTripleStores();
 
         //Store the results into Fuseki server and Move the results to results folder and rename it.
-        ResultStoringFusekiUtils.processResultFIle(repoName, repoName, tag);
+        if (exitCode == 0)
+            ResultStoringFusekiUtils.processResultFIle(repoName, repoName, tag);
+        else
+            //Todo: Just delete the result file if any
+            System.out.println("");
 
         //Clear the docker, so that next benchmark can be run.
         DockerUtils.clearDocker();
-        return exitCode;
     }
 
     /**
-     * This method builds the docker image and runs the respective docker image, then it called the Iguana to run the
+     * This method builds the docker image and runs the respective docker image, then it calls the Iguana to run the
      * benchmarking process.
      *
-     * @return Status code.
+     * @return Exit code.
      */
     protected static int runTripleStores() {
 
@@ -110,12 +112,14 @@ public class BenchmarkForGitHook {
                     testDatasetPath = Paths.get(".").toAbsolutePath().normalize().toString() + testDatasetPath;
                     dockerStatusCode = DockerUtils.runTentrisDocker(repoName, tag, port, testDataset);
                 } else if (repoName.toLowerCase().equals("fuseki")) {
-                    //Todo:This outdated. Update the code for fuseki triple store.
-                    DockerUtils.runFuesikiDocker(repoName, tag, port, testDataset);
-                    if (createTestDataSetInFuseki() != 0)
-                        return -180;
+                    dockerStatusCode = DockerUtils.runFuesikiDocker(repoName, tag, port, testDataset);
 
-                    loadTestDataInFuseki();
+                    if (dockerStatusCode == 0) {
+                        if (createTestDataSetInFuseki() != 0)
+                            return -180;
+
+                        loadTestDataInFuseki();
+                    }
                 }
 
                 if (dockerStatusCode == 0) {

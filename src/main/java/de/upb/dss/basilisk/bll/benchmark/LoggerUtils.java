@@ -9,10 +9,15 @@ import java.util.logging.SimpleFormatter;
 
 /**
  * This is a utility class for supporting the logging process.
+ *
+ * @author Ranjith Krishnamurthy
  */
 public class LoggerUtils {
     private static Logger logger = null;
 
+    /**
+     * This method instantiate all the necessary objects for the logging process.
+     */
     private static void setLogger() {
         FileHandler fileHandler = null;
         logger = Logger.getLogger("Basilisk");

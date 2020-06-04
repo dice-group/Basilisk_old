@@ -11,7 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class is the utils for Freemarker java template engine.
+ * This class is the utils for Freemarker java template engine to create an actual file from the template.
+ *
+ * @author Ranjith Krishnamurthy
+ * @author Rahul sethi
  */
 public class FreeMarkerTemplateEngineUtils {
     private static final String logPrefix = "FreeMarker Utils";
@@ -76,6 +79,7 @@ public class FreeMarkerTemplateEngineUtils {
         } catch (Exception e) {
             LoggerUtils.logForBasilisk(logPrefix, "Something went wrong", 4);
             System.err.println(e);
+            return -1;
         }
         return 0;
     }
@@ -136,6 +140,7 @@ public class FreeMarkerTemplateEngineUtils {
         } catch (Exception e) {
             LoggerUtils.logForBasilisk(logPrefix, "Something went wrong", 4);
             System.err.println(e);
+            return -1;
         }
         return 0;
     }
@@ -193,6 +198,7 @@ public class FreeMarkerTemplateEngineUtils {
         } catch (Exception e) {
             LoggerUtils.logForBasilisk(logPrefix, "Something went wrong", 4);
             System.err.println(e);
+            return -1;
         }
         return 0;
     }

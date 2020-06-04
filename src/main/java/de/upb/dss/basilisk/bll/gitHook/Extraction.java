@@ -11,6 +11,8 @@ import java.util.zip.ZipFile;
 
 /**
  * This provides the methods to extract the zip file.
+ *
+ * @author Jalaj Bajpai
  */
 public class Extraction {
     private static final int BUFFER_SIZE = 4096;
@@ -46,10 +48,10 @@ public class Extraction {
             }
         }
 
-        if(stream != null)
+        if (stream != null)
             stream.close();
 
-        if(zipFile != null)
+        if (zipFile != null)
             zipFile.close();
     }
 
@@ -80,6 +82,13 @@ public class Extraction {
         zipFile.close();
     }
 
+    /**
+     * This method extracts the zip file.
+     *
+     * @param zipIn    Input stream to a zip file.
+     * @param filePath File path to which the zip file should be extracted.
+     * @throws IOException If fails to extract the zip file.
+     */
     private void extractFiles(InputStream zipIn, String filePath) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
         byte[] bytesIn = new byte[BUFFER_SIZE];

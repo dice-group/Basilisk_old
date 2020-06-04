@@ -7,13 +7,15 @@ import java.io.InputStreamReader;
 
 /**
  * This is a utility class to support the unix commands execution.
+ *
+ * @author Ranjith Krishnamurthy
  */
 public class UnixUtils {
     private String cmdOut = "";
     private String cmdErr = "";
 
     /**
-     * Returns the output of the last run unix command.
+     * Returns the output of the unix command that ran previously.
      *
      * @return Output of the last command.
      */
@@ -22,7 +24,7 @@ public class UnixUtils {
     }
 
     /**
-     * Returns the error of the last run unix command.
+     * Returns the error of the unix command that ran previously.
      *
      * @return Error of the last command.
      */
@@ -36,7 +38,7 @@ public class UnixUtils {
      * @param cmd    Command.
      * @param path   Path to run the command.
      * @param isWait Boolean to indicate that process should wait for the completion.
-     * @return Status code.
+     * @return Exit code.
      * @throws InterruptedException If the process is interrupted.
      * @throws IOException          If fails to update the log.
      */

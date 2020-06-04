@@ -16,6 +16,8 @@ import java.util.ArrayList;
 
 /**
  * This is the hook for Docker hub for Continuous benchmarking process(CPB).
+ *
+ * @author Ranjith Krishnamurthy
  */
 public class ContinuousDeliveryDockerHook {
 
@@ -76,15 +78,15 @@ public class ContinuousDeliveryDockerHook {
                         //Calls the Benchmarking process on the currently pulled triple store.
                         BenchmarkForDockerHook.runBenchmarkForDockerHook(currentPortNum, currentTripleStore, currentDatasetFilePath,
                                 currentQueriesFilePath, currentRepoName, currentBenchmarkedTag);
-
-                        //Add the current triple store in the already benchmarked file.
-                        this.updateTagList();
                     } else {
                         LoggerUtils.logForBasilisk(logPrefix,
                                 "Basilisk failed to pull the docker image for: " + currentRepoName + ":" +
                                         this.currentBenchmarkedTag,
                                 1);
                     }
+
+                    //Add the current triple store in the already benchmarked file.
+                    this.updateTagList();
                 }
             }
         } catch (JSONException e) {

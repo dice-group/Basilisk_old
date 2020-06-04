@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This is the utility class for supporting the docker process.
+ *
+ * @author Ranjith Krishnamurthy
  */
 public class DockerUtils {
     private static DefaultDockerClientConfig.Builder config = null;
@@ -46,7 +48,7 @@ public class DockerUtils {
      *
      * @param repoName Repository name
      * @param tag      Tag
-     * @return Returns the Status code.
+     * @return Exit code.
      */
     public static int buildImage(String repoName, String tag) {
         setUpDockerApi();
@@ -63,7 +65,6 @@ public class DockerUtils {
 
             dockerClient.tagImageCmd(imageId, repoName, tag).exec();
         } catch (Exception ex) {
-            System.out.println("Check this : ");
             ex.printStackTrace();
             return 100;
         }
@@ -72,6 +73,7 @@ public class DockerUtils {
 
     /**
      * This method pulls the docker image from the docker hub.
+     * This method waits for maximum 30 minutes, within 30 minutes if docker pull command is not completed then it fails.
      *
      * @param repoName Image's repository name.
      * @param tag      Image's tag
@@ -82,7 +84,7 @@ public class DockerUtils {
         setUpDockerApi();
 
         LoggerUtils.logForBasilisk(logPrefix, repoName + ":" + tag + ": Pulling the docker image ", 1);
-        boolean flag = false;
+        boolean flag;
 
         flag = dockerClient.pullImageCmd(repoName)
                 .withTag(tag)
@@ -93,7 +95,7 @@ public class DockerUtils {
     }
 
     /**
-     * This method removes all the container and images.
+     * This method removes all the container and images for the next iteration of CPB.
      */
     public static void clearDocker() {
         setUpDockerApi();
@@ -144,6 +146,7 @@ public class DockerUtils {
      * @param tag         Tentris's tag
      * @param port        Port number on which the Tentris should run.
      * @param dataSetName Dataset name to load into the Tentris triple store.
+     * @return Exit code.
      * @throws InterruptedException If Basilisk is interrupted.
      */
     public static int runTentrisDocker(String repoName, String tag, String port, String dataSetName) throws InterruptedException {
@@ -175,7 +178,7 @@ public class DockerUtils {
     }
 
     /**
-     * This method runs the Virtuoso triple store (Docker).
+     * This method runs the Virtuoso triple store (Docker hook).
      *
      * @param repoName    Repository name of the docker image.
      * @param tag         Tag of the docker image.
@@ -227,7 +230,10 @@ public class DockerUtils {
      * @throws InterruptedException If Basilisk is interrupted.
      */
     private static int loadTestDataIntoVirtuoso(String testDataset, String containerId, String port) throws InterruptedException {
-        FreeMarkerTemplateEngineUtils.setLoadingScript(testDataset, containerId, port);
+        int code = FreeMarkerTemplateEngineUtils.setLoadingScript(testDataset, containerId, port);
+
+        if(code != 0)
+            return code;
 
         LoggerUtils.logForBasilisk(logPrefix,
                 "Running loadTestData.sh script to load the test dataset into the virtuoso triple store.",

@@ -13,6 +13,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * This is the utility class to support the process of storing the benchmark results into the Fuseki server.
+ *
+ * @author Ranjith Krishnamurthy
+ */
 public class ResultStoringFusekiUtils {
     private static final String logPrefix = "Result Processing";
 

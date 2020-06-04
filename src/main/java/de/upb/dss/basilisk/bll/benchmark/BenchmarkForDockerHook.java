@@ -1,13 +1,12 @@
 package de.upb.dss.basilisk.bll.benchmark;
 
-import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
-
 /**
- * This class runs the benchmark for the docker hub hook.
+ * This class runs the current triple store from Docker hook and then runs the Iguana for benchmarking the triple store.
+ *
+ * @author Ranjith Krishnamurthy
+ * @author Rahul Sethi
  */
 public class BenchmarkForDockerHook {
-    private static String logFilePath;
-
     private static String tripleStoreName;
     private static String port;
     private static String testDataset;
@@ -16,7 +15,7 @@ public class BenchmarkForDockerHook {
     private static final String logPrefix = "DockerBenchmark";
 
     /**
-     * This method runs the docker for the triple store and runs the benchmarking process.
+     * This method runs the triple store in docker and then runs the Iguana for benchmarking the triple store.
      *
      * @param argPort            Port number on which the triple store should run.
      * @param argTripleStoreName Triple store name.
@@ -24,14 +23,10 @@ public class BenchmarkForDockerHook {
      * @param argQueryFile       Query file name.
      * @param argRepoName        Repository name.
      * @param argTag             Docker hub repository tag.
-     * @return Exit code.
      * @throws InterruptedException If Basilisk is interrupted.
      */
-    public static int runBenchmarkForDockerHook(String argPort, String argTripleStoreName, String argTestDataSet,
-                                                String argQueryFile, String argRepoName, String argTag) throws InterruptedException {
-
-        ApplicationPropertiesUtils myAppUtils = new ApplicationPropertiesUtils();
-        logFilePath = myAppUtils.getLogFilePath();
+    public static void runBenchmarkForDockerHook(String argPort, String argTripleStoreName, String argTestDataSet,
+                                                 String argQueryFile, String argRepoName, String argTag) throws InterruptedException {
 
         //Set all the required info for running the benchmark.
         tripleStoreName = argTripleStoreName;
@@ -51,16 +46,15 @@ public class BenchmarkForDockerHook {
                 e.printStackTrace();
             }
         } else {
-            LoggerUtils.logForBasilisk(logPrefix, repoName + ":"+ tag +
+            LoggerUtils.logForBasilisk(logPrefix, repoName + ":" + tag +
                     "Could not run docker. Exit code of docker = " + exitCode, 4);
         }
-        return exitCode;
     }
 
     /**
-     * This method runs the triple store in the docker and continues the benchmarking process.
+     * This method runs the triple store in the docker.
      *
-     * @return Exit code.
+     * @return Exit code of Docker run command from Docker API.
      * @throws InterruptedException If Basilisk is interrupted.
      */
     public static int runTripleStores() throws InterruptedException {
@@ -72,7 +66,6 @@ public class BenchmarkForDockerHook {
         } else if (tripleStoreName.toLowerCase().equals("virtuoso")) {
             return DockerUtils.runVirtuosoDocker(repoName, tag, port, testDataset);
         }
-
 
         return exitCode;
     }

@@ -18,6 +18,9 @@ import java.util.ArrayList;
 
 /**
  * This is the hook for Git hub for Continuous benchmarking process(CPB).
+ *
+ * @author Jalaj Bajpai
+ * @author Ranjith Krishnamurthy
  */
 public class ContinuousDeliveryGitHook {
 
@@ -162,16 +165,19 @@ public class ContinuousDeliveryGitHook {
                     if (flag == 1) {
                         int code = this.unzipGitFile();
 
-                        if(currentTripleStore.equals("fuseki")) {
-                            FreeMarkerTemplateEngineUtils.setDockerfileForFuseki(currentPortNum);
-
-                            FileUtils.copyFile(
-                                    new File(new ApplicationPropertiesUtils().getContinuousBmPath() + "shiro.ini"),
-                                    new File(new ApplicationPropertiesUtils().getBmWorkSpace() + "shiro.ini")
-                            );
-                        }
-
                         if (code == 0) {
+                            if (currentTripleStore.equals("fuseki")) {
+                                int exitCode = FreeMarkerTemplateEngineUtils.setDockerfileForFuseki(currentPortNum);
+
+                                if (exitCode != 0)
+                                    continue;
+
+                                FileUtils.copyFile(
+                                        new File(new ApplicationPropertiesUtils().getContinuousBmPath() + "shiro.ini"),
+                                        new File(new ApplicationPropertiesUtils().getBmWorkSpace() + "shiro.ini")
+                                );
+                            }
+
                             try {
                                 LoggerUtils.logForBasilisk(logPrefix, "Benchmarking will run for version: " + this.currentBenchmarkedVersion, 1);
 

@@ -2,6 +2,7 @@ package de.upb.dss.basilisk.bll.Hook.Yaml;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.yaml.snakeyaml.DumperOptions;
@@ -10,6 +11,11 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.*;
 import java.util.Map;
 
+/**
+ * This is the utility class to support the Yaml file processing.
+ *
+ * @author Ranjith Krishnamurthy
+ */
 public class YamlUtils {
 
     /**
@@ -31,7 +37,9 @@ public class YamlUtils {
 
         try {
             InputStream inputStream = new FileInputStream(
-                    new File("continuousBM/DockerBenchmarkedAttempted.yml")
+                    new File(
+                            new ApplicationPropertiesUtils().getDockerBenchmarkedFileName()
+                    )
             );
 
             JSONObject dockerBenchmarkedAttempted = new JSONObject(getYamlData(inputStream));
@@ -52,7 +60,9 @@ public class YamlUtils {
 
         try {
             InputStream inputStream = new FileInputStream(
-                    new File("continuousBM/GitBenchmarkedAttempted.yml")
+                    new File(
+                            new ApplicationPropertiesUtils().getGitBenchmarkedFileName()
+                    )
             );
 
             JSONObject dockerBenchmarkedAttempted = new JSONObject(getYamlData(inputStream));
@@ -73,7 +83,9 @@ public class YamlUtils {
 
         try {
             InputStream inputStream = new FileInputStream(
-                    new File("continuousBM/GitMetaData.yml")
+                    new File(
+                            new ApplicationPropertiesUtils().getGitMetaDataFileName()
+                    )
             );
 
             JSONObject dockerBenchmarkedAttempted = new JSONObject(getYamlData(inputStream));
@@ -94,7 +106,9 @@ public class YamlUtils {
 
         try {
             InputStream inputStream = new FileInputStream(
-                    new File("continuousBM/DockerMetaData.yml")
+                    new File(
+                            new ApplicationPropertiesUtils().getDockerMetadataFileName()
+                    )
             );
 
             JSONObject dockerBenchmarkedAttempted = new JSONObject(getYamlData(inputStream));
@@ -152,9 +166,13 @@ public class YamlUtils {
 
             FileWriter fw = null;
             if (hook == 1)
-                fw = new FileWriter("continuousBM/GitBenchmarkedAttempted.yml");
+                fw = new FileWriter(
+                        new ApplicationPropertiesUtils().getGitBenchmarkedFileName()
+                );
             else
-                fw = new FileWriter("continuousBM/DockerBenchmarkedAttempted.yml");
+                fw = new FileWriter(
+                        new ApplicationPropertiesUtils().getDockerBenchmarkedFileName()
+                );
 
             output.dump(myMap, fw);
         } catch (IOException e) {

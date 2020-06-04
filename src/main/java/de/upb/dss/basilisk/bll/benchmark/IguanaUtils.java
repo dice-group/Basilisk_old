@@ -8,16 +8,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This is the utility class to support the Iguana process.
+ *
+ * @author Ranjith Krishnamurthy
+ * @author Rahul Sethi
+ */
 public class IguanaUtils {
     private static final String logPrefix = "IguanaUtils";
 
     /**
-     * This method runs the Iguana for the current triple store.
-     *
-     * @return Exit code.
-     */
-    /**
-     * This method runs the Iguana for the current triple store.
+     * This method runs the Iguana to benchmark the currently running triple store.
      *
      * @param repoName  Current repository name of the Docker image.
      * @param tag       Tag of the Docker image.
@@ -31,16 +32,17 @@ public class IguanaUtils {
         ApplicationPropertiesUtils myAppProperties = new ApplicationPropertiesUtils();
 
         File iguanaPath = new File(myAppProperties.getIguanaPath());
-        String logFilePath = myAppProperties.getLogFilePath();
         String configPath = myAppProperties.getConfigPath();
 
         String s;
-        String log = "";
         String err = "";
         String cmd = "";
 
         //Set the Iguana configuration file respective to triple store before running it.
-        FreeMarkerTemplateEngineUtils.setIguanaConfigFile(repoName, tag, port, queryFile, configPath);
+        int code = FreeMarkerTemplateEngineUtils.setIguanaConfigFile(repoName, tag, port, queryFile, configPath);
+
+        if (code != 0)
+            return code;
 
         //Command to run the iguana script.
         cmd = "./start-iguana.sh benchmark.config";
@@ -63,7 +65,6 @@ public class IguanaUtils {
                     p.wait();
                     return p.exitValue();
                 }
-//                System.out.println("Benchmarking = " + repoName + ":" + tag + " ------> "  + s);
             }
 
             while ((s = stdError.readLine()) != null) {
