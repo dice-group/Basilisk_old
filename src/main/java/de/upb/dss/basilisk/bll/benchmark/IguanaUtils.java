@@ -56,6 +56,8 @@ public class IguanaUtils {
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
+            TimeUnit.SECONDS.sleep(20);
+
             while ((s = stdInput.readLine()) != null) {
                 if (s.endsWith("failed: Connection refused (Connection refused)")) {
                     LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while running iguana, triple store connection is refused" +
