@@ -7,7 +7,8 @@
         <div class="col-6" style="padding: 10px 10px; display: flex; float:left;">
           <div class="form-group" id="selectVersionDiv">
             <select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
-                    style="width: 400px; border-radius: 4px;">
+                    style="width: 400px; border-radius: 4px; font-size: 15px; height: 30px">
+              <option value="None" selected>Choose the Triple Store Version......................</option>
               <option *ngFor="let version of listOfUniqueVersions" value="{{version}}">
                 {{version}}
               </option>
@@ -17,43 +18,43 @@
             <ul cdkDropList (cdkDropListDropped)="dragDrop($event)" id="myList" class="list-group">
               <li cdkDrag class="list-group-item" *ngFor="let version of selectedVersions">
                 {{version}}
-                <span class="close" style="float:right;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span>
+                <span class="close" style="float:right; border-radius: 4px;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span>
               </li>
             </ul>
           </div>
         </div>
         <div class="col-6" style=" display:inline-block;">
-          <button mat-button [matMenuTriggerFor]="xaxis" id="xAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white;">Select X-axis</button>
-          <mat-menu #xaxis="matMenu">
-            <button mat-menu-item [matMenuTriggerFor]="noofclient">No. of Clients</button>
-            <button mat-menu-item [matMenuTriggerFor]="qid">Query ID</button>
-            <button mat-menu-item [matMenuTriggerFor]="rsize">Result Size</button>
-          </mat-menu>
-          <mat-menu #noofclient="matMenu" xPosition="before">
-            <button mat-menu-item *ngFor="let client of noOfClients">{{client}}</button>
-          </mat-menu>
-          <mat-menu #qid="matMenu" xPosition="before">
-            <button mat-menu-item *ngFor="let query of queryId">{{query}}</button>
-          </mat-menu>
-          <mat-menu #rsize="matMenu" xPosition="before">
-            <button mat-menu-item *ngFor="let result of result_size">{{result}}</button>
-          </mat-menu>
+
+          <select mat-button id="xAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
+            <option value="Select X-axis" selected>Select X-axis</option>
+            <optgroup class= "" label= "No. of Clients" style="font-size: 12px;">
+              <option *ngFor="let client of noOfClients" >{{client}}</option>
+            </optgroup>
+            <optgroup class= "" label= "Query-Id" style="font-size: 12px;">
+              <option *ngFor="let query of queryId">{{query}}</option>
+            </optgroup>
+            <optgroup label= Result-Size style="font-size: 12px;">
+              <option *ngFor="let result of result_size">{{result}}</option>
+            </optgroup>
+          </select>
+          
 
           &nbsp;&nbsp;
 
-          <button mat-button id="yAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white;">
-            Select Y-axis</button>
+          <select mat-button id="yAxisVal" style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
+            <option value="Select Y-axis" selected>Select Y-axis</option>
+          </select>
 
           <div>
-            <button mat-button [matMenuTriggerFor]="selectgraph" id="graphVal" style="border-radius: 4px; height: 30px; width: 380px; margin-top: 20px; background-color: white;">
-              Select Graph</button>
-              <mat-menu #selectgraph="matMenu" >
-                <button mat-menu-item style="width: 380px">Bar Chart</button>
-                <button mat-menu-item style="width: 380px">Area Chart</button>
-                <button mat-menu-item style="width: 380px">Line Chart</button>
-                <button mat-menu-item style="width: 380px">Box Plot</button>
-                <button mat-menu-item style="width: 380px">Scatter Pot</button>
-              </mat-menu>
+            <select mat-button id="graphVal" style="border-radius: 4px; height: 30px; width: 380px; margin-top: 20px; background-color: white; font-size: 15px;">
+              <option value="Select Graph" style="left:100px " selected>Select Graph</option>
+              <option style="font-size: 12px;">Area-Chart</option>
+              <option  style="font-size: 12px;">Bar-Cahrt</option>
+              <option  style="font-size: 12px;">Line-Chart</option>
+              <option  style="font-size: 12px;">Box-Plot</option>
+              <option  style="font-size: 12px;">Scatter-Plot</option>
+            </select>
+              
           </div>
 
 

@@ -5,7 +5,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule} from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule} from '@angular/material/card';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MenuComponent } from './menu/menu.component';
@@ -25,7 +24,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     MatMenuModule,
     MatButtonModule,
     MatIconModule,
-    MatCardModule
   ],
   providers: [],
   bootstrap: [AppComponent]

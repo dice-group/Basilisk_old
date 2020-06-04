@@ -8,7 +8,7 @@ import * as c3 from 'c3';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+  title = 'Basilisk BM Platform';
 
 
 }
