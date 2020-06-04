@@ -76,7 +76,7 @@ public class ResultStoringFusekiUtils {
 
         LoggerUtils.logForBasilisk(logPrefix, "Loading " + ntFile + " into the Fuseki server.", 1);
         //Loads the file into the named graph.
-        connection.load(graphName + ":" + tag + "$" + prefix, model);
+        connection.put(graphName + ":" + tag + "$" + prefix, model);
 
         connection.commit();
         connection.close();
