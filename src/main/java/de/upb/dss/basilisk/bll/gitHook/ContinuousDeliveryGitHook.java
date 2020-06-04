@@ -87,7 +87,12 @@ public class ContinuousDeliveryGitHook {
 
             if (this.currentTripleStore.equalsIgnoreCase("Fuseki")) {
                 try {
-                    obj.unzipJena(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath);
+                    if (!obj.unzipJena(this.bmWorkspacePath + tempStore + ".zip", this.bmWorkspacePath)) {
+                        LoggerUtils.logForBasilisk(logPrefix,
+                                this.currentBenchmarkedVersion + " release does not contain fuseki2 project.",
+                                4);
+                        return -1;
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     return -1;

@@ -25,8 +25,8 @@ public class Extraction {
      * @param destDirectory Destination.
      * @throws IOException If fails to unzip the file.
      */
-    public void unzipJena(String zipFilePath, String destDirectory) throws IOException {
-
+    public boolean unzipJena(String zipFilePath, String destDirectory) throws IOException {
+        boolean flag = false;
         ZipFile zipFile = new ZipFile(zipFilePath);
 
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -43,6 +43,7 @@ public class Extraction {
                             + entry.getName().substring(entry.getName().lastIndexOf("/jena-fuseki2/") + 13));
                     dir.mkdirs();
                 }
+                flag = true;
             } else {
                 continue;
             }
@@ -53,6 +54,8 @@ public class Extraction {
 
         if (zipFile != null)
             zipFile.close();
+
+        return flag;
     }
 
     /**
