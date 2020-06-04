@@ -89,7 +89,7 @@ public class DockerUtils {
         flag = dockerClient.pullImageCmd(repoName)
                 .withTag(tag)
                 .exec(new PullImageResultCallback())
-                .awaitCompletion(30, TimeUnit.SECONDS);
+                .awaitCompletion(30, TimeUnit.MINUTES);
 
         return flag;
     }
