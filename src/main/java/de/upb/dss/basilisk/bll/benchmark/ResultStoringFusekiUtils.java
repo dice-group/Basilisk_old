@@ -118,4 +118,21 @@ public class ResultStoringFusekiUtils {
             }
         }
     }
+
+    public static void deleteUnknownResultFile() {
+        LoggerUtils.logForBasilisk(
+                logPrefix,
+                "Checking for unknown result file Iguana directory, If found any, will be deleted.",
+                4);
+        
+        for (File file : getFileList()) {
+            try {
+                Files.delete(Paths.get(file.getAbsolutePath()));
+            } catch (IOException e) {
+                LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while deleting the " +
+                        "unknown result file in Iguana folder", 4);
+                e.printStackTrace();
+            }
+        }
+    }
 }

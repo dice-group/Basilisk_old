@@ -38,6 +38,9 @@ public class IguanaUtils {
         String err = "";
         String cmd = "";
 
+        //If any, delete all the unknown benchmark result file in Iguana folder.
+        ResultStoringFusekiUtils.deleteUnknownResultFile();
+
         //Set the Iguana configuration file respective to triple store before running it.
         int code = FreeMarkerTemplateEngineUtils.setIguanaConfigFile(repoName, tag, port, queryFile, configPath);
 
