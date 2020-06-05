@@ -22,11 +22,14 @@ export class MenuComponent implements OnInit {
   listOfAllVersions=[]; //contains all versions w.r.t noOfWorkers
   listOfUniqueVersions=[]; //contains all versions of triple stores available
   selectedVersions=[]; //containes versions selected by user
+  selectedOptions=["x-axis", "y-axis", "graph"];
   listOfWorkers=["$1worker", "$4workers", "$8workers", "$16workers", "$32workers"]
-  noOfClients=["1", "4", "8", "16", "32", "All"]
+  noOfClients=["1 client", "4 clients", "8 clients", "16 clients", "32 clients", "All"]
   queryId=[];  //contains all queryIds
   dataDictionary = {}; //contains all data
   result_size=[1, 2, 3]
+  aggregated=["QMpH", "QPS", "Avg QPS", "Avg query time", "Failed"];
+  nonAggregated=["QPS per query", "Avg QPS per query", "Avg query-time per query", "No. of Failed queries", "Failed Reason"];
 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
@@ -209,6 +212,33 @@ export class MenuComponent implements OnInit {
   }
 
   /**
+   * Calls when user selects x-axis value
+   *
+   * @param {String} xValue - selected value
+   */
+  xAxisSelected(xValue){
+    this.selectedOptions[0] = xValue;
+  }
+
+  /**
+   * Calls when user selects y-axis value
+   *
+   * @param {String} yValue - selected value
+   */
+  yAxisSelected(yValue){
+    this.selectedOptions[1] = yValue;
+  }
+
+  /**
+   * calls when user selects graph to display
+   *
+   * @param {String} graph - selected value
+   */
+  graphSelected(graph){
+    this.selectedOptions[2] = graph;
+  }
+
+  /**
    * When user clicks on 'Submit' button
    */
   onSubmit(){
@@ -216,6 +246,8 @@ export class MenuComponent implements OnInit {
     for (const [key, value] of Object.entries(this.dataDictionary)) {
       console.log(key, value);
     }
+    console.log(this.selectedVersions);
+    console.log(this.selectedOptions);
   }
 
 }
