@@ -28,8 +28,8 @@ export class MenuComponent implements OnInit {
   queryId=[];  //contains all queryIds
   dataDictionary = {}; //contains all data
   result_size=[1, 2, 3]
-  aggregated=["QMpH", "QPS", "Avg QPS", "Avg query time", "Failed"];
-  nonAggregated=["QPS per query", "Avg QPS per query", "Avg query-time per query", "No. of Failed queries", "Failed Reason"];
+  metrices=["QPS", "Avg QPS", "Avg query time", "No. of Failed queries", "QMpH",
+            "QPS per query", "Avg QPS per query", "Avg query-time per query", "No. of Failed queries", "Failed Reason"];
 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
@@ -242,13 +242,121 @@ export class MenuComponent implements OnInit {
    * When user clicks on 'Submit' button
    */
   onSubmit(){
-    var newArray = [];
+    /* var newArray = [];
     for (const [key, value] of Object.entries(this.dataDictionary)) {
       console.log(key, value);
-    }
-    console.log(this.selectedVersions);
-    console.log(this.selectedOptions);
+    } */
+
+    //get data related to values selected on x-axis
+    this.selectedVersions.forEach(version => {
+      if(this.selectedOptions[0].slice(2, 8) == "client" || this.selectedOptions[0].slice(3, 9) == "client"){
+        var key = version + this.listOfWorkers[this.noOfClients.indexOf(this.selectedOptions[0])];
+        console.log(key)
+      }
+      else if(this.selectedOptions[0] == "All"){
+        var keys = [];
+        this.listOfWorkers.forEach(worker => {
+          keys.push(version+worker);
+        });
+        console.log(keys)
+      }
+      else if(this.selectedOptions[0].slice(0, 6) == "sparql"){
+        var selectedQueryID = parseInt(this.selectedOptions[0].slice(6));
+        console.log(selectedQueryID);
+        var keys = [];
+        this.listOfWorkers.forEach(worker => {
+          keys.push(version+worker);
+        });
+      }
+
+      //get data related to values selected on y-axis
+      if(this.metrices.indexOf(this.selectedOptions[1]) <= 4){
+        var aggregated: Boolean = true;
+      }
+      else{
+        var aggregated: Boolean = false;
+      }
+      if(key){
+        var data = this.dataDictionary[key];
+        var concatenated = [];
+        console.log(data);
+        var indexAndAvg = this.getIndex(this.metrices.indexOf(this.selectedOptions[1]));
+        if(aggregated == true){
+          if(indexAndAvg[2] == true){
+            concatenated = data[1];
+          }
+          else{
+            data[2].forEach(queryid => {
+              concatenated = concatenated.concat(queryid[indexAndAvg[0]])
+            });
+          }
+
+        }
+        else{
+          data[2].forEach(queryid => {
+            concatenated.push(queryid[indexAndAvg[0]]);
+          });
+        }
+
+        if(indexAndAvg[1] == true){
+          var avgConcatenated = this.getAvg(concatenated);
+          console.log(avgConcatenated)
+        }
+        else{
+          console.log(concatenated);
+        }
+
+      }
+      else if(keys){
+        console.log("all clients")
+      }
+
+    })
+
   }
+
+  /**
+   * Gets the index of the required data
+   *
+   * @param {Number} index - index of the selected y-axis value
+   */
+  getIndex(index){
+    var indexOfMetrice;
+    var avg = false;
+    var qmph = false;
+    switch(index){
+      case 0:
+        indexOfMetrice = 1;
+        break;
+      case 1:
+        indexOfMetrice = 1;
+        avg = true;
+        break;
+      case 2:
+        indexOfMetrice = 2;
+        break;
+      case 3:
+        indexOfMetrice = 3;
+        break;
+      case 4:
+        indexOfMetrice = 1;
+        qmph = true;
+        break;
+    }
+    return [indexOfMetrice, avg, qmph]
+  }
+
+  /**
+   * Calculates and returns average of an array
+   * @param {Array} inputData - input array
+   */
+  getAvg(inputData) {
+    var i = 0, sum = 0, len = inputData.length;
+    while (i < len) {
+        sum = sum + parseInt(inputData[i++]);
+    }
+    return sum / len;
+}
 
 }
 

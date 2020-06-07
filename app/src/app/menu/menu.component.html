@@ -46,10 +46,10 @@
           style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
             <option value="Select Y-axis" selected>Select Y-axis</option>
             <optgroup class= "" label= "Aggregated" style="font-size: 12px;">
-              <option *ngFor="let yaxis of aggregated" >{{yaxis}}</option>
+              <option *ngFor="let yaxis of metrices | slice:0:5" >{{yaxis}}</option>
             </optgroup>
             <optgroup class= "" label= "Non-aggregated" style="font-size: 12px;">
-              <option *ngFor="let yaxis of nonAggregated">{{yaxis}}</option>
+              <option *ngFor="let yaxis of metrices | slice:5">{{yaxis}}</option>
             </optgroup>
           </select>
 
