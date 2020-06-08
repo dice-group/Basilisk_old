@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -25,13 +26,16 @@ import java.util.Properties;
 public class Basilisk {
     public static Properties applicationProperties;
     private static final String logPrefix = "BasiliskMain";
+    private static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+    private static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_GREEN = "\u001B[32m";
 
     /**
      * The main method of the Basilisk Spring application.
      *
      * @param args Arguments to the Basilisk application.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getFile();
         System.out.println(rootPath);
         String appConfigPath = rootPath + "application.properties";
@@ -47,6 +51,12 @@ public class Basilisk {
 
         SpringApplication app = new SpringApplication(Basilisk.class);
         app.run(args);
+
+        System.out.println("\n\n###################################################################################\n");
+        System.out.println("\t--> Setting up Basilisk. Please wait....");
+        InitialSetup.setup();
+        System.out.println("\n###################################################################################\n\n");
+        System.out.println("Basilisk is ready and up.\n\n");
         printWelcomeMessage();
         LoggerUtils.logForBasilisk(logPrefix, "Basilisk is running", 1);
     }
@@ -59,8 +69,6 @@ public class Basilisk {
         String blankLines = "                                 ";
         String WelcomeMessage = "     Basilisk: version " + basiliskVersion + "     ";
 
-        final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
-        final String ANSI_RESET = "\u001B[0m";
 
         System.out.println(ANSI_GREEN_BACKGROUND + blankLines + ANSI_RESET);
         System.out.println(ANSI_GREEN_BACKGROUND + blankLines + ANSI_RESET);
@@ -69,5 +77,6 @@ public class Basilisk {
         System.out.println(ANSI_GREEN_BACKGROUND + blankLines + ANSI_RESET);
         System.out.println(ANSI_GREEN_BACKGROUND + blankLines + ANSI_RESET);
         System.out.println(ANSI_GREEN_BACKGROUND + blankLines + ANSI_RESET);
+        System.out.println("\n\n");
     }
 }

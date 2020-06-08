@@ -25,8 +25,18 @@ public class ApplicationPropertiesUtils {
     private final String logDirectory;
     private final String resultStoringFusekiEndPoint;
     private final String basiliskEndPoint;
+    private final String iguanaJarLink;
 
     Properties appProps;
+
+    /**
+     * Getter method for Iguana jar file downloadable link.
+     *
+     * @return Iguana jar file downloadable link.
+     */
+    public String getIguanaJarLink() {
+        return iguanaJarLink;
+    }
 
     /**
      * Getter method for Basilisk server endpoint.
@@ -183,5 +193,6 @@ public class ApplicationPropertiesUtils {
         logDirectory = appProps.getProperty("logDirectory");
         resultStoringFusekiEndPoint = appProps.getProperty("resultStoringFusekiEndPoint");
         basiliskEndPoint = appProps.getProperty("basiliskEndPoint");
+        iguanaJarLink = appProps.getProperty("iguanaJarLink");
     }
 }
