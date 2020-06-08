@@ -41,9 +41,10 @@ public class Basilisk {
         String appConfigPath = rootPath + "application.properties";
         System.out.println(appConfigPath);
 
-        if(!checkArguments(args)) {
+        if (!checkArguments(args)) {
             System.out.println("Invalid option. Available option is:\n" +
-                    "--admin-pass <admin password>");
+                    "--admin-pass <admin password>\n" +
+                    "--admin-email <admin email id>\n");
             return;
         }
 
@@ -67,16 +68,34 @@ public class Basilisk {
         LoggerUtils.logForBasilisk(logPrefix, "Basilisk is running", 1);
     }
 
+    /**
+     * This method checks for the valid arguments provided to Basilisk
+     *
+     * @param args Arguments
+     * @return Boolean, True if arguments are valid
+     */
     private static boolean checkArguments(String[] args) {
-        if(args.length > 2) {
+        if (args.length > 4) {
             System.out.println("Got too many arguments.");
             return false;
         }
 
-        if(args.length != 2 && args.length != 0)
+        if (args.length != 2 && args.length != 4 && args.length != 0)
             return false;
 
-        return "--admin-pass".equals(args[0]);
+        if (args.length == 4) {
+            if (args[0].equals(args[2]))
+                return false;
+
+            if (!("--admin-pass".equals(args[2]) || "--admin-email".equals(args[2])))
+                return false;
+        }
+
+        if (args.length == 2 && !("--admin-pass".equals(args[0]) || "--admin-email".equals(args[0])))
+            return false;
+
+
+        return true;
     }
 
     /**
