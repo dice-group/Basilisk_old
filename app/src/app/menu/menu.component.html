@@ -1,0 +1,109 @@
+<div class="menu" id="menuId">
+    <div class="logo" style="width: 60px;">
+      <img src=".\assets\Images\Basilisk_Logo.png" height="150" width="150" />
+    </div>
+
+      <div class="row menu-1" style="margin-bottom: 10px;">
+        <div class="col-6" style="padding: 10px 10px; display: flex; float:left;">
+          <div class="form-group" id="selectVersionDiv">
+            <select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
+                    style="width: 400px; border-radius: 4px; font-size: 15px; height: 30px">
+              <option value="None" selected>Choose the Triple Store Version......................</option>
+              <option *ngFor="let version of listOfUniqueVersions" value="{{version}}">
+                {{version}}
+              </option>
+            </select>
+          </div>
+          <div class="row">
+            <ul cdkDropList (cdkDropListDropped)="dragDrop($event)" id="myList" class="list-group">
+              <li cdkDrag class="list-group-item" *ngFor="let version of selectedVersions">
+                {{version}}
+                <span class="close" style="float:right; border-radius: 4px;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-6" style=" display:inline-block;">
+
+          <select mat-button id="xAxisVal" (change)="xAxisSelected($event.target.value)"
+          style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
+            <option value="Select X-axis" selected>Select X-axis</option>
+            <optgroup class= "" label= "No. of Clients" style="font-size: 12px;">
+              <option *ngFor="let client of noOfClients" >{{client}}</option>
+            </optgroup>
+            <optgroup class= "" label= "Query-Id" style="font-size: 12px;">
+              <option *ngFor="let query of queryId">{{query}}</option>
+            </optgroup>
+            <optgroup label= Result-Size style="font-size: 12px;">
+              <option *ngFor="let result of result_size">{{result}}</option>
+            </optgroup>
+          </select>
+
+
+          &nbsp;&nbsp;
+
+          <select mat-button id="yAxisVal" (change)="yAxisSelected($event.target.value)"
+          style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
+            <option value="Select Y-axis" selected>Select Y-axis</option>
+            <optgroup class= "" label= "Aggregated" style="font-size: 12px;">
+              <option *ngFor="let yaxis of metrices | slice:0:5" >{{yaxis}}</option>
+            </optgroup>
+            <optgroup class= "" label= "Non-aggregated" style="font-size: 12px;">
+              <option *ngFor="let yaxis of metrices | slice:5">{{yaxis}}</option>
+            </optgroup>
+          </select>
+
+          <div>
+            <select mat-button id="graphVal" (change)="graphSelected($event.target.value)"
+            style="border-radius: 4px; height: 30px; width: 380px; margin-top: 20px; background-color: white; font-size: 15px;">
+              <option value="Select Graph" style="left:100px " selected>Select Graph</option>
+              <option style="font-size: 12px;">Area-Chart</option>
+              <option  style="font-size: 12px;">Bar-Cahrt</option>
+              <option  style="font-size: 12px;">Line-Chart</option>
+              <option  style="font-size: 12px;">Box-Plot</option>
+              <option  style="font-size: 12px;">Scatter-Plot</option>
+            </select>
+
+          </div>
+
+
+          <div>
+              <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 175px; font-weight:inherit" (click)="onSubmit()">Submit</button>
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 175px; font-weight:inherit" onClick="">Clear all</button>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="menu-2" style="padding-left: 20px;">
+        <table style=" padding: 10px 10px 10px 10px;">
+          <tr>
+            <td>
+              <form class="color1">
+                <input class="rad" type="radio" value="bar" name="chart" onclick="" checked> Bar chart<br>
+                <input class="rad" type="radio" value="box" name="chart" onclick=""> Area Chart<br>
+                <input class="rad" type="radio" value="line" name="chart" onclick=""> Line chart<br>
+              </form>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="color1">Download Results: &nbsp;
+                <label class="btn btn-sm" style="margin-left: 0px; font-weight:inherit" onclick="">RDF Format</label>
+                &nbsp;&nbsp;
+                <label class="btn btn-sm" style="font-weight:inherit" onclick="">CSV Format</label>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <a href="#" class="btn btn-sm" style="font-weight:inherit" id="login-button">Login</a>
+              &nbsp;&nbsp;
+              <a href="#" class="btn btn-sm" style="font-weight:inherit" id="signup-button">Signup</a>
+            </td>
+          </tr>
+        </table>
+      </div>
+  </div>
