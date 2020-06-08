@@ -41,6 +41,12 @@ public class Basilisk {
         String appConfigPath = rootPath + "application.properties";
         System.out.println(appConfigPath);
 
+        if(!checkArguments(args)) {
+            System.out.println("Invalid options. Available option is:\n" +
+                    "--admin-pass <admin passwprd>");
+            return;
+        }
+
         applicationProperties = new Properties();
         try {
             applicationProperties.load(new FileInputStream(appConfigPath));
@@ -59,6 +65,16 @@ public class Basilisk {
         System.out.println("Basilisk is ready and up.\n\n");
         printWelcomeMessage();
         LoggerUtils.logForBasilisk(logPrefix, "Basilisk is running", 1);
+    }
+
+    private static boolean checkArguments(String[] args) {
+        System.out.println(args.length);
+        if(args.length != 2 && args.length != 0)
+            return false;
+
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+        return "--admin-pass".equals(args[0]);
     }
 
     /**
