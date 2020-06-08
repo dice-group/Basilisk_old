@@ -42,8 +42,8 @@ public class Basilisk {
         System.out.println(appConfigPath);
 
         if(!checkArguments(args)) {
-            System.out.println("Invalid options. Available option is:\n" +
-                    "--admin-pass <admin passwprd>");
+            System.out.println("Invalid option. Available option is:\n" +
+                    "--admin-pass <admin password>");
             return;
         }
 
@@ -60,7 +60,7 @@ public class Basilisk {
 
         System.out.println("\n\n###################################################################################\n");
         System.out.println("\t--> Setting up Basilisk. Please wait....");
-        InitialSetup.setup();
+        InitialSetup.setup(args);
         System.out.println("\n###################################################################################\n\n");
         System.out.println("Basilisk is ready and up.\n\n");
         printWelcomeMessage();
@@ -68,12 +68,14 @@ public class Basilisk {
     }
 
     private static boolean checkArguments(String[] args) {
-        System.out.println(args.length);
+        if(args.length > 2) {
+            System.out.println("Got too many arguments.");
+            return false;
+        }
+
         if(args.length != 2 && args.length != 0)
             return false;
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
         return "--admin-pass".equals(args[0]);
     }
 
