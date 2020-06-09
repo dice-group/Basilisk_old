@@ -247,14 +247,15 @@ export class MenuComponent implements OnInit {
       console.log(key, value);
     } */
 
+    var keys = [];
     //get data related to values selected on x-axis
     this.selectedVersions.forEach(version => {
       if(this.selectedOptions[0].slice(2, 8) == "client" || this.selectedOptions[0].slice(3, 9) == "client"){
         var key = version + this.listOfWorkers[this.noOfClients.indexOf(this.selectedOptions[0])];
+        keys.push(key);
         console.log(key)
       }
       else if(this.selectedOptions[0] == "All"){
-        var keys = [];
         this.listOfWorkers.forEach(worker => {
           keys.push(version+worker);
         });
@@ -263,56 +264,54 @@ export class MenuComponent implements OnInit {
       else if(this.selectedOptions[0].slice(0, 6) == "sparql"){
         var selectedQueryID = parseInt(this.selectedOptions[0].slice(6));
         console.log(selectedQueryID);
-        var keys = [];
         this.listOfWorkers.forEach(worker => {
           keys.push(version+worker);
         });
       }
 
-      //get data related to values selected on y-axis
-      if(this.metrices.indexOf(this.selectedOptions[1]) <= 4){
-        var aggregated: Boolean = true;
-      }
-      else{
-        var aggregated: Boolean = false;
-      }
-      if(key){
-        var data = this.dataDictionary[key];
+      if(keys){
+        keys.forEach(keyz => {
+          var data = this.dataDictionary[keyz];
         var concatenated = [];
-        console.log(data);
-        var indexAndAvg = this.getIndex(this.metrices.indexOf(this.selectedOptions[1]));
-        if(aggregated == true){
-          if(indexAndAvg[2] == true){
-            concatenated = data[1];
-          }
-          else{
-            data[2].forEach(queryid => {
-              concatenated = concatenated.concat(queryid[indexAndAvg[0]])
-            });
+        var indexAggAvgQmph = this.getIndex(this.metrices.indexOf(this.selectedOptions[1]));
+
+        //if aggregated is true
+        if(indexAggAvgQmph[1] == true){
+          data[2].forEach(queryid => {
+            concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
+          });
+          //if avg is true and aggregated is also true
+          if(indexAggAvgQmph[2] == true){
+            var avgConcatenated = this.getAvg(concatenated);
           }
 
         }
+        //if aggregated is false
         else{
           data[2].forEach(queryid => {
-            concatenated.push(queryid[indexAndAvg[0]]);
+            concatenated.push(queryid[indexAggAvgQmph[0]]);
           });
+          //if avg is true and aggregated is false
+          if(indexAggAvgQmph[2] == true){
+            var avgNonAggregated = [];
+            concatenated.forEach(ana => {
+              avgNonAggregated.push(this.getAvg(ana))
+            })
+          }
         }
 
-        if(indexAndAvg[1] == true){
-          var avgConcatenated = this.getAvg(concatenated);
-          console.log(avgConcatenated)
+        if(avgConcatenated){
+          console.log(avgConcatenated);
+        }
+        else if(avgNonAggregated){
+          console.log(avgNonAggregated)
         }
         else{
-          console.log(concatenated);
+          console.log(concatenated)
         }
-
-      }
-      else if(keys){
-        console.log("all clients")
-      }
-
-    })
-
+      })
+    }
+  })
   }
 
   /**
@@ -324,26 +323,55 @@ export class MenuComponent implements OnInit {
     var indexOfMetrice;
     var avg = false;
     var qmph = false;
+    var aggregated: Boolean;
     switch(index){
       case 0:
         indexOfMetrice = 1;
+        aggregated = true;
         break;
       case 1:
         indexOfMetrice = 1;
+        aggregated = true;
         avg = true;
         break;
       case 2:
         indexOfMetrice = 2;
+        aggregated = true;
         break;
       case 3:
         indexOfMetrice = 3;
+        aggregated = true;
         break;
       case 4:
         indexOfMetrice = 1;
+        aggregated = true;
         qmph = true;
         break;
+      case 5:
+        indexOfMetrice = 1;
+        aggregated = false;
+        break;
+      case 6:
+        indexOfMetrice = 1;
+        aggregated = false;
+        avg = true;
+        break;
+      case 7:
+        indexOfMetrice = 2;
+        aggregated = false;
+        avg = true;
+        break;
+      case 8:
+        indexOfMetrice = 3;
+        aggregated = false;
+        break;
+      case 8:
+        indexOfMetrice = 4;
+        aggregated = false;
+        break;
+
     }
-    return [indexOfMetrice, avg, qmph]
+    return [indexOfMetrice, aggregated, avg, qmph]
   }
 
   /**
