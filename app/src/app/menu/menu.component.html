@@ -3,19 +3,23 @@
       <img src=".\assets\Images\Basilisk_Logo.png" height="150" width="150" />
     </div>
 
-      <div class="row menu-1" style="margin-bottom: 10px;">
+      <div class="row menu-1" style="margin-bottom: 20px;">
         <div class="col-6" style="padding: 10px 10px; display: flex; float:left;">
           <div class="form-group" id="selectVersionDiv">
-            <select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
-                    style="width: 400px; border-radius: 4px; font-size: 15px; height: 30px">
-              <option value="None" selected>Choose the Triple Store Version......................</option>
-              <option *ngFor="let version of listOfUniqueVersions" value="{{version}}">
+            <mat-form-field style="width: 400px; border-radius: 4px; font-size: 15px; height: 50px; background-color: white;">
+             <mat-label>Triplestore version</mat-label> 
+             <mat-select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
+                    style="width: 336px; border-radius: 4px; font-size: 15px; height: 50px; margin-left: 40px;" multiple>
+              
+              <mat-option *ngFor="let version of listOfUniqueVersions" (click)="updateVersion(version)" value="{{version}}">
                 {{version}}
-              </option>
-            </select>
+              </mat-option>
+             </mat-select>
+            </mat-form-field> 
+
           </div>
-          <div class="row">
-            <ul cdkDropList (cdkDropListDropped)="dragDrop($event)" id="myList" class="list-group">
+          <div class="row" style="margin-top:30px">
+            <ul cdkDropList (cdkDropListDropped)="dragDrop($event)" id="myList" class="list-group" >
               <li cdkDrag class="list-group-item" *ngFor="let version of selectedVersions">
                 {{version}}
                 <span class="close" style="float:right; border-radius: 4px;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span>

@@ -1,8 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import axios from 'axios';
 import { version } from 'punycode';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import * as d3 from 'd3'
+import {FormControl} from '@angular/forms';
+import { selectAll } from 'd3';
+import { MatSelect } from '@angular/material/select';
+
+
 
 
 @Component({
@@ -11,6 +16,8 @@ import * as d3 from 'd3'
   styleUrls: ['./menu.component.css']
 })
 export class MenuComponent implements OnInit {
+  allchecked: boolean;
+  selectedValues: any;
 
   constructor() { }
 
@@ -23,14 +30,15 @@ export class MenuComponent implements OnInit {
   listOfUniqueVersions=[]; //contains all versions of triple stores available
   selectedVersions=[]; //containes versions selected by user
   selectedOptions=["x-axis", "y-axis", "graph"];
-  listOfWorkers=["$1worker", "$4workers", "$8workers", "$16workers", "$32workers"]
-  noOfClients=["1 client", "4 clients", "8 clients", "16 clients", "32 clients", "All"]
+  listOfWorkers=["$1worker", "$4workers", "$8workers", "$16workers", "$32workers"];
+  noOfClients=["1 client", "4 clients", "8 clients", "16 clients", "32 clients", "All"];
   queryId=[];  //contains all queryIds
   dataDictionary = {}; //contains all data
   result_size=[1, 2, 3]
   metrices=["QPS", "Avg QPS", "Avg query time", "No. of Failed queries", "QMpH",
             "QPS per query", "Avg QPS per query", "Avg query-time per query", "No. of Failed queries", "Failed Reason"];
-
+  
+ 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
 
@@ -193,13 +201,24 @@ export class MenuComponent implements OnInit {
    *
    * @param {String} version - version to be deleted
    */
+  updateVersion(version)
+  {
+   const index=this.selectedVersions.indexOf(version);
+    if(index>-1)
+     {
+     this.selectedVersions.splice(index,1);
+     } else {
+      this.selectedVersions.push(version);
+     }
+  }
+
   versionDeleted(version)
   {
-    const index=this.selectedVersions.indexOf(version);
+   const index=this.selectedVersions.indexOf(version);
     if(index>-1)
-    {
+     {
      this.selectedVersions.splice(index,1);
-    }
+     } 
   }
 
   /**
@@ -242,6 +261,8 @@ export class MenuComponent implements OnInit {
    * When user clicks on 'Submit' button
    */
   onSubmit(){
+
+    console.log(this.selectedVersions);
     /* var newArray = [];
     for (const [key, value] of Object.entries(this.dataDictionary)) {
       console.log(key, value);
@@ -386,7 +407,11 @@ export class MenuComponent implements OnInit {
     return sum / len;
 }
 
+
+
 }
+
+
 
 
 
