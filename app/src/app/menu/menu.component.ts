@@ -37,8 +37,8 @@ export class MenuComponent implements OnInit {
   result_size=[1, 2, 3]
   metrices=["QPS", "Avg QPS", "Avg query time", "No. of Failed queries", "QMpH",
             "QPS per query", "Avg QPS per query", "Avg query-time per query", "No. of Failed queries", "Failed Reason"];
-  
- 
+
+
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
 
@@ -218,7 +218,7 @@ export class MenuComponent implements OnInit {
     if(index>-1)
      {
      this.selectedVersions.splice(index,1);
-     } 
+     }
   }
 
   /**
@@ -262,25 +262,23 @@ export class MenuComponent implements OnInit {
    */
   onSubmit(){
 
-    console.log(this.selectedVersions);
-    /* var newArray = [];
-    for (const [key, value] of Object.entries(this.dataDictionary)) {
-      console.log(key, value);
-    } */
-
     var keys = [];
+    var concatenated = [];
+    var avgConcatenated;
+    var avgNonAggregated = [];
+    var allClientsData = [];
+    var allVersionsData = [];
+
     //get data related to values selected on x-axis
     this.selectedVersions.forEach(version => {
       if(this.selectedOptions[0].slice(2, 8) == "client" || this.selectedOptions[0].slice(3, 9) == "client"){
         var key = version + this.listOfWorkers[this.noOfClients.indexOf(this.selectedOptions[0])];
         keys.push(key);
-        console.log(key)
       }
       else if(this.selectedOptions[0] == "All"){
         this.listOfWorkers.forEach(worker => {
           keys.push(version+worker);
         });
-        console.log(keys)
       }
       else if(this.selectedOptions[0].slice(0, 6) == "sparql"){
         var selectedQueryID = parseInt(this.selectedOptions[0].slice(6));
@@ -291,47 +289,78 @@ export class MenuComponent implements OnInit {
       }
 
       if(keys){
+        //Run for each client of a version
         keys.forEach(keyz => {
           var data = this.dataDictionary[keyz];
-        var concatenated = [];
+
         var indexAggAvgQmph = this.getIndex(this.metrices.indexOf(this.selectedOptions[1]));
 
-        //if aggregated is true
+        if(indexAggAvgQmph[3] == true){
+          allClientsData.push(data[1])
+        }
+        else{
+          //if aggregated is true
         if(indexAggAvgQmph[1] == true){
-          data[2].forEach(queryid => {
-            concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
-          });
+          //if queryID is selected
+          if(selectedQueryID){
+            concatenated = concatenated.concat(data[2][selectedQueryID][indexAggAvgQmph[0]])
+            if(indexAggAvgQmph[2] == false){allClientsData.push(concatenated)}
+          }
+          else{
+            data[2].forEach(queryid => {
+              concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
+            });
+            if(indexAggAvgQmph[2] == false){allClientsData.push(concatenated)}
+          }
+
           //if avg is true and aggregated is also true
           if(indexAggAvgQmph[2] == true){
-            var avgConcatenated = this.getAvg(concatenated);
+            avgConcatenated = this.getAvg(concatenated);
+            allClientsData.push(avgConcatenated);
           }
 
         }
         //if aggregated is false
         else{
-          data[2].forEach(queryid => {
-            concatenated.push(queryid[indexAggAvgQmph[0]]);
-          });
+          if(selectedQueryID){
+            concatenated = concatenated.concat(data[2][selectedQueryID][indexAggAvgQmph[0]])
+            allClientsData.push(concatenated)
+          }
+          else{
+            data[2].forEach(queryid => {
+              concatenated.push(queryid[indexAggAvgQmph[0]]);
+            });
+            allClientsData.push(concatenated)
+          }
           //if avg is true and aggregated is false
           if(indexAggAvgQmph[2] == true){
-            var avgNonAggregated = [];
+
             concatenated.forEach(ana => {
               avgNonAggregated.push(this.getAvg(ana))
             })
           }
         }
-
-        if(avgConcatenated){
-          console.log(avgConcatenated);
         }
-        else if(avgNonAggregated){
-          console.log(avgNonAggregated)
-        }
-        else{
-          console.log(concatenated)
-        }
-      })
+     })
     }
+    if(allClientsData.length != 0){
+      console.log(allClientsData);
+      allVersionsData.push(allClientsData);
+    }
+    else if(avgNonAggregated.length != 0){
+      console.log(avgNonAggregated)
+    }
+    else{
+      console.log(concatenated)
+    }
+    if(allVersionsData.length != 0){
+      console.log(allVersionsData);
+    }
+    concatenated = [];
+    avgConcatenated == null;
+    avgNonAggregated = [];
+    allClientsData = [];
+    keys = [];
   })
   }
 
@@ -358,6 +387,7 @@ export class MenuComponent implements OnInit {
       case 2:
         indexOfMetrice = 2;
         aggregated = true;
+        avg = true;
         break;
       case 3:
         indexOfMetrice = 3;
@@ -405,10 +435,7 @@ export class MenuComponent implements OnInit {
         sum = sum + parseInt(inputData[i++]);
     }
     return sum / len;
-}
-
-
-
+  }
 }
 
 

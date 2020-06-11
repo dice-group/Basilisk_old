@@ -7,15 +7,15 @@
         <div class="col-6" style="padding: 10px 10px; display: flex; float:left;">
           <div class="form-group" id="selectVersionDiv">
             <mat-form-field style="width: 400px; border-radius: 4px; font-size: 15px; height: 50px; background-color: white;">
-             <mat-label>Triplestore version</mat-label> 
+             <mat-label style="margin-left: 10px;">Triplestore version</mat-label>
              <mat-select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
                     style="width: 336px; border-radius: 4px; font-size: 15px; height: 50px; margin-left: 40px;" multiple>
-              
+
               <mat-option *ngFor="let version of listOfUniqueVersions" (click)="updateVersion(version)" value="{{version}}">
                 {{version}}
               </mat-option>
              </mat-select>
-            </mat-form-field> 
+            </mat-form-field>
 
           </div>
           <div class="row" style="margin-top:30px">
