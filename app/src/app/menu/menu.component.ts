@@ -3,11 +3,10 @@ import axios from 'axios';
 import { version } from 'punycode';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import * as d3 from 'd3'
+import * as c3 from 'c3';
 import {FormControl} from '@angular/forms';
 import { selectAll } from 'd3';
 import { MatSelect } from '@angular/material/select';
-
-
 
 
 @Component({
@@ -261,7 +260,9 @@ export class MenuComponent implements OnInit {
    * When user clicks on 'Submit' button
    */
   onSubmit(){
+    console.log(this.dataDictionary)
 
+    //this.awain()
     var keys = [];
     var concatenated = [];
     var avgConcatenated;
@@ -271,6 +272,7 @@ export class MenuComponent implements OnInit {
 
     //get data related to values selected on x-axis
     this.selectedVersions.forEach(version => {
+      allClientsData[0] = version;
       if(this.selectedOptions[0].slice(2, 8) == "client" || this.selectedOptions[0].slice(3, 9) == "client"){
         var key = version + this.listOfWorkers[this.noOfClients.indexOf(this.selectedOptions[0])];
         keys.push(key);
@@ -310,7 +312,7 @@ export class MenuComponent implements OnInit {
             data[2].forEach(queryid => {
               concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
             });
-            if(indexAggAvgQmph[2] == false){allClientsData.push(concatenated)}
+            if(indexAggAvgQmph[2] == false){allClientsData = allClientsData.concat(concatenated)}
           }
 
           //if avg is true and aggregated is also true
@@ -353,15 +355,14 @@ export class MenuComponent implements OnInit {
     else{
       console.log(concatenated)
     }
-    if(allVersionsData.length != 0){
-      console.log(allVersionsData);
-    }
     concatenated = [];
     avgConcatenated == null;
     avgNonAggregated = [];
     allClientsData = [];
     keys = [];
   })
+  console.log(allVersionsData);
+  this.barGraph(allVersionsData);
   }
 
   /**
@@ -436,6 +437,52 @@ export class MenuComponent implements OnInit {
     }
     return sum / len;
   }
+
+
+  barGraph(data){
+
+    var chart = c3.generate({
+      data: {
+          columns: [
+          ],
+          type: 'bar'
+      },
+      axis: {
+        x: {
+          label: {
+
+          text: 'Number of Clients',
+          position: 'outer-center'
+          },
+          type: 'category',
+          categories: this.listOfWorkers,
+        },
+        y: {
+          label: {
+            text: 'Average QPS per Client',
+            position: 'outer-middle'
+            }
+        }
+      },
+      bar: {
+          width: {
+              ratio: 0.5 // this makes bar width 50% of length between ticks
+          }
+          // or
+          //width: 100 // this makes bar width 100px
+      }
+  });
+
+  data.forEach(col => {
+    chart.load({
+      columns: [
+          col
+      ]
+  });
+  })
+
+  }
+
 }
 
 

@@ -10,5 +10,4 @@ import * as c3 from 'c3';
 export class AppComponent {
   title = 'Basilisk BM Platform';
 
-
 }
