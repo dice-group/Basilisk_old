@@ -261,6 +261,8 @@ export class MenuComponent implements OnInit {
    */
   onSubmit(){
     console.log(this.dataDictionary)
+    console.log(this.listOfAllVersions)
+    console.log(this.listOfUniqueVersions)
 
     //this.awain()
     var keys = [];
@@ -363,6 +365,7 @@ export class MenuComponent implements OnInit {
   })
   console.log(allVersionsData);
   this.barGraph(allVersionsData);
+  this.scatterPlot(allVersionsData);
   }
 
   /**
@@ -481,6 +484,37 @@ export class MenuComponent implements OnInit {
   });
   })
 
+  }
+
+
+  scatterPlot(test) {
+    console.log(test)
+
+    var chart = c3.generate({
+      data: {
+          xs: {
+            hi: 'hi_x'
+
+          },
+          // iris data f
+          columns: [
+            test[0],
+            test[1]
+              ],
+          type: 'scatter'
+      },
+      axis: {
+          x: {
+              label: 'Sepal.Width',
+              tick: {
+                  fit: false
+              }
+          },
+          y: {
+              label: 'Petal.Width'
+          }
+      }
+  });
   }
 
 }
