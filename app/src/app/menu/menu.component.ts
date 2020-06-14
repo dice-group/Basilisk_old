@@ -196,21 +196,28 @@ export class MenuComponent implements OnInit {
 
 
   /**
-   * Deletes the respective version from the list when clicked on cross icon
+   * Delete the respective version from the list when any version is unchecked
    *
    * @param {String} version - version to be deleted
    */
-  updateVersion(version)
+  updateVersion(value, selected)
   {
-   const index=this.selectedVersions.indexOf(version);
-    if(index>-1)
-     {
-     this.selectedVersions.splice(index,1);
-     } else {
-      this.selectedVersions.push(version);
-     }
+    if(selected){
+      this.selectedVersions.push(value);
+    }
+    else {
+      const index = this.selectedVersions.indexOf(value);
+      if (index > -1) {
+        this.selectedVersions.splice(index, 1);
+      }
+    }
   }
 
+  /**
+   * Delete the version from the list when clicked on cross icon
+   *
+   * @param version
+   */
   versionDeleted(version)
   {
    const index=this.selectedVersions.indexOf(version);
@@ -463,7 +470,7 @@ export class MenuComponent implements OnInit {
     var chart = c3.generate({
       size: {
         height: 480,
-        width: 1100
+        width: 1090
       },
       data: {
           columns: [

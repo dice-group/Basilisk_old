@@ -4,21 +4,20 @@
     </div>
 
       <div class="row menu-1" style="margin-bottom: 20px;">
-        <div class="col-6" style="padding: 10px 10px; display: flex; float:left;">
-          <div class="form-group" id="selectVersionDiv">
-            <mat-form-field style="width: 400px; border-radius: 4px; font-size: 15px; height: 50px; background-color: white;">
+        <div class="col-6" style="padding: 10px 10px; display: flex; position: relative;">
+          <div class="form-group" id="selectVersionDiv" style="position: absolute;">
+            <mat-form-field style="margin-left: 1px; width: 400px; border-radius: 4px; font-size: 15px; height: 50px; background-color: white;">
              <mat-label style="margin-left: 10px;">Triplestore version</mat-label>
              <mat-select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
                     style="width: 336px; border-radius: 4px; font-size: 15px; height: 50px; margin-left: 40px;" multiple>
-
-              <mat-option *ngFor="let version of listOfUniqueVersions" (click)="updateVersion(version)" value="{{version}}">
-                {{version}}
+              <mat-option #matOption *ngFor="let version of listOfUniqueVersions"
+                          (click)="updateVersion(matOption.value, matOption.selected)" value="{{version}}">
+                          {{version}}
               </mat-option>
              </mat-select>
             </mat-form-field>
-
           </div>
-          <div class="row" style="margin-top:30px">
+          <div class="row" style="margin-top:23px; position: absolute; left: 419px;">
             <ul cdkDropList (cdkDropListDropped)="dragDrop($event)" id="myList" class="list-group" >
               <li cdkDrag class="list-group-item" *ngFor="let version of selectedVersions">
                 {{version}}
@@ -83,14 +82,8 @@
 
       <div class="menu-2" style="padding-left: 20px;">
         <table style=" padding: 10px 10px 10px 10px;">
-          <tr>
-            <td>
-              <form class="color1">
-                <input class="rad" type="radio" value="bar" name="chart" onclick="" checked> Bar chart<br>
-                <input class="rad" type="radio" value="box" name="chart" onclick=""> Area Chart<br>
-                <input class="rad" type="radio" value="line" name="chart" onclick=""> Line chart<br>
-              </form>
-            </td>
+          <tr style="height: 80px">
+
           </tr>
 
           <tr>
