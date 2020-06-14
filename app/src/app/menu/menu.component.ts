@@ -261,8 +261,8 @@ export class MenuComponent implements OnInit {
    */
   onSubmit(){
     console.log(this.dataDictionary)
-    console.log(this.listOfAllVersions)
-    console.log(this.listOfUniqueVersions)
+    /* console.log(this.listOfAllVersions)
+    console.log(this.listOfUniqueVersions) */
 
     //this.awain()
     var keys = [];
@@ -357,15 +357,30 @@ export class MenuComponent implements OnInit {
     else{
       console.log(concatenated)
     }
+
     concatenated = [];
     avgConcatenated == null;
     avgNonAggregated = [];
     allClientsData = [];
     keys = [];
   })
+
+  switch(this.selectedOptions[2]){
+    case "Bar-Chart":
+      this.barGraph(allVersionsData, this.noOfClients);
+      break;
+    case "Line-Chart":
+      this.lineGraph(allVersionsData, this.noOfClients);
+      break;
+    case "Area-Chart":
+      this.areaGraph(allVersionsData, this.noOfClients);
+      break;
+  }
   console.log(allVersionsData);
-  this.barGraph(allVersionsData);
-  this.scatterPlot(allVersionsData);
+  //this.barGraph(allVersionsData, this.noOfClients);
+  //this.lineGraph(allVersionsData, this.noOfClients);
+  //this.scatterPlot(allVersionsData);
+  console.log(this.noOfClients);
   }
 
   /**
@@ -442,9 +457,14 @@ export class MenuComponent implements OnInit {
   }
 
 
-  barGraph(data){
+  barGraph(data, noOfclient){
+    var clients = noOfclient.slice();
 
     var chart = c3.generate({
+      size: {
+        height: 480,
+        width: 1100
+      },
       data: {
           columns: [
           ],
@@ -458,11 +478,11 @@ export class MenuComponent implements OnInit {
           position: 'outer-center'
           },
           type: 'category',
-          categories: this.listOfWorkers,
+          categories: clients.splice(0, 5)
         },
         y: {
           label: {
-            text: 'Average QPS per Client',
+            text: 'Average QPS',
             position: 'outer-middle'
             }
         }
@@ -515,6 +535,85 @@ export class MenuComponent implements OnInit {
           }
       }
   });
+  }
+
+  lineGraph(data, noOfclient){
+    var clients = noOfclient.slice();
+    var chart = c3.generate({
+      size: {
+        height: 480,
+        width: 1050
+      },
+      data: {
+          columns: [
+          ]
+      },
+      axis: {
+        x: {
+          label: {
+
+          text: 'Number of Clients',
+          position: 'outer-center'
+          },
+          type: 'category',
+          categories: clients.splice(0, 5)
+        },
+        y: {
+          label: {
+            text: 'Average QPS',
+            position: 'outer-middle'
+            }
+        }
+      }
+  });
+
+  data.forEach(col => {
+    chart.load({
+      columns: [
+          col
+      ]
+  });
+  })
+  }
+
+  areaGraph(data, noOfclient){
+    var clients = noOfclient.slice();
+    var chart = c3.generate({
+      size: {
+        height: 480,
+        width: 1050
+      },
+      data: {
+          columns: [
+          ]
+      },
+      axis: {
+        x: {
+          label: {
+          text: 'Number of Clients',
+          position: 'outer-center'
+          },
+          type: 'category',
+          categories: clients.splice(0, 5)
+        },
+        y: {
+          label: {
+            text: 'Average QPS',
+            position: 'outer-middle'
+            }
+        }
+      }
+  });
+
+  data.forEach(col => {
+    chart.load({
+      columns: [
+          col
+      ]
+  });
+  })
+
+  chart.transform('area-spline');
   }
 
 }
