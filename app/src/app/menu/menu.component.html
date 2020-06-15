@@ -21,7 +21,7 @@
             <ul cdkDropList (cdkDropListDropped)="dragDrop($event)" id="myList" class="list-group" >
               <li cdkDrag class="list-group-item" *ngFor="let version of selectedVersions">
                 {{version}}
-                <span class="close" style="float:right; border-radius: 4px;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span>
+                <!-- <span class="close" style="float:right; border-radius: 4px;" name="deselectVersion" (click)="versionDeleted(version)">&times;</span> -->
               </li>
             </ul>
           </div>

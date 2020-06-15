@@ -24,6 +24,7 @@ export class MenuComponent implements OnInit {
   connectionString="http://131.234.28.165:3030";
   postConnectionString="/sparql?query=";
 
+  counter = 0;
   listOfAllDatasets=[]; //contains names of available datasets
   listOfAllVersions=[]; //contains all versions w.r.t noOfWorkers
   listOfUniqueVersions=[]; //contains all versions of triple stores available
@@ -77,10 +78,11 @@ export class MenuComponent implements OnInit {
    * @param {Object} response - json object containing details of the available datasets
    */
   getDatasets(response){
+    this.counter = response.data.datasets.length;
     for(var i=0; i<response.data.datasets.length; i++){
       var datasetName = response.data.datasets[i]["ds.name"];
       this.listOfAllDatasets.push(datasetName);
-      this.runVersionQuery(datasetName, i);
+      this.runVersionQuery(datasetName);
     }
   }
 
@@ -89,12 +91,12 @@ export class MenuComponent implements OnInit {
    *
    * @param {String} dataset - Name of the dataset
    */
-  runVersionQuery(dataset, datasetNo){
+  runVersionQuery(dataset){
     var getVersionsQuery = this.connectionString + dataset + this.postConnectionString + encodeURIComponent(this.queryForAllGraphs);
     axios({
       method: 'get',
       url: getVersionsQuery})
-    .then(res => this.getVersions(res, dataset, datasetNo))
+    .then(res => this.getVersions(res, dataset))
     .catch(err => console.log(err));
   }
 
@@ -104,15 +106,17 @@ export class MenuComponent implements OnInit {
    *
    * @param response - json object containing response of to the version query
    */
-  getVersions(response, dataset, datasetNo){
+  getVersions(response, dataset){
     response.data.results.bindings.forEach(element => {
       this.listOfAllVersions.push([element.g.value, dataset]);
-      if(response.data.results.bindings.indexOf(element)%5 == 1){
-        var name = element.g.value;
-        this.listOfUniqueVersions.push(name.slice(0, name.indexOf('$')));
+      let name = element.g.value;
+      let version = name.slice(0, name.indexOf('$'));
+      if(!this.listOfUniqueVersions.includes(version)){
+        this.listOfUniqueVersions.push(version);
       }
     });
-    if(datasetNo == 2){
+    this.counter--;
+    if(this.counter == 0){
       this.getAllData();
     }
   }
@@ -267,9 +271,10 @@ export class MenuComponent implements OnInit {
    * When user clicks on 'Submit' button
    */
   onSubmit(){
+    console.log(this.listOfAllDatasets)
     console.log(this.dataDictionary)
-    /* console.log(this.listOfAllVersions)
-    console.log(this.listOfUniqueVersions) */
+    console.log(this.listOfAllVersions)
+    console.log(this.listOfUniqueVersions)
 
     //this.awain()
     var keys = [];
@@ -382,12 +387,9 @@ export class MenuComponent implements OnInit {
     case "Area-Chart":
       this.areaGraph(allVersionsData, this.noOfClients);
       break;
+    case "Scatter-Plot":
+      break;
   }
-  console.log(allVersionsData);
-  //this.barGraph(allVersionsData, this.noOfClients);
-  //this.lineGraph(allVersionsData, this.noOfClients);
-  //this.scatterPlot(allVersionsData);
-  console.log(this.noOfClients);
   }
 
   /**
@@ -523,7 +525,6 @@ export class MenuComponent implements OnInit {
             hi: 'hi_x'
 
           },
-          // iris data f
           columns: [
             test[0],
             test[1]
