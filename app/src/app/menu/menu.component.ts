@@ -651,9 +651,28 @@ verticalSlider1: SimpleSliderModel = {
 
 getSliderMinMax(){
   var pushedversion = []
-}
+  this.selectedVersions.forEach((ele1) => { 
+    // this.listOfWorkers.forEach(worker => {
+    //   allslicedversion.push(ele1+worker) });
+    Object.keys(this.dataDictionary).forEach((key) => {
+      this.listOfWorkers.forEach(worker => { 
+        if(ele1+worker == key){
+          this.dataDictionary[key].forEach((elem1) => {
+           
+              console.log(elem1[2])
+            
+         });
+        }
+      });
+
+  });
+
+});
 
 }
+}
+
+
 
 
 
