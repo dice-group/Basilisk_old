@@ -35,8 +35,6 @@ public class Basilisk {
      * @param args Arguments to the Basilisk application.
      */
     public static void main(String[] args) throws IOException {
-        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getFile();
-        String appConfigPath = rootPath + "application.properties";
 
         if (!checkArguments(args)) {
             System.out.println("Invalid option. Available option is:\n" +
@@ -47,19 +45,20 @@ public class Basilisk {
 
         applicationProperties = new Properties();
         try {
-            applicationProperties.load(new FileInputStream(appConfigPath));
+            applicationProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties"));
         } catch (Exception ex) {
             ex.printStackTrace();
             return;
         }
 
-        SpringApplication app = new SpringApplication(Basilisk.class);
-        app.run(args);
-
         System.out.println("\n\n###################################################################################\n");
         System.out.println("\t--> Setting up Basilisk. Please wait....");
         InitialSetup.setup(args);
         System.out.println("\n###################################################################################\n\n");
+
+        SpringApplication app = new SpringApplication(Basilisk.class);
+        app.run(args);
+
         System.out.println("Basilisk is ready and up.\n\n");
         printWelcomeMessage();
         LoggerUtils.logForBasilisk(logPrefix, "Basilisk is running", 1);
