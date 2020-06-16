@@ -83,7 +83,7 @@
       <div class="menu-2" style="padding-left: 20px;">
         <table style=" padding: 10px 10px 10px 10px;">
           <tr style="height: 80px">
-
+            
           </tr>
 
           <tr>
@@ -92,7 +92,7 @@
                 &nbsp;&nbsp;
                 <label class="btn btn-sm" style="font-weight:inherit" onclick="">CSV Format</label>
             </td>
-          </tr>
+          </tr> 
 
           <tr>
             <td>
@@ -103,5 +103,14 @@
           </tr>
         </table>
       </div>
+    </div>
+
+  <div id="sidemenu">
+   <tr>
+     <label style="color: aliceblue; font-size: large;">Result Size:</label>
+   </tr>  
+    <div class="col-2" style="height: 25%">
+     <ng5-slider class="slider" [(value)]="verticalSlider1.value" [options]="verticalSlider1.options"></ng5-slider>
+    </div>
+    <button (click)="getSliderMinMax()">Click</button>
   </div>
-  <div id="chart" style="margin:30px 200px;"></div>

@@ -12,6 +12,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
+import { Ng5SliderModule } from 'ng5-slider';
 
 
 
@@ -31,7 +32,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatIconModule,
     CommonModule,
     FormsModule,
-    MatDialogModule
+    MatDialogModule,
+    Ng5SliderModule
   ],
   providers: [],
   bootstrap: [AppComponent]

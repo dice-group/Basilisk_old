@@ -7,7 +7,21 @@ import * as c3 from 'c3';
 import {FormControl} from '@angular/forms';
 import { selectAll } from 'd3';
 import { MatSelect } from '@angular/material/select';
+import { Options } from 'ng5-slider';
+import { element } from 'protractor';
 
+
+
+interface SimpleSliderModel {
+  value: number;
+  options: Options;
+}
+
+interface RangeSliderModel {
+  minValue: number;
+  maxValue: number;
+  options: Options;
+}
 
 @Component({
   selector: 'app-menu',
@@ -268,6 +282,8 @@ export class MenuComponent implements OnInit {
    */
   onSubmit(){
     console.log(this.dataDictionary)
+    
+   
     /* console.log(this.listOfAllVersions)
     console.log(this.listOfUniqueVersions) */
 
@@ -388,7 +404,12 @@ export class MenuComponent implements OnInit {
   //this.lineGraph(allVersionsData, this.noOfClients);
   //this.scatterPlot(allVersionsData);
   console.log(this.noOfClients);
-  }
+
+
+  
+  
+
+}
 
   /**
    * Gets the index of the required data
@@ -623,10 +644,20 @@ export class MenuComponent implements OnInit {
   chart.transform('area-spline');
   }
 
+
+
+verticalSlider1: SimpleSliderModel = {
+  value: 5,
+  options: {
+    floor: 0,
+    ceil: 10,
+    vertical: true
+  }
+};
+
+
+
 }
-
-
-
 
 
 
