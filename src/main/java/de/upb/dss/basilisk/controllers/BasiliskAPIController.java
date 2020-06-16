@@ -46,7 +46,7 @@ public class BasiliskAPIController {
      * @see de.upb.dss.basilisk.ErrorCode.EXITCODE
      */
     @RequestMapping("/runbenchmark")
-    public String runBenchmark(@RequestParam(defaultValue = "2") int hook,
+    public String runBenchmark(@RequestParam(defaultValue = "3") int hook,
                                @RequestParam(defaultValue = "null") String userName,
                                @RequestParam(defaultValue = "null") String password) throws InterruptedException {
 
@@ -111,12 +111,36 @@ public class BasiliskAPIController {
                 exitcode = new ContinuousDeliveryGitHook()
                         .forEachStore();
                 resp = "Successfully ran Basilisk on Git hook.";
+            } else if (hook == 3) {
+                LoggerUtils.logForBasilisk(logPrefix,
+                        userName + " kicked off Basilisk CPB on Docker hook ", 1);
+
+                exitcode = new ContinuousDeliveryDockerHook()
+                        .forEachStore();
+
+                if (exitcode == 0)
+                    resp = "Successfully ran Basilisk on Docker hook.";
+                else
+                    resp = "Something went wrong while running Basilisk CPB on Docker hook.";
+
+                LoggerUtils.logForBasilisk(logPrefix,
+                        userName + " kicked off Basilisk CPB on Git hook ", 1);
+
+                exitcode = new ContinuousDeliveryGitHook()
+                        .forEachStore();
+
+                if (exitcode == 0)
+                    resp += "\nSuccessfully ran Basilisk on Git hook.";
+                else
+                    resp += "\nSomething went wrong while running Basilisk CPB on Git hook.";
+
             } else {
                 LoggerUtils.logForBasilisk(logPrefix,
                         userName + " kicked off Basilisk CPB on invalid hook ", 1);
                 resp = "Invalid value to the hook parameter. Please look at the below values to the hook parameter.\n" +
                         "1 means run CPB for github hook\n" +
-                        "2 means run CPB for docker hub hook\n";
+                        "2 means run CPB for docker hub hook\n" +
+                        "3 means run CPB on both the hooks\n";
             }
 
             if (exitcode == 0) {
