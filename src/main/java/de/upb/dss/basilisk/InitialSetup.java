@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
 import de.upb.dss.basilisk.bll.gitHook.Extraction;
-import de.upb.dss.basilisk.security.*;
-import org.apache.commons.validator.routines.EmailValidator;
+import de.upb.dss.basilisk.security.BasiliskAdminInitializer;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -271,44 +270,22 @@ public class InitialSetup {
         System.out.println("\t\t* Setting up the initial Basilisk configuration files");
         setUpBasiliskConfig();
 
-        String adminPass = "admin";
-        String adminEmail = "admin@dummy.com";
+        String adminUserName = null;
+        String adminPass = null;
 
-        if (args.length == 2 || args.length == 4) {
-            if ("--admin-pass".equals(args[0]))
-                adminPass = args[1];
-            else if ("--admin-email".equals(args[0]))
-                adminEmail = args[1];
-        }
+        if ("--admin-pass".equals(args[0]))
+            adminPass = args[1];
+        else if ("--admin-user-name".equals(args[0]))
+            adminUserName = args[1];
 
-        if (args.length == 4) {
-            if ("--admin-pass".equals(args[2]))
-                adminPass = args[3];
-            else if ("--admin-email".equals(args[2]))
-                adminEmail = args[3];
-        }
+        if ("--admin-pass".equals(args[2]))
+            adminPass = args[3];
+        else if ("--admin-user-name".equals(args[2]))
+            adminUserName = args[3];
 
         System.out.println("\t\t* Setting up the admin account");
 
-        if (ReadAuth.isValidUser("admin")) {
-            System.out.println("\t\t\t* Admin account already present.");
-        } else {
-            if (!EmailValidator.getInstance().isValid(adminEmail)) {
-                System.out.println("\t\t\t* Invalid email id. Added admin with dummy email id: admin@dummy.com");
-                adminEmail = "admin@dummy.com";
-            } else {
-                System.out.println("\t\t\t* Added admin account.");
-            }
-
-            byte[] salt = GenerateSalt.getSalt();
-            String encodedSalt = Base64Utils.encode64(salt);
-            String hashedPass = BasiliskHash.hashThePassword(adminPass, salt);
-            PasswordFileUtils.addNewCred("admin",
-                    hashedPass,
-                    encodedSalt,
-                    adminEmail,
-                    true,
-                    OPERATIONTYPE.APPROVE);
-        }
+        BasiliskAdminInitializer.initializeBasiliskAdmin(adminUserName, adminPass);
+        System.out.println("\t\t\t* Added admin account.");
     }
 }

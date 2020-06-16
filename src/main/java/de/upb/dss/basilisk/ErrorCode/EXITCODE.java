@@ -7,14 +7,10 @@ package de.upb.dss.basilisk.ErrorCode;
  */
 public enum EXITCODE {
     SUCCESS(0),
-    USER_EXIST(-150),
-    INVALID_EMAIL(-50),
     INVALID_USER(-100),
     WRONG_PASSWORD(-200),
     HASH_ERROR(-300),
-    NULL_VALUE(-400),
-    NOT_ADMIN(-800),
-    INVALID_PARAM_VALUE(-500);
+    NULL_VALUE(-400);
 
     private final int exitCode;
 

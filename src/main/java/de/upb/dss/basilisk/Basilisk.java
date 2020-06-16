@@ -28,7 +28,6 @@ public class Basilisk {
     private static final String logPrefix = "BasiliskMain";
     private static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
     private static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
 
     /**
      * The main method of the Basilisk Spring application.
@@ -37,14 +36,12 @@ public class Basilisk {
      */
     public static void main(String[] args) throws IOException {
         String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getFile();
-        System.out.println(rootPath);
         String appConfigPath = rootPath + "application.properties";
-        System.out.println(appConfigPath);
 
         if (!checkArguments(args)) {
             System.out.println("Invalid option. Available option is:\n" +
-                    "--admin-pass <admin password>\n" +
-                    "--admin-email <admin email id>\n");
+                    "--admin-user-name <admin user name>\n" +
+                    "--admin-pass <admin password>\n");
             return;
         }
 
@@ -75,23 +72,20 @@ public class Basilisk {
      * @return Boolean, True if arguments are valid
      */
     private static boolean checkArguments(String[] args) {
-        if (args.length > 4) {
-            System.out.println("Got too many arguments.");
+        if (args.length != 4) {
+            System.out.println("Got too many arguments or too few arguments.");
             return false;
         }
 
-        if (args.length != 2 && args.length != 4 && args.length != 0)
+
+        if (args[0].equals(args[2]))
             return false;
 
-        if (args.length == 4) {
-            if (args[0].equals(args[2]))
-                return false;
+        if (!("--admin-pass".equals(args[2]) || "--admin-user-name".equals(args[2])))
+            return false;
 
-            if (!("--admin-pass".equals(args[2]) || "--admin-email".equals(args[2])))
-                return false;
-        }
 
-        if (args.length == 2 && !("--admin-pass".equals(args[0]) || "--admin-email".equals(args[0])))
+        if (!("--admin-pass".equals(args[0]) || "--admin-user-name".equals(args[0])))
             return false;
 
 
