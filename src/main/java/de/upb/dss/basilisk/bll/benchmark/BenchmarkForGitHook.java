@@ -1,7 +1,6 @@
 package de.upb.dss.basilisk.bll.benchmark;
 
 import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -17,11 +16,9 @@ import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * This class runs the current triple store from Git hook and then runs the Iguana for benchmarking the triple store.

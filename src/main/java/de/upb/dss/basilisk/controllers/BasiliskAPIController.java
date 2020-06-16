@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.StringWriter;
 
 /**
- * This is the Basilisk's user Rest Controller.
+ * This is the Basilisk's Rest Controller.
  *
  * @author Ranjith Krishnamurthy
  * @author Samrat Dutta
@@ -130,120 +130,6 @@ public class BasiliskAPIController {
                         "   \"exitCode\":" + exitcode + "\n" +
                         "}\n";
             }
-        }
-
-        return "Unknown error";
-    }
-
-    /**
-     * This signs up the user for Basilisk application.
-     *
-     * @param userName User name.
-     * @param password Password
-     * @param email    Email id
-     * @return Exit code.
-     * @see de.upb.dss.basilisk.ErrorCode.EXITCODE
-     */
-    @RequestMapping("/signUp")
-    public String signUpNewUser(@RequestParam(defaultValue = "null") String userName,
-                                @RequestParam(defaultValue = "null") String password,
-                                @RequestParam(defaultValue = "null") String email) {
-
-        if (userName.equals("null") || password.equals("null") || email.equals("null")) {
-            LoggerUtils.logForSecurity(logPrefix, "Someone tried to sign up for Basilisk without passing " +
-                    "userName, password and email id", 100);
-
-            return "{\n" +
-                    "   \"message\":\"User name, password and email id all are required\"\n" +
-                    "   \"exitCode\":-400\n" +
-                    "}\n";
-        }
-
-        EXITCODE exitCode = InsertAuth.signUp(userName, password, email, OPERATIONTYPE.PENDING);
-
-        if (exitCode == EXITCODE.SUCCESS) {
-            LoggerUtils.logForSecurity(logPrefix, userName + " signed up for Basilisk. Waiting for admin's " +
-                    "approve.", 1);
-
-            return "{\n" +
-                    "   \"message\":\"Successfully signed up. Waiting for admin to approve.\"\n" +
-                    "   \"exitCode\":" + exitCode.getExitCode() + "\n" +
-                    "}\n";
-        } else if (exitCode == EXITCODE.USER_EXIST) {
-            LoggerUtils.logForSecurity(logPrefix, "Someone tried to sign up with the existing userName: "
-                    + userName, 4);
-
-            return "{\n" +
-                    "   \"message\":\"User name already exist. Please use different user name.\"\n" +
-                    "   \"exitCode\":" + exitCode.getExitCode() + "\n" +
-                    "}\n";
-        } else {
-            LoggerUtils.logForSecurity(logPrefix, userName + " tried to sign up with the " +
-                    "invalid email id", 4);
-            return "{\n" +
-                    "   \"message\":\"Invalid email id.\"\n" +
-                    "   \"exitCode\":" + exitCode.getExitCode() + "\n" +
-                    "}\n";
-        }
-    }
-
-    /**
-     * This method lets the user change their password
-     *
-     * @param userName    User name
-     * @param oldPassword Old password for authentication
-     * @param newPassword New Password
-     * @return Exit code
-     * @see de.upb.dss.basilisk.ErrorCode.EXITCODE
-     */
-    @RequestMapping("/changePassword")
-    public String changePassword(@RequestParam(defaultValue = "null") String userName,
-                                 @RequestParam(defaultValue = "null") String oldPassword,
-                                 @RequestParam(defaultValue = "null") String newPassword) {
-
-        if (userName.equals("null") || oldPassword.equals("null") || newPassword.equals("null")) {
-            LoggerUtils.logForSecurity(logPrefix, "Someone tried to change the password without passing " +
-                    "the userName, old password and new password", 100);
-
-            return "{\n" +
-                    "   \"message\":\"User name, old password and new password id all are required\"\n" +
-                    "   \"exitCode\":" + EXITCODE.NULL_VALUE.getExitCode() + "\n" +
-                    "}\n";
-        }
-
-        EXITCODE exitCode = UpdateAuth.updatePassword(userName, oldPassword, newPassword);
-
-        if (exitCode == EXITCODE.SUCCESS) {
-            LoggerUtils.logForSecurity(logPrefix,
-                    userName + " successfully change his/her password", 1);
-
-            return "{\n" +
-                    "   \"message\":\"Successfully changed the password.\"\n" +
-                    "   \"exitCode\":" + exitCode.getExitCode() + "\n" +
-                    "}\n";
-        } else if (exitCode == EXITCODE.INVALID_USER) {
-            LoggerUtils.logForSecurity(logPrefix,
-                    "Someone tried to change his/her password with invalid userName", 100);
-            return "{\n" +
-                    "   \"message\":\"Invalid user name.\"\n" +
-                    "   \"exitCode\":" + exitCode.getExitCode() + "\n" +
-                    "}\n";
-        } else if (exitCode == EXITCODE.WRONG_PASSWORD) {
-            LoggerUtils.logForSecurity(logPrefix,
-                    userName + " tried to change his/her password with wrong password", 4);
-            return "{\n" +
-                    "   \"message\":\"Wrong Password.\"\n" +
-                    "   \"exitCode\":" + exitCode.getExitCode() + "\n" +
-                    "}\n";
-        } else if (exitCode == EXITCODE.HASH_ERROR) {
-            LoggerUtils.logForSecurity(logPrefix,
-                    "Something went wrong in hasing the password" +
-                            "while changing the password for " + userName, 100);
-
-            return "{\n" +
-                    "   \"message\":\"Something went wrong while hashing the password.\"\n" +
-                    "   \"exitCode\":" + exitCode.getExitCode() + "\n" +
-                    "}\n";
         }
 
         return "Unknown error";
