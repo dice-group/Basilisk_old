@@ -27,6 +27,7 @@ public class ContinuousDeliveryDockerHook {
     private String currentPortNum;
     private String currentDatasetFilePath;
     private String currentQueriesFilePath;
+    private String currentBenchmarkedDigest;
     private static final String logPrefix = "Docker Hook";
 
 
@@ -39,7 +40,7 @@ public class ContinuousDeliveryDockerHook {
 
         this.dockerHookBenchmarkedFileData = YamlUtils.addTagToDockerBenchmarkedAttempted(
                 this.dockerHookBenchmarkedFileData,
-                this.currentBenchmarkedTag,
+                this.currentBenchmarkedDigest,
                 this.currentTripleStore);
 
         //Clears the docker environment for the next iteration.
@@ -60,12 +61,14 @@ public class ContinuousDeliveryDockerHook {
                 JSONObject singleTagData = dockerHubTagsJsonArray.getJSONObject(i);
 
                 String tag = (String) singleTagData.get("name");
+                String digest = (String) ((JSONObject) singleTagData.getJSONArray("images").get(0)).get("digest");
 
-                if (!this.alreadyBenchmarkedTagList.contains(tag)) {
+                if (!this.alreadyBenchmarkedTagList.contains(digest)) {
                     //Clears the docker environment before starting the benchmark process.
                     DockerUtils.clearDocker();
 
                     this.currentBenchmarkedTag = tag;
+                    this.currentBenchmarkedDigest = digest;
 
                     boolean flag = DockerUtils.pullImage(this.currentRepoName, tag);
 
@@ -123,8 +126,8 @@ public class ContinuousDeliveryDockerHook {
         }
 
         if (s.length() != 0) {
-            if (s.charAt(0) == '[') {
-                dockerHubTags = new JSONArray(s);
+            if (s.charAt(0) == '{') {
+                dockerHubTags = new JSONObject(s).getJSONArray("results");
 
                 p.destroy();
 

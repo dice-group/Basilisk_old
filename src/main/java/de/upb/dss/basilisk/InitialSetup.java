@@ -172,7 +172,7 @@ public class InitialSetup {
                 "    {\n" +
                 "      \"name\": \"tentris\",\n" +
                 "      \"repositoryName\": \"dicegroup/tentris_server\",\n" +
-                "      \"command\": \"curl https://registry.hub.docker.com/v1/repositories/dicegroup/tentris_server/tags\",\n" +
+                "      \"command\": \"curl https://registry.hub.docker.com/v2/repositories/dicegroup/tentris_server/tags\",\n" +
                 "      \"port\": \"9080\",\n" +
                 "      \"dataset\": \"sp2b.nt\",\n" +
                 "      \"queriesFilePath\": \"sp2b.txt\"\n" +
@@ -180,7 +180,7 @@ public class InitialSetup {
                 "    {\n" +
                 "      \"name\": \"virtuoso\",\n" +
                 "      \"repositoryName\": \"openlink/virtuoso-opensource-7\",\n" +
-                "      \"command\": \"curl https://registry.hub.docker.com/v1/repositories/openlink/virtuoso-opensource-7/tags\",\n" +
+                "      \"command\": \"curl https://registry.hub.docker.com/v2/repositories/openlink/virtuoso-opensource-7/tags\",\n" +
                 "      \"port\": \"8890\",\n" +
                 "      \"dataset\": \"sp2b.nt\",\n" +
                 "      \"queriesFilePath\": \"sp2b.txt\"\n" +
