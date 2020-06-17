@@ -1,27 +1,10 @@
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import axios from 'axios';
-import { version } from 'punycode';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import * as d3 from 'd3'
 import * as c3 from 'c3';
-import {FormControl} from '@angular/forms';
-import { selectAll } from 'd3';
-import { MatSelect } from '@angular/material/select';
+import { min, max } from 'd3';
 import { Options } from 'ng5-slider';
-import { element } from 'protractor';
 
-
-
-interface SimpleSliderModel {
-  value: number;
-  options: Options;
-}
-
-interface RangeSliderModel {
-  minValue: number;
-  maxValue: number;
-  options: Options;
-}
 
 @Component({
   selector: 'app-menu',
@@ -52,6 +35,14 @@ export class MenuComponent implements OnInit {
   metrices=["QPS", "Avg QPS", "Avg query time", "No. of Failed queries", "QMpH",
             "QPS per query", "Avg QPS per query", "Avg query-time per query", "No. of Failed queries", "Failed Reason"];
 
+  displaySideMenu: Boolean = false;
+  value = 30;
+  highValue = 70;
+  options: Options = {
+    floor: 0,
+    ceil: 100,
+    vertical: true
+    };
 
 
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
@@ -404,6 +395,7 @@ export class MenuComponent implements OnInit {
     case "Scatter-Plot":
       break;
   }
+  this.getSliderMinMax();
   }
 
   /**
@@ -639,37 +631,35 @@ export class MenuComponent implements OnInit {
   }
 
 
-
-verticalSlider1: SimpleSliderModel = {
-  value: 5,
-  options: {
-    floor: 0,
-    ceil: 10,
-    vertical: true
-  }
-};
-
 getSliderMinMax(){
-  var pushedversion = []
-  this.selectedVersions.forEach((ele1) => { 
-    // this.listOfWorkers.forEach(worker => {
-    //   allslicedversion.push(ele1+worker) });
-    Object.keys(this.dataDictionary).forEach((key) => {
-      this.listOfWorkers.forEach(worker => { 
-        if(ele1+worker == key){
-          this.dataDictionary[key].forEach((elem1) => {
-           
-              console.log(elem1[2])
-            
-         });
-        }
-      });
-
+  var resultSize = [];
+  this.selectedVersions.forEach((element) => {
+    this.listOfWorkers.forEach(worker => {
+      console.log(this.dataDictionary[element+worker]);
+      this.dataDictionary[element+worker][2].forEach(queryid => {
+        console.log(queryid[5][0])
+        resultSize.push(parseInt(queryid[5][0]));
+      })
+    })
   });
 
-});
+  this.value = min(resultSize);
+  this.highValue = max(resultSize);
+  var floor = min(resultSize);
+  var ceil = max(resultSize);
+  console.log(resultSize, this.value, this.highValue, floor, ceil)
+  var opt: Options = {
+    floor: floor,
+    ceil: ceil,
+    vertical: true
+    };
 
-}
+    this.options = opt;
+  }
+
+  onChangeSlider(){
+    console.log(this.value, this.highValue)
+  }
 }
 
 
