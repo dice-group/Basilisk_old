@@ -90,6 +90,10 @@ public class ContinuousDeliveryDockerHook {
 
                     //Add the current triple store in the already benchmarked file.
                     this.updateTagList();
+                } else {
+                    LoggerUtils.logForBasilisk(logPrefix,
+                            "Already CBP ran for " + this.currentTripleStore + ":" + tag,
+                            1);
                 }
             }
         } catch (JSONException e) {

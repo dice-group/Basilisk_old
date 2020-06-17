@@ -243,6 +243,10 @@ public class ContinuousDeliveryGitHook {
                             this.updateVersionList();
                         }
                     }
+                } else {
+                    LoggerUtils.logForBasilisk(logPrefix,
+                            "Already CBP ran for " + this.currentTripleStore + ":" + version,
+                            1);
                 }
             } catch (JSONException e) {
                 LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
