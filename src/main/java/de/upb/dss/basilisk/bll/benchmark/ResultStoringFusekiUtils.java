@@ -50,7 +50,7 @@ public class ResultStoringFusekiUtils {
      * @param ntFile          Name of the nt file to be loaded.
      * @param prefix          Prefix to the graph name in Fuseki server.
      */
-    private static void loadNtFile(String tripleStoreName, String repoName, String tag, String ntFile, String prefix) {
+    private static void loadNtFile(String tripleStoreName, String repoName, String tag, String ntFile, String suffix) {
         RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(
                         new ApplicationPropertiesUtils().getResultStoringFusekiEndPoint()
@@ -61,22 +61,22 @@ public class ResultStoringFusekiUtils {
         Model model = ModelFactory.createDefaultModel();
         model.read(ntFile);
 
-        String graphName = "";
+        String graphName = "http://basilisk-cpb.de/";
 
         //Todo: Add new triple store information here to load into the Fuseki server.
         if ("dicegroup/tentris_server".equals(repoName)) {
-            graphName = "dockertentris";
+            graphName += "docker/tentris";
         } else if ("tentris".equals(repoName)) {
-            graphName = "gittentris";
+            graphName += "git/tentris";
         } else if ("openlink/virtuoso-opensource-7".equals(repoName)) {
-            graphName = "dockervirtuoso";
+            graphName += "docker/virtuoso";
         } else if ("fuseki".equals(repoName)) {
-            graphName = "gitfuseki";
+            graphName += "git/fuseki";
         }
 
         LoggerUtils.logForBasilisk(logPrefix, "Loading " + ntFile + " into the Fuseki server.", 1);
         //Loads the file into the named graph.
-        connection.put(graphName + ":" + tag + "$" + prefix, model);
+        connection.put(graphName + "/" + tag + "/" + suffix, model);
 
         connection.commit();
         connection.close();
@@ -124,7 +124,7 @@ public class ResultStoringFusekiUtils {
                 logPrefix,
                 "Checking for unknown result file Iguana directory, If found any, will be deleted.",
                 4);
-        
+
         for (File file : getFileList()) {
             try {
                 Files.delete(Paths.get(file.getAbsolutePath()));
