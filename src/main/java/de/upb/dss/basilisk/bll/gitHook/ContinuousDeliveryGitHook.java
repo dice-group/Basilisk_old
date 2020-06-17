@@ -31,6 +31,7 @@ public class ContinuousDeliveryGitHook {
     private String currentPortNum;
     private String currentDatasetFilePath;
     private String currentQueriesFilePath;
+    private String currentTripleStoreDigest;
     private static final String logPrefix = "Git Hook";
 
     /**
@@ -68,7 +69,7 @@ public class ContinuousDeliveryGitHook {
         this.alreadyBenchmarkedVersionsList.add(this.currentBenchmarkedVersion);
         this.gitHookBenchmarkedFileData = YamlUtils.addVersionToGitBenchmarkedAttempted(
                 this.gitHookBenchmarkedFileData,
-                this.currentBenchmarkedVersion,
+                this.currentTripleStoreDigest,
                 this.currentTripleStore
         );
 
@@ -158,12 +159,14 @@ public class ContinuousDeliveryGitHook {
                 JSONObject versionObj = githubJsonArray.getJSONObject(i);
 
                 String version = (String) versionObj.get("name");
+                String digest = (String) versionObj.getJSONObject("commit").get("sha");
 
-                if (!benchmarkedVersionsList.contains(version)) {
+                if (!benchmarkedVersionsList.contains(digest)) {
                     //Delete the previous zip file if exist and clear the bmWorkSpace directory.
                     this.delRepository();
 
                     this.currentBenchmarkedVersion = version;
+                    this.currentTripleStoreDigest = digest;
 
                     int flag = this.downloadRepo((String) versionObj.get("zipball_url"));
 
