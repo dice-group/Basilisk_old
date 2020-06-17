@@ -118,6 +118,10 @@ public class InitialSetup {
      * @param fileName File name. One of the 4 file name mentioned above.
      */
     private static void createBasiliskConfigFile(String initData, String fileName) {
+
+        if (new File(fileName).exists())
+            return;
+        
         ObjectMapper mapper = new ObjectMapper();
         try {
             Map<String, Object> myMap = mapper.readValue(initData.toString(),
