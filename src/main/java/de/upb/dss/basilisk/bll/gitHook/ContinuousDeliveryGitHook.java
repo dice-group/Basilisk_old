@@ -147,6 +147,49 @@ public class ContinuousDeliveryGitHook {
     }
 
     /**
+     * This method creates the shiro.ini security configuration file required for Fuseki server.
+     *
+     * @return Exit code.
+     */
+    private int createSecurityConfigFileForFuseki() {
+        LoggerUtils.logForBasilisk(logPrefix, "Creating shiro.ini for fuseki", 1);
+        try {
+            File shiroFile = new File(new ApplicationPropertiesUtils().getBmWorkSpace() + "shiro.ini");
+
+            String shiroContent = "[main]\n" +
+                    "ssl.enabled = false\n" +
+                    "plainMatcher=org.apache.shiro.authc.credential.SimpleCredentialsMatcher\n" +
+                    "iniRealm.credentialsMatcher = $plainMatcher\n" +
+                    "[users]\n" +
+                    "admin=pw\n" +
+                    "[roles]\n" +
+                    "[urls]\n" +
+                    "/$/status  = anon\n" +
+                    "/$/ping    = anon\n" +
+                    "/$/metrics = anon\n" +
+                    "/$/** = anon\n" +
+                    "/**=anon";
+
+            if (shiroFile.exists())
+                shiroFile.delete();
+
+            FileWriter fileWriter = new FileWriter(shiroFile);
+
+            fileWriter.write(shiroContent);
+            fileWriter.close();
+        } catch (IOException e) {
+            LoggerUtils.logForBasilisk(logPrefix,
+                    "Something went wrong while creating shiro.ini for fuseiki", 4);
+            e.printStackTrace();
+            return -1;
+        }
+
+        LoggerUtils.logForBasilisk(logPrefix, "Successfully created shiro.ini for fuseki", 1);
+
+        return 0;
+    }
+
+    /**
      * This method checks whether the benchmark is already run for the current version, if not, it will
      * download the git repository and continue with the CPB process. This process continues for all
      * the tags in the dockerHubTagsJsonArray parameter.
@@ -181,10 +224,10 @@ public class ContinuousDeliveryGitHook {
                                 if (exitCode != 0)
                                     continue;
 
-                                FileUtils.copyFile(
-                                        new File(new ApplicationPropertiesUtils().getContinuousBmPath() + "shiro.ini"),
-                                        new File(new ApplicationPropertiesUtils().getBmWorkSpace() + "shiro.ini")
-                                );
+                                exitCode = createSecurityConfigFileForFuseki();
+
+                                if (exitCode != 0)
+                                    continue;
                             }
 
                             try {
@@ -201,9 +244,6 @@ public class ContinuousDeliveryGitHook {
                         }
                     }
                 }
-            } catch (IOException ex) {
-                LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while copying shiro.ini file", 4);
-                ex.printStackTrace();
             } catch (JSONException e) {
                 LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
                 e.printStackTrace();

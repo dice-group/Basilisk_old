@@ -121,7 +121,7 @@ public class InitialSetup {
 
         if (new File(fileName).exists())
             return;
-        
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             Map<String, Object> myMap = mapper.readValue(initData.toString(),
