@@ -92,6 +92,7 @@ public class ContinuousDeliveryGitHook {
                         LoggerUtils.logForBasilisk(logPrefix,
                                 this.currentBenchmarkedVersion + " release does not contain fuseki2 project.",
                                 4);
+                        this.updateVersionList();
                         return -1;
                     }
                 } catch (IOException e) {
