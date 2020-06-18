@@ -276,8 +276,8 @@ public class ContinuousDeliveryGitHook {
 
                     basiliskRunStatisticsData.addTripleStore(
                             this.currentTripleStore,
-                            this.currentBenchmarkedVersion.replace(" ", ""),
-                            currentTripleStoreDigest,
+                            version,
+                            digest,
                             "Git",
                             BasiliskRunStatus.ALREADY_RAN
                     );

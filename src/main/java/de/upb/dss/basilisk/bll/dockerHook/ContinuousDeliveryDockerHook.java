@@ -123,8 +123,8 @@ public class ContinuousDeliveryDockerHook {
 
                     basiliskRunStatisticsData.addTripleStore(
                             this.currentRepoName,
-                            this.currentBenchmarkedTag,
-                            this.currentBenchmarkedDigest,
+                            tag,
+                            digest,
                             "Docker",
                             BasiliskRunStatus.ALREADY_RAN
                     );
