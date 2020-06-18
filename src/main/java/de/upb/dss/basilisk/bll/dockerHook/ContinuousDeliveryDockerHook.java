@@ -63,6 +63,10 @@ public class ContinuousDeliveryDockerHook {
                 String tag = (String) singleTagData.get("name");
                 String digest = (String) ((JSONObject) singleTagData.getJSONArray("images").get(0)).get("digest");
 
+                if (digest.matches("^sha[0-9]*:.*")) {
+                    digest = digest.split("sha[0-9]*:")[1];
+                }
+
                 if (!this.alreadyBenchmarkedTagList.contains(digest)) {
                     //Clears the docker environment before starting the benchmark process.
                     DockerUtils.clearDocker();
