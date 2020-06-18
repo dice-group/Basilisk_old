@@ -94,7 +94,7 @@ public class ContinuousDeliveryDockerHook {
                                     this.currentRepoName,
                                     this.currentBenchmarkedTag,
                                     this.currentBenchmarkedDigest,
-                                    "Git",
+                                    "Docker",
                                     BasiliskRunStatus.RUN_SUCCESS
                             );
                         } else {
@@ -102,7 +102,7 @@ public class ContinuousDeliveryDockerHook {
                                     this.currentRepoName,
                                     this.currentBenchmarkedTag,
                                     this.currentBenchmarkedDigest,
-                                    "Git",
+                                    "Docker",
                                     BasiliskRunStatus.RUN_FAIL
                             );
                         }
@@ -125,7 +125,7 @@ public class ContinuousDeliveryDockerHook {
                             this.currentRepoName,
                             this.currentBenchmarkedTag,
                             this.currentBenchmarkedDigest,
-                            "Git",
+                            "Docker",
                             BasiliskRunStatus.ALREADY_RAN
                     );
                 }
