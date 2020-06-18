@@ -1,6 +1,8 @@
 package de.upb.dss.basilisk.controllers;
 
 import de.upb.dss.basilisk.ErrorCode.EXITCODE;
+import de.upb.dss.basilisk.StatisticsOutput.BasiliskRunStatisticsData;
+import de.upb.dss.basilisk.StatisticsOutput.PrintBasiliskRunStatData;
 import de.upb.dss.basilisk.bll.benchmark.LoggerUtils;
 import de.upb.dss.basilisk.bll.dockerHook.ContinuousDeliveryDockerHook;
 import de.upb.dss.basilisk.bll.gitHook.ContinuousDeliveryGitHook;
@@ -91,8 +93,9 @@ public class BasiliskAPIController {
                     "}\n";
         }
 
+        BasiliskRunStatisticsData basiliskRunStatisticsData = null;
+
         if (authenticationExitCode == EXITCODE.SUCCESS) {
-            int exitcode = -1;
             String resp = "";
 
             StringWriter sw = new StringWriter();
@@ -101,38 +104,37 @@ public class BasiliskAPIController {
                 LoggerUtils.logForBasilisk(logPrefix,
                         userName + " kicked off Basilisk CPB on Docker hook ", 1);
 
-                exitcode = new ContinuousDeliveryDockerHook()
-                        .forEachStore();
+                basiliskRunStatisticsData = new ContinuousDeliveryDockerHook()
+                        .forEachStore(new BasiliskRunStatisticsData());
+                basiliskRunStatisticsData.setEndTime();
+
                 resp = "Successfully ran Basilisk on Docker hook.";
             } else if (hook == 1) {
                 LoggerUtils.logForBasilisk(logPrefix,
                         userName + " kicked off Basilisk CPB on Git hook ", 1);
 
-                exitcode = new ContinuousDeliveryGitHook()
-                        .forEachStore();
+                basiliskRunStatisticsData = new ContinuousDeliveryGitHook()
+                        .forEachStore(new BasiliskRunStatisticsData());
+                basiliskRunStatisticsData.setEndTime();
+
                 resp = "Successfully ran Basilisk on Git hook.";
             } else if (hook == 3) {
                 LoggerUtils.logForBasilisk(logPrefix,
                         userName + " kicked off Basilisk CPB on Docker hook ", 1);
 
-                exitcode = new ContinuousDeliveryDockerHook()
-                        .forEachStore();
+                basiliskRunStatisticsData = new ContinuousDeliveryDockerHook()
+                        .forEachStore(new BasiliskRunStatisticsData());
 
-                if (exitcode == 0)
-                    resp = "Successfully ran Basilisk on Docker hook.";
-                else
-                    resp = "Something went wrong while running Basilisk CPB on Docker hook.";
+                resp = "Successfully ran Basilisk on Docker hook.";
 
                 LoggerUtils.logForBasilisk(logPrefix,
                         userName + " kicked off Basilisk CPB on Git hook ", 1);
 
-                exitcode = new ContinuousDeliveryGitHook()
-                        .forEachStore();
+                basiliskRunStatisticsData = new ContinuousDeliveryGitHook()
+                        .forEachStore(basiliskRunStatisticsData);
+                basiliskRunStatisticsData.setEndTime();
 
-                if (exitcode == 0)
-                    resp += "\nSuccessfully ran Basilisk on Git hook.";
-                else
-                    resp += "\nSomething went wrong while running Basilisk CPB on Git hook.";
+                resp += "\nSuccessfully ran Basilisk on Git hook.";
 
             } else {
                 LoggerUtils.logForBasilisk(logPrefix,
@@ -143,17 +145,14 @@ public class BasiliskAPIController {
                         "3 means run CPB on both the hooks\n";
             }
 
-            if (exitcode == 0) {
-                return "{\n" +
-                        "   \"message\":\"" + resp + "\"\n" +
-                        "   \"exitCode\":0\n" +
-                        "}\n";
-            } else {
-                return "{\n" +
-                        "   \"message\":\"Problem encountered while running Basilisk. Please try again.\"\n" +
-                        "   \"exitCode\":" + exitcode + "\n" +
-                        "}\n";
-            }
+            if (basiliskRunStatisticsData != null)
+                PrintBasiliskRunStatData.printRunStat(basiliskRunStatisticsData);
+
+            return "{\n" +
+                    "   \"message\":\"" + resp + "\"\n" +
+                    "   \"exitCode\":0\n" +
+                    "}\n";
+
         }
 
         return "Unknown error";

@@ -248,6 +248,7 @@ public class InitialSetup {
         File iguana = new File(applicationPropertiesUtils.getIguanaPath());
         File bmWorkSpace = new File(applicationPropertiesUtils.getBmWorkSpace());
         File testDataSet = new File(applicationPropertiesUtils.getTestDatasetPath());
+        File statDir = new File("./runStat");
 
         System.out.println("\t\t* Creating results directory");
         createDir(results);
@@ -261,6 +262,8 @@ public class InitialSetup {
         createDir(bmWorkSpace);
         System.out.println("\t\t* Creating testDataSet directory");
         createDir(testDataSet);
+        System.out.println("\t\t* Creating Basilisk statistics directory");
+        createDir(statDir);
 
         System.out.println("\t\t* Downloading Iguana");
         downloadIguana();

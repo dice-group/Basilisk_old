@@ -15,7 +15,6 @@ import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,7 @@ public class BenchmarkForGitHook {
     private static String tag;
     private static String testDatasetPath;
     private static final String logPrefix = "GitBenchmark";
-
+    
     /**
      * This method builds the docker image, runs the container and then runs the Iguana
      * for benchmarking the triple store.
@@ -46,9 +45,10 @@ public class BenchmarkForGitHook {
      * @param argTestDataSet   Test dataset file name.
      * @param argQueryFile     Query file name.
      * @param argVersionNumber Git repository version.
-     * @throws IOException If fails to rename the results file.
+     * @return Exit code
+     * @throws InterruptedException If interuppted by the user
      */
-    public static void runBenchmark(String argPort, String argRepoName, String argTestDataSet, String argQueryFile, String argVersionNumber) throws IOException {
+    public static int runBenchmark(String argPort, String argRepoName, String argTestDataSet, String argQueryFile, String argVersionNumber) throws InterruptedException {
         ApplicationPropertiesUtils myAppUtils = new ApplicationPropertiesUtils();
 
         dockerFile = new File(myAppUtils.getDockerFile());
@@ -76,6 +76,8 @@ public class BenchmarkForGitHook {
 
         //Clear the docker, so that next benchmark can be run.
         DockerUtils.clearDocker();
+
+        return exitCode;
     }
 
     /**
@@ -84,7 +86,7 @@ public class BenchmarkForGitHook {
      *
      * @return Exit code.
      */
-    protected static int runTripleStores() {
+    protected static int runTripleStores() throws InterruptedException {
 
         try {
             LoggerUtils.logForBasilisk(logPrefix, "Trying to build the docker image.", 1);
@@ -135,6 +137,8 @@ public class BenchmarkForGitHook {
                 LoggerUtils.logForBasilisk(logPrefix, "Dockerfile does not exist\n", 4);
                 return -151;
             }
+        } catch (InterruptedException ex) {
+            throw new InterruptedException();
         } catch (Exception e) {
             LoggerUtils.logForBasilisk(logPrefix, "Something went wrong", 4);
             e.printStackTrace();

@@ -119,6 +119,9 @@ public class ResultStoringFusekiUtils {
         }
     }
 
+    /**
+     * Delete all the results file in the iguana directory.
+     */
     public static void deleteUnknownResultFile() {
         LoggerUtils.logForBasilisk(
                 logPrefix,

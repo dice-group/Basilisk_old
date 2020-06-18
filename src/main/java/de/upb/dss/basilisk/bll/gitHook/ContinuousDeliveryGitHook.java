@@ -1,5 +1,7 @@
 package de.upb.dss.basilisk.bll.gitHook;
 
+import de.upb.dss.basilisk.StatisticsOutput.BasiliskRunStatisticsData;
+import de.upb.dss.basilisk.StatisticsOutput.BasiliskRunStatus;
 import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
 import de.upb.dss.basilisk.bll.applicationProperties.ApplicationPropertiesUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForGitHook;
@@ -33,6 +35,7 @@ public class ContinuousDeliveryGitHook {
     private String currentQueriesFilePath;
     private String currentTripleStoreDigest;
     private static final String logPrefix = "Git Hook";
+    private BasiliskRunStatisticsData basiliskRunStatisticsData = new BasiliskRunStatisticsData();
 
     /**
      * This constructs the ContinuousDeliveryGitHook object.
@@ -66,7 +69,7 @@ public class ContinuousDeliveryGitHook {
      * This method updates the GitBenchmarkedAttempted.yml file to keep track of the already benchmarked versions.
      */
     public void updateVersionList() {
-        this.alreadyBenchmarkedVersionsList.add(this.currentBenchmarkedVersion);
+        this.alreadyBenchmarkedVersionsList.add(this.currentTripleStoreDigest);
         this.gitHookBenchmarkedFileData = YamlUtils.addVersionToGitBenchmarkedAttempted(
                 this.gitHookBenchmarkedFileData,
                 this.currentTripleStoreDigest,
@@ -93,6 +96,15 @@ public class ContinuousDeliveryGitHook {
                                 this.currentBenchmarkedVersion + " release does not contain fuseki2 project.",
                                 4);
                         this.updateVersionList();
+
+                        basiliskRunStatisticsData.addTripleStore(
+                                this.currentTripleStore,
+                                this.currentBenchmarkedVersion.replace(" ", ""),
+                                currentTripleStoreDigest,
+                                "Git",
+                                BasiliskRunStatus.RUN_FAIL
+                        );
+
                         return -1;
                     }
                 } catch (IOException e) {
@@ -197,7 +209,7 @@ public class ContinuousDeliveryGitHook {
      * @param githubJsonArray         List of all the version for a single triple store.
      * @param benchmarkedVersionsList List of all version already benchmarked.
      */
-    public void checkAndRunCPB(JSONArray githubJsonArray, ArrayList<String> benchmarkedVersionsList) {
+    public void checkAndRunCPB(JSONArray githubJsonArray, ArrayList<String> benchmarkedVersionsList) throws InterruptedException {
         for (int i = 0; i < githubJsonArray.length(); i++) {
             try {
                 JSONObject versionObj = githubJsonArray.getJSONObject(i);
@@ -230,13 +242,27 @@ public class ContinuousDeliveryGitHook {
                                     continue;
                             }
 
-                            try {
-                                LoggerUtils.logForBasilisk(logPrefix, "Benchmarking will run for version: " + this.currentBenchmarkedVersion, 1);
+                            LoggerUtils.logForBasilisk(logPrefix, "Benchmarking will run for version: " + this.currentBenchmarkedVersion, 1);
 
-                                BenchmarkForGitHook.runBenchmark(this.currentPortNum, this.currentTripleStore, this.currentDatasetFilePath,
-                                        this.currentQueriesFilePath, this.currentBenchmarkedVersion.replace(" ", ""));
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            int exitCode = BenchmarkForGitHook.runBenchmark(this.currentPortNum, this.currentTripleStore, this.currentDatasetFilePath,
+                                    this.currentQueriesFilePath, this.currentBenchmarkedVersion.replace(" ", ""));
+
+                            if (exitCode == 0) {
+                                basiliskRunStatisticsData.addTripleStore(
+                                        this.currentTripleStore,
+                                        this.currentBenchmarkedVersion.replace(" ", ""),
+                                        currentTripleStoreDigest,
+                                        "Git",
+                                        BasiliskRunStatus.RUN_SUCCESS
+                                );
+                            } else {
+                                basiliskRunStatisticsData.addTripleStore(
+                                        this.currentTripleStore,
+                                        this.currentBenchmarkedVersion.replace(" ", ""),
+                                        currentTripleStoreDigest,
+                                        "Git",
+                                        BasiliskRunStatus.RUN_FAIL
+                                );
                             }
 
                             //Add the current verion to the already benchmarked file.
@@ -247,6 +273,14 @@ public class ContinuousDeliveryGitHook {
                     LoggerUtils.logForBasilisk(logPrefix,
                             "Already CBP ran for " + this.currentTripleStore + ":" + version,
                             1);
+
+                    basiliskRunStatisticsData.addTripleStore(
+                            this.currentTripleStore,
+                            this.currentBenchmarkedVersion.replace(" ", ""),
+                            currentTripleStoreDigest,
+                            "Git",
+                            BasiliskRunStatus.ALREADY_RAN
+                    );
                 }
             } catch (JSONException e) {
                 LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while parsing the JSON object.", 4);
@@ -332,7 +366,8 @@ public class ContinuousDeliveryGitHook {
      *
      * @return Exit code.
      */
-    public int forEachStore() {
+    public BasiliskRunStatisticsData forEachStore(BasiliskRunStatisticsData basiliskRunStatisticsData) throws InterruptedException {
+        this.basiliskRunStatisticsData = basiliskRunStatisticsData;
         try {
             this.gitHookBenchmarkedFileData = YamlUtils.getGitBenchmarkAttempted();
 
@@ -366,6 +401,6 @@ public class ContinuousDeliveryGitHook {
         }
 
         LoggerUtils.logForBasilisk(logPrefix, "Basilisk completed benchmark process  on Git hook.", 1);
-        return 0;
+        return basiliskRunStatisticsData;
     }
 }

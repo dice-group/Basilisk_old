@@ -175,6 +175,7 @@ public class YamlUtils {
                 );
 
             output.dump(myMap, fw);
+            fw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

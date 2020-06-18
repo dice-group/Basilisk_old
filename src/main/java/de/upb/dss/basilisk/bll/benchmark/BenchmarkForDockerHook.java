@@ -23,10 +23,11 @@ public class BenchmarkForDockerHook {
      * @param argQueryFile       Query file name.
      * @param argRepoName        Repository name.
      * @param argTag             Docker hub repository tag.
+     * @return Exit code.
      * @throws InterruptedException If Basilisk is interrupted.
      */
-    public static void runBenchmarkForDockerHook(String argPort, String argTripleStoreName, String argTestDataSet,
-                                                 String argQueryFile, String argRepoName, String argTag) throws InterruptedException {
+    public static int runBenchmarkForDockerHook(String argPort, String argTripleStoreName, String argTestDataSet,
+                                                String argQueryFile, String argRepoName, String argTag) throws InterruptedException {
 
         //Set all the required info for running the benchmark.
         tripleStoreName = argTripleStoreName;
@@ -49,6 +50,8 @@ public class BenchmarkForDockerHook {
             LoggerUtils.logForBasilisk(logPrefix, repoName + ":" + tag +
                     "Could not run docker. Exit code of docker = " + exitCode, 4);
         }
+
+        return exitCode;
     }
 
     /**

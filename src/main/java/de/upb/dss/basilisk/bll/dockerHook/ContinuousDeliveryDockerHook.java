@@ -1,5 +1,7 @@
 package de.upb.dss.basilisk.bll.dockerHook;
 
+import de.upb.dss.basilisk.StatisticsOutput.BasiliskRunStatisticsData;
+import de.upb.dss.basilisk.StatisticsOutput.BasiliskRunStatus;
 import de.upb.dss.basilisk.bll.Hook.Yaml.YamlUtils;
 import de.upb.dss.basilisk.bll.benchmark.BenchmarkForDockerHook;
 import de.upb.dss.basilisk.bll.benchmark.DockerUtils;
@@ -23,12 +25,13 @@ public class ContinuousDeliveryDockerHook {
 
     private JSONArray dockerHookBenchmarkedFileData;
     private String currentBenchmarkedTag, currentTripleStore, currentRepoName;
-    private ArrayList<String> alreadyBenchmarkedTagList;
+    private ArrayList<String> alreadyBenchmarkedDigestList;
     private String currentPortNum;
     private String currentDatasetFilePath;
     private String currentQueriesFilePath;
     private String currentBenchmarkedDigest;
     private static final String logPrefix = "Docker Hook";
+    private BasiliskRunStatisticsData basiliskRunStatisticsData;
 
 
     /**
@@ -36,7 +39,7 @@ public class ContinuousDeliveryDockerHook {
      * benchmarked tags.
      */
     public void updateTagList() {
-        this.alreadyBenchmarkedTagList.add(this.currentBenchmarkedTag);
+        this.alreadyBenchmarkedDigestList.add(this.currentBenchmarkedDigest);
 
         this.dockerHookBenchmarkedFileData = YamlUtils.addTagToDockerBenchmarkedAttempted(
                 this.dockerHookBenchmarkedFileData,
@@ -67,7 +70,7 @@ public class ContinuousDeliveryDockerHook {
                     digest = digest.split("sha[0-9]*:")[1];
                 }
 
-                if (!this.alreadyBenchmarkedTagList.contains(digest)) {
+                if (!this.alreadyBenchmarkedDigestList.contains(digest)) {
                     //Clears the docker environment before starting the benchmark process.
                     DockerUtils.clearDocker();
 
@@ -83,8 +86,27 @@ public class ContinuousDeliveryDockerHook {
                                 1);
 
                         //Calls the Benchmarking process on the currently pulled triple store.
-                        BenchmarkForDockerHook.runBenchmarkForDockerHook(currentPortNum, currentTripleStore, currentDatasetFilePath,
+                        int exitCode = BenchmarkForDockerHook.runBenchmarkForDockerHook(currentPortNum, currentTripleStore, currentDatasetFilePath,
                                 currentQueriesFilePath, currentRepoName, currentBenchmarkedTag);
+
+                        if (exitCode == 0) {
+                            basiliskRunStatisticsData.addTripleStore(
+                                    this.currentRepoName,
+                                    this.currentBenchmarkedTag,
+                                    this.currentBenchmarkedDigest,
+                                    "Git",
+                                    BasiliskRunStatus.RUN_SUCCESS
+                            );
+                        } else {
+                            basiliskRunStatisticsData.addTripleStore(
+                                    this.currentRepoName,
+                                    this.currentBenchmarkedTag,
+                                    this.currentBenchmarkedDigest,
+                                    "Git",
+                                    BasiliskRunStatus.RUN_FAIL
+                            );
+                        }
+
                     } else {
                         LoggerUtils.logForBasilisk(logPrefix,
                                 "Basilisk failed to pull the docker image for: " + currentRepoName + ":" +
@@ -98,6 +120,14 @@ public class ContinuousDeliveryDockerHook {
                     LoggerUtils.logForBasilisk(logPrefix,
                             "Already CBP ran for " + this.currentTripleStore + ":" + tag,
                             1);
+
+                    basiliskRunStatisticsData.addTripleStore(
+                            this.currentRepoName,
+                            this.currentBenchmarkedTag,
+                            this.currentBenchmarkedDigest,
+                            "Git",
+                            BasiliskRunStatus.ALREADY_RAN
+                    );
                 }
             }
         } catch (JSONException e) {
@@ -192,7 +222,9 @@ public class ContinuousDeliveryDockerHook {
      * @return Exit code.
      * @throws InterruptedException If Basilisk is interrupted.
      */
-    public int forEachStore() throws InterruptedException {
+    public BasiliskRunStatisticsData forEachStore(BasiliskRunStatisticsData basiliskRunStatisticsDatak) throws InterruptedException {
+
+        this.basiliskRunStatisticsData = basiliskRunStatisticsDatak;
 
         this.dockerHookBenchmarkedFileData = YamlUtils.getDockerBenchmarkAttempted();
 
@@ -211,7 +243,7 @@ public class ContinuousDeliveryDockerHook {
                 LoggerUtils.logForBasilisk(logPrefix, "Currently checking for " + this.currentTripleStore + " triple store.", 1);
 
                 //Get the list of all the tag of the current triple store that is already benchmarked in Docker hook.
-                this.alreadyBenchmarkedTagList = this.getBenchmarkedDetails(this.currentTripleStore);
+                this.alreadyBenchmarkedDigestList = this.getBenchmarkedDetails(this.currentTripleStore);
 
                 //Get the list of all tags from the docker hub for the current triple store.
                 JSONArray dockerHubTagsJsonArray = this.getDockerHubTags((String) singleStoreMetaData.get("command"));
@@ -228,6 +260,7 @@ public class ContinuousDeliveryDockerHook {
         }
 
         LoggerUtils.logForBasilisk(logPrefix, "Basilisk completed benchmark process  on Docker hook.", 1);
-        return 0;
+
+        return basiliskRunStatisticsDatak;
     }
 }
