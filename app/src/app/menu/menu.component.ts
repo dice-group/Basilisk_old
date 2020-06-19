@@ -23,7 +23,7 @@ export class MenuComponent implements OnInit {
 
   counter = 0;
   listOfAllDatasets=[]; //contains names of available datasets
-  listOfAllVersions=[]; //contains all versions w.r.t noOfWorkers
+  listOfAllVersionsURI=[];
   listOfUniqueVersions=[]; //contains all versions of triple stores available
   selectedVersions=[]; //containes versions selected by user
   selectedOptions=["x-axis", "y-axis", "graph"];
@@ -113,12 +113,7 @@ export class MenuComponent implements OnInit {
    */
   getVersions(response, dataset){
     response.data.results.bindings.forEach(element => {
-      this.listOfAllVersions.push([element.g.value, dataset]);
-      let name = element.g.value;
-      let version = name.slice(0, name.indexOf('$'));
-      if(!this.listOfUniqueVersions.includes(version)){
-        this.listOfUniqueVersions.push(version);
-      }
+      this.listOfAllVersionsURI.push([element.g.value, dataset]);
     });
     this.counter--;
     if(this.counter == 0){
@@ -130,7 +125,7 @@ export class MenuComponent implements OnInit {
    * Runs queries to get data for all version of triple stores
    */
   getAllData(){
-    this.listOfAllVersions.forEach(element => {
+    this.listOfAllVersionsURI.forEach(element => {
       var queryFromPart = "FROM <" + element[0] + "> \n";
       var queryAllParts = this.querySelectPart + queryFromPart + this.queryWherePart;
       let queryForAllData = this.connectionString + element[1] + this.postConnectionString + encodeURIComponent(queryAllParts);
@@ -138,7 +133,7 @@ export class MenuComponent implements OnInit {
       axios({
         method: 'get',
         url: queryForAllData})
-      .then(res => this.sortData(res.data.results.bindings, element[0]))
+      .then(res => this.sortData(res.data.results.bindings))
       .catch(err => console.log(err));
     })
   }
@@ -147,20 +142,25 @@ export class MenuComponent implements OnInit {
    *sorts data with respect to the version and store them in the form of dictionary
    *
    * @param {Array} data - data in the form of array for each triple store
-   * @param {String} element - contains name of version and no. of workers
    */
-  sortData(data, element){
-
+  sortData(data){
     var qm = []
     var arr4d = [];
     var arr3d = [];
+    var version;
+    var uniqueVersion;
     this.queryId.forEach(id => {
       var arr2d = [id, [], [], [], [], []]
       arr3d.push(arr2d);
     })
 
+
+
     data.forEach(item => {
-      if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queriesPerSecond") {
+      if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "connection") {
+        uniqueVersion = item.value.value.slice(item.value.value.lastIndexOf("/")+1)
+      }
+      else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queriesPerSecond") {
         var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
         arr3d[index][1].push(item.value.value)
       }
@@ -184,13 +184,22 @@ export class MenuComponent implements OnInit {
         qm.push(item.value.value)
       }
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "noOfWorkers") {
-        arr4d.push(item.value.value)
+        var worker = item.value.value;
+        if(worker == "1") version = uniqueVersion + this.listOfWorkers[0];
+        if(worker == "4") version = uniqueVersion + this.listOfWorkers[1];
+        if(worker == "8") version = uniqueVersion + this.listOfWorkers[2];
+        if(worker == "16") version = uniqueVersion + this.listOfWorkers[3];
+        if(worker == "32") version = uniqueVersion + this.listOfWorkers[4];
+        arr4d.push(worker)
       }
     });
 
+    if(this.listOfUniqueVersions.indexOf(uniqueVersion) == -1){
+      this.listOfUniqueVersions.push(uniqueVersion);
+    }
     arr4d.push(qm);
     arr4d.push(arr3d);
-    this.dataDictionary[element] = arr4d;
+    this.dataDictionary[version] = arr4d;
   }
 
 
@@ -276,12 +285,7 @@ export class MenuComponent implements OnInit {
    * When user clicks on 'Submit' button
    */
   onSubmit(){
-    console.log(this.listOfAllDatasets)
-    console.log(this.dataDictionary)
-    console.log(this.listOfAllVersions)
-    console.log(this.listOfUniqueVersions)
 
-    //this.awain()
     var keys = [];
     var concatenated = [];
     var avgConcatenated;
@@ -471,7 +475,12 @@ export class MenuComponent implements OnInit {
     return sum / len;
   }
 
-
+/**
+ * Generate bar graph for the data passed
+ *
+ * @param data
+ * @param noOfclient
+ */
   barGraph(data, noOfclient){
     var clients = noOfclient.slice();
 
@@ -518,10 +527,15 @@ export class MenuComponent implements OnInit {
       ]
   });
   })
-
+  this.displaySideMenu = true;
   }
 
 
+  /**
+   * Generate scatter plot for the data passed
+   *
+   * @param test
+   */
   scatterPlot(test) {
     console.log(test)
 
@@ -549,8 +563,15 @@ export class MenuComponent implements OnInit {
           }
       }
   });
+  this.displaySideMenu = true;
   }
 
+  /**
+   * Generate line graph for the data passed
+   *
+   * @param data
+   * @param noOfclient
+   */
   lineGraph(data, noOfclient){
     var clients = noOfclient.slice();
     var chart = c3.generate({
@@ -588,8 +609,15 @@ export class MenuComponent implements OnInit {
       ]
   });
   })
+  this.displaySideMenu = true;
   }
 
+  /**
+   * Generate area graph for the data passed
+   *
+   * @param data
+   * @param noOfclient
+   */
   areaGraph(data, noOfclient){
     var clients = noOfclient.slice();
     var chart = c3.generate({
@@ -626,18 +654,18 @@ export class MenuComponent implements OnInit {
       ]
   });
   })
-
   chart.transform('area-spline');
+  this.displaySideMenu = true;
   }
 
-
+/**
+ * Populate slider for the min and max value of result size
+ */
 getSliderMinMax(){
   var resultSize = [];
   this.selectedVersions.forEach((element) => {
     this.listOfWorkers.forEach(worker => {
-      console.log(this.dataDictionary[element+worker]);
       this.dataDictionary[element+worker][2].forEach(queryid => {
-        console.log(queryid[5][0])
         resultSize.push(parseInt(queryid[5][0]));
       })
     })
@@ -647,16 +675,17 @@ getSliderMinMax(){
   this.highValue = max(resultSize);
   var floor = min(resultSize);
   var ceil = max(resultSize);
-  console.log(resultSize, this.value, this.highValue, floor, ceil)
   var opt: Options = {
     floor: floor,
     ceil: ceil,
     vertical: true
     };
-
     this.options = opt;
   }
 
+  /**
+   * Calls when slider value is changed
+   */
   onChangeSlider(){
     console.log(this.value, this.highValue)
   }
