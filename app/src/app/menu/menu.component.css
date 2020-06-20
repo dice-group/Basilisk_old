@@ -171,4 +171,28 @@ body {
     height:76%;
 }
 
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  margin-left: 3px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 2px grey;
+  border-radius: 5px;
+  background-color: gainsboro;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: gray;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #707070;
+}
+
 

@@ -21,9 +21,11 @@ export class MenuComponent implements OnInit {
   connectionString="http://131.234.28.165:3030";
   postConnectionString="/sparql?query=";
 
+  delay = ms => new Promise(res => setTimeout(res, ms));
   counter = 0;
   listOfAllDatasets=[]; //contains names of available datasets
   listOfAllVersionsURI=[];
+  listOfAllVersionsDic = [];
   listOfUniqueVersions=[]; //contains all versions of triple stores available
   selectedVersions=[]; //containes versions selected by user
   selectedOptions=["x-axis", "y-axis", "graph"];
@@ -48,6 +50,12 @@ export class MenuComponent implements OnInit {
   queryForAllGraphs = "SELECT ?g { GRAPH ?g {} }";
 
   querySelectPart = "SELECT ?query ?property ?value \n"
+  queryWherePartForVersionNames = "WHERE {" +
+    "VALUES ?property { <http://iguana-benchmark.eu/properties/connection>" +
+    "<http://iguana-benchmark.eu/properties/noOfWorkers>}" +
+
+    "?query ?property ?value ." +
+  "}"
   queryWherePart = "WHERE {" +
     "VALUES ?property { <http://iguana-benchmark.eu/properties/connection>" +
     "<http://iguana-benchmark.eu/properties/noOfWorkers>" +
@@ -109,7 +117,8 @@ export class MenuComponent implements OnInit {
    * This function is called once for each dataset
    * Goes through each element of the object and extract version names
    *
-   * @param response - json object containing response of to the version query
+   * @param {Object} response - javascript object containing response of to the version query
+   * @param {String} dataset - dataset name of the current graph
    */
   getVersions(response, dataset){
     response.data.results.bindings.forEach(element => {
@@ -117,25 +126,71 @@ export class MenuComponent implements OnInit {
     });
     this.counter--;
     if(this.counter == 0){
-      this.getAllData();
+      this.runQueryForVersionNames();
     }
   }
 
   /**
-   * Runs queries to get data for all version of triple stores
+   * Run query to get all the versions available of current triple store
    */
-  getAllData(){
+  runQueryForVersionNames() {
     this.listOfAllVersionsURI.forEach(element => {
       var queryFromPart = "FROM <" + element[0] + "> \n";
-      var queryAllParts = this.querySelectPart + queryFromPart + this.queryWherePart;
+      var queryAllParts = this.querySelectPart + queryFromPart + this.queryWherePartForVersionNames;
       let queryForAllData = this.connectionString + element[1] + this.postConnectionString + encodeURIComponent(queryAllParts);
 
       axios({
         method: 'get',
         url: queryForAllData})
-      .then(res => this.sortData(res.data.results.bindings))
+      .then(res => this.getAllVersions(res.data.results.bindings, element[0], element[1]))
       .catch(err => console.log(err));
     })
+  }
+
+  /**
+   * Get list of all versions push them into listOfUniqueVersions
+   *
+   * @param {Array} data - response of queried data
+   * @param {String} versionURI - Graph name of current version
+   * @param {String} datasetName - Name of dataset to which this graph belongs
+   */
+  getAllVersions(data, versionURI, datasetName){
+    var version = data[0].value.value.slice(data[0].value.value.lastIndexOf("/")+1);
+    var worker = data[1].value.value;
+    {
+      if(worker == "1") this.listOfAllVersionsDic[version+this.listOfWorkers[0]] = [versionURI, datasetName];
+      if(worker == "4") this.listOfAllVersionsDic[version+this.listOfWorkers[1]] = [versionURI, datasetName];
+      if(worker == "8") this.listOfAllVersionsDic[version+this.listOfWorkers[2]] = [versionURI, datasetName];
+      if(worker == "16") this.listOfAllVersionsDic[version+this.listOfWorkers[3]] = [versionURI, datasetName];
+      if(worker == "32") this.listOfAllVersionsDic[version+this.listOfWorkers[4]] = [versionURI, datasetName];
+    }
+    if(this.listOfUniqueVersions.indexOf(version) == -1){
+      this.listOfUniqueVersions.push(version);
+    }
+  }
+
+
+  /**
+   * Runs queries to get data for all selected versions of triple stores
+   *
+   * @param {Array} versions - Array of selected versions
+   */
+  populateDataDictionary(versions){
+    var queryForAllData;
+    versions.forEach(version => {
+      this.listOfWorkers.forEach(worker => {
+        let queryFromPart = "FROM <" + this.listOfAllVersionsDic[version+worker][0] + "> \n";
+        let queryAllParts = this.querySelectPart + queryFromPart + this.queryWherePart;
+        queryForAllData = this.connectionString + this.listOfAllVersionsDic[version+worker][1] +
+                          this.postConnectionString + encodeURIComponent(queryAllParts);
+
+        axios({
+          method: 'get',
+          url: queryForAllData})
+        .then(res => this.sortData(res.data.results.bindings))
+        .catch(err => console.log(err));
+      });
+    });
   }
 
   /**
@@ -154,11 +209,9 @@ export class MenuComponent implements OnInit {
       arr3d.push(arr2d);
     })
 
-
-
     data.forEach(item => {
       if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "connection") {
-        uniqueVersion = item.value.value.slice(item.value.value.lastIndexOf("/")+1)
+        uniqueVersion = item.value.value.slice(item.value.value.lastIndexOf("/")+1);
       }
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queriesPerSecond") {
         var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
@@ -194,9 +247,6 @@ export class MenuComponent implements OnInit {
       }
     });
 
-    if(this.listOfUniqueVersions.indexOf(uniqueVersion) == -1){
-      this.listOfUniqueVersions.push(uniqueVersion);
-    }
     arr4d.push(qm);
     arr4d.push(arr3d);
     this.dataDictionary[version] = arr4d;
@@ -282,9 +332,32 @@ export class MenuComponent implements OnInit {
   }
 
   /**
+   * Wait until dataDictionary is completely populated with required data
+   */
+  waitForData = async () => {
+    await this.delay(100);
+    console.log("Waited 0.1s");
+    if(Object.keys(this.dataDictionary).length == this.selectedVersions.length*5){
+      this.sortDataForGraphs();
+    }
+    else {
+      this.waitForData();
+    }
+  };
+
+  /**
    * When user clicks on 'Submit' button
    */
   onSubmit(){
+    this.dataDictionary = {};
+    this.populateDataDictionary(this.selectedVersions);
+    this.waitForData();
+  }
+
+  /**
+   * Sort the data in dataDictionary to display graphs
+   */
+  sortDataForGraphs(){
 
     var keys = [];
     var concatenated = [];
