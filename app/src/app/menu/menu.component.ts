@@ -4,6 +4,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import * as c3 from 'c3';
 import { min, max } from 'd3';
 import { Options } from 'ng5-slider';
+import { element } from 'protractor';
 
 
 @Component({
@@ -199,6 +200,7 @@ export class MenuComponent implements OnInit {
    * @param {Array} data - data in the form of array for each triple store
    */
   sortData(data){
+    console.log(data)
     var qm = []
     var arr4d = [];
     var arr3d = [];
@@ -365,10 +367,14 @@ export class MenuComponent implements OnInit {
     var avgNonAggregated = [];
     var allClientsData = [];
     var allVersionsData = [];
+    var resultSize = [];
+    var allrs = [];
+    var allvrs = [];
 
     //get data related to values selected on x-axis
     this.selectedVersions.forEach(version => {
       allClientsData[0] = version;
+      allrs[0] = version+"_x"
       if(this.selectedOptions[0].slice(2, 8) == "client" || this.selectedOptions[0].slice(3, 9) == "client"){
         var key = version + this.listOfWorkers[this.noOfClients.indexOf(this.selectedOptions[0])];
         keys.push(key);
@@ -407,8 +413,10 @@ export class MenuComponent implements OnInit {
           else{
             data[2].forEach(queryid => {
               concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
+              resultSize = resultSize.concat(queryid[2]);
             });
-            if(indexAggAvgQmph[2] == false){allClientsData = allClientsData.concat(concatenated)}
+            console.log(concatenated);
+            if(indexAggAvgQmph[2] == false){allClientsData = allClientsData.concat(concatenated); allrs = allrs.concat(resultSize);}
           }
 
           //if avg is true and aggregated is also true
@@ -442,14 +450,19 @@ export class MenuComponent implements OnInit {
      })
     }
     if(allClientsData.length != 0){
+      console.log(this.dataDictionary)
       console.log(allClientsData);
+      console.log(concatenated)
+      console.log(allrs)
       allVersionsData.push(allClientsData);
+      allvrs.push(allrs);
     }
     else if(avgNonAggregated.length != 0){
       console.log(avgNonAggregated)
     }
     else{
       console.log(concatenated)
+      console.log(resultSize)
     }
 
     concatenated = [];
@@ -457,6 +470,8 @@ export class MenuComponent implements OnInit {
     avgNonAggregated = [];
     allClientsData = [];
     keys = [];
+    resultSize = [];
+    allrs = []
   })
 
   switch(this.selectedOptions[2]){
@@ -470,6 +485,7 @@ export class MenuComponent implements OnInit {
       this.areaGraph(allVersionsData, this.noOfClients);
       break;
     case "Scatter-Plot":
+      this.scatterPlot(allVersionsData, allvrs);
       break;
   }
   this.getSliderMinMax();
@@ -609,18 +625,18 @@ export class MenuComponent implements OnInit {
    *
    * @param test
    */
-  scatterPlot(test) {
-    console.log(test)
+  scatterPlot(allVersionsData, allVersionsRS) {
+
 
     var chart = c3.generate({
+      size: {
+        height: 480,
+        width: 1090
+      },
       data: {
           xs: {
-            hi: 'hi_x'
-
           },
           columns: [
-            test[0],
-            test[1]
               ],
           type: 'scatter'
       },
@@ -636,6 +652,20 @@ export class MenuComponent implements OnInit {
           }
       }
   });
+
+  for(var i=0; i<allVersionsData.length; i++){
+    var x = allVersionsData[i][0];
+    chart.load({
+      xs: {
+        [allVersionsData[i][0]]: allVersionsRS[i][0]
+      },
+      columns: [
+        allVersionsRS[i],
+        allVersionsData[i]
+      ]
+  });
+  }
+
   this.displaySideMenu = true;
   }
 
@@ -730,6 +760,7 @@ export class MenuComponent implements OnInit {
   chart.transform('area-spline');
   this.displaySideMenu = true;
   }
+
 
 /**
  * Populate slider for the min and max value of result size
