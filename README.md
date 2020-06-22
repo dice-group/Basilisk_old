@@ -1,39 +1,28 @@
 # Basilisk
-A Continuous Benchmarking Platform for Tentris, Virtuoso & Apache Jena Fuseki triple stores using Iguana (https://github.com/dice-group/IGUANA).
 
-* Tentris : https://github.com/dice-group/tentris
-* Virtuoso : https://github.com/openlink/virtuoso-opensource
-* Apache Jena Fuseki : https://github.com/apache/jena
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.0.
 
-### iguanaConfig.ftl
-This is the configuration file(Basilisk/src/main/resources/iguanaConfig.ftl) which is used as a template for running benchmarking using Iguana. Make modifications here in case you want to make changes like the number of clients used for benchmarking, etc.
+## How to run development server
 
-### Metadata.json
-The current file(Basilisk/continuousBM/Metadata.json) contains entry just for Tentris. The entry for Virtuoso and Fuseki should be added in future using the below json:
+Run `npm install` inside the app directory to install node modules.
 
-```json
-[{
-  "name": "Tentris",
-  "command": "curl https://api.github.com/repos/dice-group/tentris/tags",
-  "port": "9080",
-  "dataset": "sp2b.nt",
-  "queriesFilePath": "sp2b.txt"
-},
-{
-  "name": "Virtuoso",
-  "command": "curl https://api.github.com/repos/openlink/virtuoso-opensource/tags",
-  "port": "8890",
-  "dataset": "",
-  "queriesFilePath": ""
-},
-{
-  "name": "Fuseki",
-  "command": "curl https://api.github.com/repos/apache/jena/tags",
-  "port": "",
-  "dataset": "",
-  "queriesFilePath": ""
-}]
-```
+  ### Dependencies:
 
-### BenchmarkingAttempted.json
-This file(Basilisk/continuousBM/BenchmarkingAttempted.json) contains the versions of the triple stores on which benchmarking has been attempted once. The entry of a version in this file means that benchmarking will be skipped for it in subsequent runs. If you want to run benchmarking for a particular version of a triple store, remove that version number/name from this file.
+  The following dependencies should automatically be installed when you run `npm install`. If not you can use following commands to install these dependies.
+
+    * d3.js `npm install d3`
+    * c3.js `npm install c3` and `npm install @types/c3`
+    * jquery `npm install jquery`
+    * bootsrap `npm install --save bootstrap`
+    * angular/material `npm install --save @angular/material`
+    * ng5-slider `npm install ng5-slider`
+
+  After that, run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+
+## Code scaffolding
+
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+
+## Build
+
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
