@@ -90,7 +90,7 @@ public class ResultStoringFusekiUtils {
      * @param repoName        Currently running triple store's repository name.
      * @param tag             Tag of the currently running triple store.
      */
-    public static void processResultFIle(String tripleStoreName, String repoName, String tag) {
+    public static void processResultFIle(String tripleStoreName, String repoName, String tag, String hook) {
         File[] files = getFileList();
 
         String suffix;
@@ -109,9 +109,31 @@ public class ResultStoringFusekiUtils {
 
             //Loads the result file into the Fuseki server.
             loadNtFile(tripleStoreName, repoName, tag, file.getAbsolutePath(), suffix);
+
+            String directoryRepoName = repoName.replace(".", "_")
+                    .replace("-", "_")
+                    .replace("/", "_");
+
+            String dirName = "./results/";
+            if ("Docker".equals(hook))
+                dirName += "docker/" +
+                        directoryRepoName + "/"
+                        + tag.replace(".", "_")
+                        .replace("-", "_") + "/";
+            else
+                dirName += "git/" +
+                        directoryRepoName + "/"
+                        + tag.replace(".", "_")
+                        .replace("-", "_") + "/";
+
+            File resultPath = new File(dirName);
+
+            if (!resultPath.exists())
+                resultPath.mkdirs();
+
             try {
                 Files.move(Paths.get(file.getAbsolutePath()),
-                        Paths.get("./results/" + file.getName()));
+                        Paths.get(dirName + file.getName()));
             } catch (IOException e) {
                 LoggerUtils.logForBasilisk(logPrefix, "Something went wrong while moving the result files into results directory.", 4);
                 e.printStackTrace();

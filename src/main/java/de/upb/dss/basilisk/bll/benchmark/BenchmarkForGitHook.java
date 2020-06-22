@@ -69,7 +69,7 @@ public class BenchmarkForGitHook {
 
         //Store the results into Fuseki server and Move the results to results folder and rename it.
         if (exitCode == 0)
-            ResultStoringFusekiUtils.processResultFIle(repoName, repoName, tag);
+            ResultStoringFusekiUtils.processResultFIle(repoName, repoName, tag, "Git");
         else
             //Todo: Just delete the result file if any
             System.out.println("");

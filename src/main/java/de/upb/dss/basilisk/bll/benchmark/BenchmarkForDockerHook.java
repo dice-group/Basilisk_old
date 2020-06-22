@@ -42,7 +42,7 @@ public class BenchmarkForDockerHook {
         if (exitCode == 0) {
             try {
                 IguanaUtils.runIguana(repoName, tag, port, argQueryFile);
-                ResultStoringFusekiUtils.processResultFIle(tripleStoreName, repoName, tag);
+                ResultStoringFusekiUtils.processResultFIle(tripleStoreName, repoName, tag, "Docker");
             } catch (Exception e) {
                 e.printStackTrace();
             }
