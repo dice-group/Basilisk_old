@@ -35,7 +35,7 @@ public class BenchmarkForGitHook {
     private static String tag;
     private static String testDatasetPath;
     private static final String logPrefix = "GitBenchmark";
-    
+
     /**
      * This method builds the docker image, runs the container and then runs the Iguana
      * for benchmarking the triple store.
@@ -71,8 +71,7 @@ public class BenchmarkForGitHook {
         if (exitCode == 0)
             ResultStoringFusekiUtils.processResultFIle(repoName, repoName, tag, "Git");
         else
-            //Todo: Just delete the result file if any
-            System.out.println("");
+            ResultStoringFusekiUtils.deleteUnknownResultFile();
 
         //Clear the docker, so that next benchmark can be run.
         DockerUtils.clearDocker();

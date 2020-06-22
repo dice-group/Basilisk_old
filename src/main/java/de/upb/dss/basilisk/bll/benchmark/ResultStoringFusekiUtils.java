@@ -63,7 +63,7 @@ public class ResultStoringFusekiUtils {
 
         String graphName = "http://basilisk-cpb.de/";
 
-        //Todo: Add new triple store information here to load into the Fuseki server.
+        //Todo: Add new triple store(in future if any) information here to load into the Fuseki server.
         if ("dicegroup/tentris_server".equals(repoName)) {
             graphName += "docker/tentris";
         } else if ("tentris".equals(repoName)) {

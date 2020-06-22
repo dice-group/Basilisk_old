@@ -1,7 +1,7 @@
 package de.upb.dss.basilisk.security;
 
 /**
- * Thic class initialize the admin account for Basilisk
+ * This class initialize the admin account for Basilisk
  */
 public class BasiliskAdminInitializer {
     /**
