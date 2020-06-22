@@ -48,7 +48,7 @@ public class ResultStoringFusekiUtils {
      * @param repoName        Currently running triple store's repository name.
      * @param tag             Tag of the currently running triple store.
      * @param ntFile          Name of the nt file to be loaded.
-     * @param prefix          Prefix to the graph name in Fuseki server.
+     * @param suffix          Prefix to the graph name in Fuseki server.
      */
     private static void loadNtFile(String tripleStoreName, String repoName, String tag, String ntFile, String suffix) {
         RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()

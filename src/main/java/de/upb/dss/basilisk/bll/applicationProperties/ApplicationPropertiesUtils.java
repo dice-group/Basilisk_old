@@ -26,8 +26,6 @@ public class ApplicationPropertiesUtils {
     private final String resultStoringFusekiEndPoint;
     private final String basiliskEndPoint;
     private final String iguanaJarLink;
-    private final String passFile;
-    private final String passPendingFile;
     private final String securityLogFilePath;
 
     Properties appProps;
@@ -39,24 +37,6 @@ public class ApplicationPropertiesUtils {
      */
     public String getSecurityLogFilePath() {
         return securityLogFilePath;
-    }
-
-    /**
-     * Getter method for password file.
-     *
-     * @return Password file.
-     */
-    public String getPassFile() {
-        return passFile;
-    }
-
-    /**
-     * Getter method for password pending file.
-     *
-     * @return Password file.
-     */
-    public String getPassPendingFile() {
-        return passPendingFile;
     }
 
     /**
@@ -224,8 +204,6 @@ public class ApplicationPropertiesUtils {
         resultStoringFusekiEndPoint = appProps.getProperty("resultStoringFusekiEndPoint");
         basiliskEndPoint = appProps.getProperty("basiliskEndPoint");
         iguanaJarLink = appProps.getProperty("iguanaJarLink");
-        passFile = appProps.getProperty("passFile");
-        passPendingFile = appProps.getProperty("passPendingFile");
         securityLogFilePath = appProps.getProperty("securityLogFilePath");
     }
 }

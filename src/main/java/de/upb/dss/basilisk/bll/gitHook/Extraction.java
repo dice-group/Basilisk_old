@@ -16,7 +16,6 @@ import java.util.zip.ZipFile;
  */
 public class Extraction {
     private static final int BUFFER_SIZE = 4096;
-    private String storeName;
 
     /**
      * This method extracts the fuesiki zip file.
