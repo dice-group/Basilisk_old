@@ -6,18 +6,18 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 Run `npm install` inside the app directory to install node modules.
 
-  ### Dependencies:
+### Dependencies:
 
-  The following dependencies should automatically be installed when you run `npm install`. If not you can use following commands to install these dependies.
+The following dependencies should automatically be installed when you run `npm install`. If not you can use following commands to install these dependies.
 
-    * d3.js `npm install d3`
-    * c3.js `npm install c3` and `npm install @types/c3`
-    * jquery `npm install jquery`
-    * bootsrap `npm install --save bootstrap`
-    * angular/material `npm install --save @angular/material`
-    * ng5-slider `npm install ng5-slider`
+* d3.js `npm install d3` 
+* c3.js `npm install c3` and `npm install @types/c3`
+* jquery `npm install jquery`
+* bootsrap `npm install --save bootstrap`
+* angular/material `npm install --save @angular/material`
+* ng5-slider `npm install ng5-slider`
 
-  After that, run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+After that, run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
