@@ -19,17 +19,9 @@ import java.util.List;
  */
 public class PrintBasiliskRunStatData {
     private static BasiliskRunStatisticsData basiliskRunStatisticsData;
-    private static StringBuilder success = new StringBuilder("\n*******************************************\n" +
-            "*               Run Success               *\n" +
-            "*******************************************\n");
-
-    private static StringBuilder fail = new StringBuilder("\n*******************************************\n" +
-            "*                Run Fail                 *\n" +
-            "*******************************************\n");
-
-    private static StringBuilder alreadyRan = new StringBuilder("\n*******************************************\n" +
-            "*               Already Ran               *\n" +
-            "*******************************************\n");
+    private static StringBuilder success;
+    private static StringBuilder fail;
+    private static StringBuilder alreadyRan;
     private static boolean isSuccessPresent = false;
     private static boolean isFailPresent = false;
     private static boolean isAlreadyRanPresent = false;
@@ -45,6 +37,25 @@ public class PrintBasiliskRunStatData {
      */
     public static void printRunStat(BasiliskRunStatisticsData basiliskRunStatsData) {
         basiliskRunStatisticsData = basiliskRunStatsData;
+        successCount = 0;
+        failCount = 0;
+        alreadyRanCount = 0;
+        statFileData = "";
+        isSuccessPresent = false;
+        isFailPresent = false;
+        isAlreadyRanPresent = false;
+
+        success = new StringBuilder("\n*******************************************\n" +
+                "*               Run Success               *\n" +
+                "*******************************************\n");
+
+        fail = new StringBuilder("\n*******************************************\n" +
+                "*                Run Fail                 *\n" +
+                "*******************************************\n");
+
+        alreadyRan = new StringBuilder("\n*******************************************\n" +
+                "*               Already Ran               *\n" +
+                "*******************************************\n");
 
         processStatData();
         printInitialInfo();
