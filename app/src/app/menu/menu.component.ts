@@ -35,10 +35,15 @@ export class MenuComponent implements OnInit {
   queryId=[];  //contains all queryIds
   dataDictionary = {}; //contains all data
   result_size=[1, 2, 3]
-  metrices=["QPS", "Avg QPS", "Avg query time", "No. of Failed queries", "QMpH",
-            "QPS per query", "Avg QPS per query", "Avg query-time per query", "No. of Failed queries", "Failed Reason"];
+  selectedVersionsResultSize = [];
+  selectedVersionsQueryTime = [];
+  selectedVersionsNoOfWorkers = [];
+  allVersionsSelectedData = [];
+  metrices=["QPS", "Avg QPS", "Query Time", "Avg Query Time", "QMpH", "Avg QMpH", "No. of Failed Queries", "Failed Reason"];
 
   displaySideMenu: Boolean = false;
+  disPlayScatterPlot: Boolean = false;
+  scatterChart;
   value = 30;
   highValue = 70;
   options: Options = {
@@ -365,16 +370,29 @@ export class MenuComponent implements OnInit {
     var concatenated = [];
     var avgConcatenated;
     var avgNonAggregated = [];
+
     var allClientsData = [];
-    var allVersionsData = [];
+
     var resultSize = [];
-    var allrs = [];
-    var allvrs = [];
+    var allResultSize = [];
+
+    var queryTime = [];
+    var allQueryTime = [];
+
+    var workers = [];
+    var allWorkers = [];
+
+    this.allVersionsSelectedData = [];
+    this.selectedVersionsResultSize = [];
+    this.selectedVersionsQueryTime = [];
+    this.selectedVersionsNoOfWorkers = [];
 
     //get data related to values selected on x-axis
     this.selectedVersions.forEach(version => {
       allClientsData[0] = version;
-      allrs[0] = version+"_x"
+      allResultSize[0] = version+"_x"
+      allQueryTime[0] = version+"_x"
+      allWorkers[0] = version+"_x"
       if(this.selectedOptions[0].slice(2, 8) == "client" || this.selectedOptions[0].slice(3, 9) == "client"){
         var key = version + this.listOfWorkers[this.noOfClients.indexOf(this.selectedOptions[0])];
         keys.push(key);
@@ -411,12 +429,35 @@ export class MenuComponent implements OnInit {
             if(indexAggAvgQmph[2] == false){allClientsData.push(concatenated)}
           }
           else{
-            data[2].forEach(queryid => {
+            if(this.selectedOptions[2] == "Scatter-Plot") {
+              data[2].forEach(queryid => {
+                concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
+                resultSize = resultSize.concat(queryid[5]);
+                queryTime = queryTime.concat(queryid[2]);
+                var wrkr = [];
+                queryid[1].forEach(query => {
+                  if(data[0] == "1") wrkr.push(data[0] + " client");
+                  else wrkr.push(data[0] + " clients")
+                });
+                workers = workers.concat(wrkr);
+                this.disPlayScatterPlot = true;
+              });
+            }
+            else {
+              data[2].forEach(queryid => {
               concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
               resultSize = resultSize.concat(queryid[2]);
-            });
-            console.log(concatenated);
-            if(indexAggAvgQmph[2] == false){allClientsData = allClientsData.concat(concatenated); allrs = allrs.concat(resultSize);}
+              this.disPlayScatterPlot = false;
+              });
+            }
+            if(indexAggAvgQmph[2] == false) {
+              allClientsData = allClientsData.concat(concatenated);
+              allResultSize = allResultSize.concat(resultSize);
+              allWorkers = allWorkers.concat(workers);
+              if(this.selectedOptions[2] == "Scatter-Plot") {
+                allQueryTime = allQueryTime.concat(queryTime);
+              }
+            }
           }
 
           //if avg is true and aggregated is also true
@@ -450,12 +491,10 @@ export class MenuComponent implements OnInit {
      })
     }
     if(allClientsData.length != 0){
-      console.log(this.dataDictionary)
-      console.log(allClientsData);
-      console.log(concatenated)
-      console.log(allrs)
-      allVersionsData.push(allClientsData);
-      allvrs.push(allrs);
+      this.allVersionsSelectedData.push(allClientsData);
+      this.selectedVersionsResultSize.push(allResultSize);
+      this.selectedVersionsQueryTime.push(allQueryTime);
+      this.selectedVersionsNoOfWorkers.push(allWorkers);
     }
     else if(avgNonAggregated.length != 0){
       console.log(avgNonAggregated)
@@ -471,21 +510,24 @@ export class MenuComponent implements OnInit {
     allClientsData = [];
     keys = [];
     resultSize = [];
-    allrs = []
+    allResultSize = []
+    queryTime = [];
+    allQueryTime = [];
+    allWorkers = [];
   })
 
   switch(this.selectedOptions[2]){
     case "Bar-Chart":
-      this.barGraph(allVersionsData, this.noOfClients);
+      this.barGraph(this.allVersionsSelectedData, this.noOfClients);
       break;
     case "Line-Chart":
-      this.lineGraph(allVersionsData, this.noOfClients);
+      this.lineGraph(this.allVersionsSelectedData, this.noOfClients);
       break;
     case "Area-Chart":
-      this.areaGraph(allVersionsData, this.noOfClients);
+      this.areaGraph(this.allVersionsSelectedData, this.noOfClients);
       break;
     case "Scatter-Plot":
-      this.scatterPlot(allVersionsData, allvrs);
+      this.scatterPlot('noOfClients');
       break;
   }
   this.getSliderMinMax();
@@ -625,47 +667,125 @@ export class MenuComponent implements OnInit {
    *
    * @param test
    */
-  scatterPlot(allVersionsData, allVersionsRS) {
+  scatterPlot(xAxisVariable) {
 
-
-    var chart = c3.generate({
-      size: {
-        height: 480,
-        width: 1090
-      },
-      data: {
-          xs: {
-          },
-          columns: [
-              ],
-          type: 'scatter'
-      },
-      axis: {
+    if(xAxisVariable == "noOfClients") {
+      this.scatterChart = c3.generate({
+        size: {
+          height: 480,
+          width: 1090
+        },
+        data: {
+            xs: {
+            },
+            columns: [
+                ],
+            order: 'desc',
+            type: 'scatter'
+        },
+        axis: {
           x: {
-              label: 'Sepal.Width',
+            label: {
+              text: '',
+              position: 'outer-right'
+            },
+              type: 'category',
               tick: {
                   fit: false
               }
           },
           y: {
-              label: 'Petal.Width'
+            label: {
+              text: '',
+              position: 'outer-top'
+            },
           }
       }
-  });
 
-  for(var i=0; i<allVersionsData.length; i++){
-    var x = allVersionsData[i][0];
-    chart.load({
-      xs: {
-        [allVersionsData[i][0]]: allVersionsRS[i][0]
-      },
-      columns: [
-        allVersionsRS[i],
-        allVersionsData[i]
-      ]
-  });
+    });
+    }
+    else {
+      this.scatterChart = c3.generate({
+        size: {
+          height: 480,
+          width: 1090
+        },
+        data: {
+            xs: {
+            },
+            columns: [
+                ],
+            order: 'desc',
+            type: 'scatter'
+        },
+        axis: {
+          x: {
+              label: {
+                text: '',
+                position: 'outer-right'
+              },
+              tick: {
+                  fit: false
+              }
+          },
+          y: {
+            label: {
+              text: '',
+              position: 'outer-top'
+            },
+          }
+      }
+
+    });
+    }
+
+
+  for(var i=0; i<this.allVersionsSelectedData.length; i++){
+
+    if(xAxisVariable == "queryTime"){
+      var x = this.allVersionsSelectedData[i][0];
+      this.scatterChart.load({
+        xs: {
+          [this.allVersionsSelectedData[i][0]]: this.selectedVersionsQueryTime[i][0]
+        },
+        columns: [
+          this.selectedVersionsQueryTime[i],
+          this.allVersionsSelectedData[i]
+        ]
+      });
+      this.scatterChart.axis.labels({x: 'Total Query Time', y: 'Query Per Second'});
+    }
+
+    else if(xAxisVariable == "noOfClients"){
+      var x = this.allVersionsSelectedData[i][0];
+      this.scatterChart.load({
+        xs: {
+          [this.allVersionsSelectedData[i][0]]: this.selectedVersionsNoOfWorkers[i][0]
+        },
+        columns: [
+          this.selectedVersionsNoOfWorkers[i],
+          this.allVersionsSelectedData[i]
+        ]
+      });
+
+      this.scatterChart.axis.labels({x: 'Number of Clients', y: 'Query Per Second'});
+    }
+
+    else if(xAxisVariable == "resultSize") {
+      var x = this.allVersionsSelectedData[i][0];
+      this.scatterChart.load({
+        xs: {
+          [this.allVersionsSelectedData[i][0]]: this.selectedVersionsResultSize[i][0]
+        },
+        columns: [
+          this.selectedVersionsResultSize[i],
+          this.allVersionsSelectedData[i]
+        ]
+      });
+      this.scatterChart.axis.labels({x: 'Result Size', y: 'Query Per Second'});
+    }
+
   }
-
   this.displaySideMenu = true;
   }
 
