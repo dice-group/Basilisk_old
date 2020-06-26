@@ -40,7 +40,7 @@ export class MenuComponent implements OnInit {
   selectedVersionsQueryTime = [];
   selectedVersionsNoOfWorkers = [];
   allVersionsSelectedData = [];
-  metrices=["QPS", "Avg QPS", "Query Time", "Avg Query Time", "Avg QMpH", "No. of Failed Queries", "Failed Reason"];
+  metrices=["QPS", "Average QPS", "Query Time", "Average Query Time", "Average QMpH", "No. of Failed Queries", "Failed Reason"];
 
   displaySideMenu: Boolean = false;
   disPlayScatterPlot: Boolean = false;
@@ -612,8 +612,10 @@ export class MenuComponent implements OnInit {
       }
   });
 
+  if(this.selectedOptions[1] == 'QPS') chart.axis.labels({x: 'Number Of Clients', y: 'Query Per Second'});
+  else chart.axis.labels({x: 'Number Of Clients', y: this.selectedOptions[1]});
+
   data.forEach(col => {
-    console.log(col)
     chart.load({
       columns: [
           col
@@ -787,6 +789,9 @@ export class MenuComponent implements OnInit {
       }
   });
 
+  if(this.selectedOptions[1] == 'QPS') chart.axis.labels({x: 'Number Of Clients', y: 'Query Per Second'});
+  else chart.axis.labels({x: 'Number Of Clients', y: this.selectedOptions[1]});
+
   data.forEach(col => {
     chart.load({
       columns: [
@@ -831,6 +836,9 @@ export class MenuComponent implements OnInit {
         }
       }
   });
+
+  if(this.selectedOptions[1] == 'QPS') chart.axis.labels({x: 'Number Of Clients', y: 'Query Per Second'});
+  else chart.axis.labels({x: 'Number Of Clients', y: this.selectedOptions[1]});
 
   data.forEach(col => {
     chart.load({

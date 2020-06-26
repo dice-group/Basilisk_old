@@ -1,6 +1,6 @@
 <div class="menu" id="menuId">
-    <div class="logo" style="width: 60px;">
-      <img src=".\assets\Images\Basilisk_Logo.png" height="150" width="150" />
+    <div class="logo" style="width: 100px; margin-left: 20px;">
+      <img src=".\assets\Images\logo11.png" height="135" width="160" />
     </div>
 
       <div class="row menu-1" style="margin-bottom: 20px;">
@@ -90,7 +90,7 @@
     </div>
 
   <div *ngIf="displaySideMenu" id="sidemenu">
-    <div style="margin-top: 40px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div *ngIf="selectedOptions[1] != 'Average QMpH'" style="margin-top: 40px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
       <label style="color: aliceblue; font-size: medium; margin-left: -30px;">Result Size:</label>
       <ng5-slider class="slider" [(value)]="value" [(highValue)]="highValue" [options]="options" (valueChange)="onChangeSlider()"></ng5-slider>
       <div *ngIf="disPlayScatterPlot" style="margin-top: 40px;">
