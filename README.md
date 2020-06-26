@@ -1,6 +1,6 @@
 # Basilisk
 
-<img src = "https://raw.githubusercontent.com/ranjithmasthikatte/BasiliskLogo/master/9.png" alt = "Basilisk Logo" width = "400" align = "center">
+<img src = "https://raw.githubusercontent.com/ranjithmasthikatte/BasiliskLogo/master/10.png" alt = "Basilisk Logo" width = "400" align = "center">
 
 ## What is Basilisk?
 
