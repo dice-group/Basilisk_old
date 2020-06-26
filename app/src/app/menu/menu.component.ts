@@ -5,6 +5,7 @@ import * as c3 from 'c3';
 import { min, max } from 'd3';
 import { Options } from 'ng5-slider';
 import { element } from 'protractor';
+import { worker } from 'cluster';
 
 
 @Component({
@@ -39,10 +40,11 @@ export class MenuComponent implements OnInit {
   selectedVersionsQueryTime = [];
   selectedVersionsNoOfWorkers = [];
   allVersionsSelectedData = [];
-  metrices=["QPS", "Avg QPS", "Query Time", "Avg Query Time", "QMpH", "Avg QMpH", "No. of Failed Queries", "Failed Reason"];
+  metrices=["QPS", "Avg QPS", "Query Time", "Avg Query Time", "Avg QMpH", "No. of Failed Queries", "Failed Reason"];
 
   displaySideMenu: Boolean = false;
   disPlayScatterPlot: Boolean = false;
+  sliderMoved: Boolean = false;
   scatterChart;
   value = 30;
   highValue = 70;
@@ -369,7 +371,6 @@ export class MenuComponent implements OnInit {
     var keys = [];
     var concatenated = [];
     var avgConcatenated;
-    var avgNonAggregated = [];
 
     var allClientsData = [];
 
@@ -411,126 +412,109 @@ export class MenuComponent implements OnInit {
       }
 
       if(keys){
-        //Run for each client of a version
+        //Run for each NoOfClient of a version
         keys.forEach(keyz => {
           var data = this.dataDictionary[keyz];
+          var indexAvgQmph = this.getIndex(this.metrices.indexOf(this.selectedOptions[1]));
 
-        var indexAggAvgQmph = this.getIndex(this.metrices.indexOf(this.selectedOptions[1]));
-
-        if(indexAggAvgQmph[3] == true){
-          allClientsData.push(data[1])
-        }
-        else{
-          //if aggregated is true
-        if(indexAggAvgQmph[1] == true){
-          //if queryID is selected
-          if(selectedQueryID){
-            concatenated = concatenated.concat(data[2][selectedQueryID][indexAggAvgQmph[0]])
-            if(indexAggAvgQmph[2] == false){allClientsData.push(concatenated)}
+          if(indexAvgQmph[2] == true){
+            allClientsData.push(data[1]);
           }
           else{
-            if(this.selectedOptions[2] == "Scatter-Plot") {
-              data[2].forEach(queryid => {
-                concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
-                resultSize = resultSize.concat(queryid[5]);
-                queryTime = queryTime.concat(queryid[2]);
-                var wrkr = [];
-                queryid[1].forEach(query => {
-                  if(data[0] == "1") wrkr.push(data[0] + " client");
-                  else wrkr.push(data[0] + " clients")
-                });
-                workers = workers.concat(wrkr);
-                this.disPlayScatterPlot = true;
-              });
+            //if queryID is selected
+            if(selectedQueryID){
+              concatenated = concatenated.concat(data[2][selectedQueryID][indexAvgQmph[0]])
+              if(indexAvgQmph[1] == false){allClientsData.push(concatenated)}
             }
-            else {
-              data[2].forEach(queryid => {
-              concatenated = concatenated.concat(queryid[indexAggAvgQmph[0]])
-              resultSize = resultSize.concat(queryid[2]);
-              this.disPlayScatterPlot = false;
-              });
-            }
-            if(indexAggAvgQmph[2] == false) {
-              allClientsData = allClientsData.concat(concatenated);
-              allResultSize = allResultSize.concat(resultSize);
-              allWorkers = allWorkers.concat(workers);
+            else{
               if(this.selectedOptions[2] == "Scatter-Plot") {
-                allQueryTime = allQueryTime.concat(queryTime);
+                this.disPlayScatterPlot = true;
+                data[2].forEach(queryid => {
+                  for(var i = 0; i < queryid[indexAvgQmph[0]].length; i++) {
+                    if(queryid[5][i] >= this.value && queryid[5][i] <= this.highValue) {
+                      concatenated = concatenated.concat(queryid[indexAvgQmph[0]][i]);
+                      resultSize = resultSize.concat(queryid[5][i]);
+                      queryTime = queryTime.concat(queryid[2][i]);
+                      if(data[0] == "1") workers.push(data[0] + " client");
+                      else workers.push(data[0] + " clients")
+                    }
+                  }
+                });
+              }
+              else {
+                data[2].forEach(queryid => {
+                  for(var i = 0; i < queryid[indexAvgQmph[0]].length; i++) {
+                    if(queryid[5][i] >= this.value && queryid[5][i] <= this.highValue) {
+                      concatenated = concatenated.concat(queryid[indexAvgQmph[0]][i]);
+                      resultSize = resultSize.concat(queryid[5][i]);
+                    }
+                  }
+                  this.disPlayScatterPlot = false;
+                });
+              }
+              if(indexAvgQmph[1] == false) {
+                allClientsData = allClientsData.concat(concatenated);
+                allResultSize = allResultSize.concat(resultSize);
+                allWorkers = allWorkers.concat(workers);
+                if(this.selectedOptions[2] == "Scatter-Plot") {
+                  allQueryTime = allQueryTime.concat(queryTime);
+                }
               }
             }
-          }
 
-          //if avg is true and aggregated is also true
-          if(indexAggAvgQmph[2] == true){
-            avgConcatenated = this.getAvg(concatenated);
-            allClientsData.push(avgConcatenated);
+            //if avg is true and aggregated is also true
+            if(indexAvgQmph[1] == true){
+              avgConcatenated = this.getAvg(concatenated);
+              allClientsData.push(avgConcatenated);
+              //console.log(resultSize, allClientsData)
+              allResultSize.push(resultSize);
+            }
           }
+        });
+      }
+      if(allClientsData.length != 0){
+        this.allVersionsSelectedData.push(allClientsData);
+        console.log(this.allVersionsSelectedData)
+        this.selectedVersionsResultSize.push(allResultSize);
+        this.selectedVersionsQueryTime.push(allQueryTime);
+        this.selectedVersionsNoOfWorkers.push(allWorkers);
+      }
 
-        }
-        //if aggregated is false
-        else{
-          if(selectedQueryID){
-            concatenated = concatenated.concat(data[2][selectedQueryID][indexAggAvgQmph[0]])
-            allClientsData.push(concatenated)
-          }
-          else{
-            data[2].forEach(queryid => {
-              concatenated.push(queryid[indexAggAvgQmph[0]]);
-            });
-            allClientsData.push(concatenated)
-          }
-          //if avg is true and aggregated is false
-          if(indexAggAvgQmph[2] == true){
+      //empty all arrays before the next iteration start
+      concatenated = [];
+      avgConcatenated == null;
+      allClientsData = [];
+      keys = [];
+      resultSize = [];
+      allResultSize = []
+      queryTime = [];
+      allQueryTime = [];
+      allWorkers = [];
+    })
 
-            concatenated.forEach(ana => {
-              avgNonAggregated.push(this.getAvg(ana))
-            })
-          }
-        }
-        }
-     })
-    }
-    if(allClientsData.length != 0){
-      this.allVersionsSelectedData.push(allClientsData);
-      this.selectedVersionsResultSize.push(allResultSize);
-      this.selectedVersionsQueryTime.push(allQueryTime);
-      this.selectedVersionsNoOfWorkers.push(allWorkers);
-    }
-    else if(avgNonAggregated.length != 0){
-      console.log(avgNonAggregated)
-    }
-    else{
-      console.log(concatenated)
-      console.log(resultSize)
-    }
-
-    concatenated = [];
-    avgConcatenated == null;
-    avgNonAggregated = [];
-    allClientsData = [];
-    keys = [];
-    resultSize = [];
-    allResultSize = []
-    queryTime = [];
-    allQueryTime = [];
-    allWorkers = [];
-  })
-
-  switch(this.selectedOptions[2]){
-    case "Bar-Chart":
-      this.barGraph(this.allVersionsSelectedData, this.noOfClients);
-      break;
-    case "Line-Chart":
-      this.lineGraph(this.allVersionsSelectedData, this.noOfClients);
-      break;
-    case "Area-Chart":
-      this.areaGraph(this.allVersionsSelectedData, this.noOfClients);
-      break;
-    case "Scatter-Plot":
-      this.scatterPlot('noOfClients');
-      break;
+    if(!this.sliderMoved) this.getSliderMinMax();
+    this.selectGraph();
+    console.log(this.dataDictionary);
   }
-  this.getSliderMinMax();
+
+  /**
+   * Select which graph needs to display and call its function
+   */
+  selectGraph() {
+    switch(this.selectedOptions[2]){
+      case "Bar-Chart":
+        this.barGraph(this.allVersionsSelectedData, this.noOfClients);
+        break;
+      case "Line-Chart":
+        this.lineGraph(this.allVersionsSelectedData, this.noOfClients);
+        break;
+      case "Area-Chart":
+        this.areaGraph(this.allVersionsSelectedData, this.noOfClients);
+        break;
+      case "Scatter-Plot":
+        this.scatterPlot('noOfClients');
+        break;
+    }
   }
 
   /**
@@ -542,56 +526,43 @@ export class MenuComponent implements OnInit {
     var indexOfMetrice;
     var avg = false;
     var qmph = false;
-    var aggregated: Boolean;
     switch(index){
       case 0:
         indexOfMetrice = 1;
-        aggregated = true;
         break;
       case 1:
         indexOfMetrice = 1;
-        aggregated = true;
         avg = true;
         break;
       case 2:
         indexOfMetrice = 2;
-        aggregated = true;
         avg = true;
         break;
       case 3:
         indexOfMetrice = 3;
-        aggregated = true;
         break;
       case 4:
         indexOfMetrice = 1;
-        aggregated = true;
         qmph = true;
         break;
       case 5:
         indexOfMetrice = 1;
-        aggregated = false;
         break;
       case 6:
-        indexOfMetrice = 1;
-        aggregated = false;
-        avg = true;
+        indexOfMetrice = 3;
         break;
       case 7:
-        indexOfMetrice = 2;
-        aggregated = false;
-        avg = true;
+        indexOfMetrice = 4;
         break;
       case 8:
         indexOfMetrice = 3;
-        aggregated = false;
         break;
       case 8:
         indexOfMetrice = 4;
-        aggregated = false;
         break;
 
     }
-    return [indexOfMetrice, aggregated, avg, qmph]
+    return [indexOfMetrice, avg, qmph]
   }
 
   /**
@@ -652,6 +623,7 @@ export class MenuComponent implements OnInit {
   });
 
   data.forEach(col => {
+    console.log(col)
     chart.load({
       columns: [
           col
@@ -910,8 +882,10 @@ getSliderMinMax(){
   /**
    * Calls when slider value is changed
    */
-  onChangeSlider(){
-    console.log(this.value, this.highValue)
+  onChangeSlider = async () => {
+    this.sliderMoved = true;
+    //await this.delay(100);
+    this.sortDataForGraphs();
   }
 }
 
