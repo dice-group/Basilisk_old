@@ -1,9 +1,18 @@
 # Basilisk
-A Continuous Benchmarking Platform for Tentris, Virtuoso & Apache Jena Fuseki triple stores using Iguana (https://github.com/dice-group/IGUANA).
 
-* Tentris : https://github.com/dice-group/tentris
-* Virtuoso : https://github.com/openlink/virtuoso-opensource
-* Apache Jena Fuseki : https://github.com/apache/jena
+<img src = "https://raw.githubusercontent.com/ranjithmasthikatte/BasiliskLogo/master/9.png" alt = "Basilisk Logo" width = "400" align = "center">
+
+## What is Basilisk?
+
+Basilisk is a web application to run the continuous benchmarking
+process on triple stores like 
+[Tentris](https://github.com/dice-group/tentris), 
+[Virtuoso](https://hub.docker.com/r/openlink/virtuoso-opensource-7/) 
+and 
+[Fuseki](https://github.com/apache/jena). Current implementation
+of Basilisk runs CBP on Git and Docker hook.
+In Git hook, Basilisk runs CBP on Tentris and Fuseki.
+In Docker hook, Basilisk runs CBP on Tentris and Virtuoso.
 
 ### iguanaConfig.ftl
 This is the configuration file(Basilisk/src/main/resources/iguanaConfig.ftl) which is used as a template for running benchmarking using Iguana. Make modifications here in case you want to make changes like the number of clients used for benchmarking, etc.
