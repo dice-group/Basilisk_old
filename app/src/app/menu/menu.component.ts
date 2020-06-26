@@ -418,7 +418,7 @@ export class MenuComponent implements OnInit {
           var indexAvgQmph = this.getIndex(this.metrices.indexOf(this.selectedOptions[1]));
 
           if(indexAvgQmph[2] == true){
-            allClientsData.push(data[1]);
+            allClientsData.push(this.getAvg(data[1]));
           }
           else{
             //if queryID is selected
@@ -546,21 +546,11 @@ export class MenuComponent implements OnInit {
         qmph = true;
         break;
       case 5:
-        indexOfMetrice = 1;
+        indexOfMetrice = 3;
         break;
       case 6:
-        indexOfMetrice = 3;
-        break;
-      case 7:
         indexOfMetrice = 4;
         break;
-      case 8:
-        indexOfMetrice = 3;
-        break;
-      case 8:
-        indexOfMetrice = 4;
-        break;
-
     }
     return [indexOfMetrice, avg, qmph]
   }
