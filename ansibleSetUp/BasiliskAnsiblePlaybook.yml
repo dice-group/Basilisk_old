@@ -1,50 +1,48 @@
 ---
 - hosts: basilisk
+  become: true
   tasks:
-          - name: Download Basilisk.
-            git:
-                  repo: https://github.com/ranjithmasthikatte/Basilisk.git
-                  dest: /home/dss/testingAnsible/
-                  version: feature/DockerHook
+    - name: Update and upgrade of apt package.
+      shell: apt update
 
-          - name: Download Iguana and unzip it.
-            unarchive:
-                    src: https://github.com/dice-group/IGUANA/releases/download/v3.0.0-alpha2/iguana-single-run.zip
-                    dest: /home/dss/testingAnsible/continuousBM/iguana/
-                    remote_src: yes
-                    extra_opts: "-j"
+    - name: Install latest version of maven.
+      apt:
+        name: maven
+        state: latest
+        update_cache: 'True'
 
-          - name: Make jar file executable.
-            file:
-                    path: /home/dss/testingAnsible/continuousBM/iguana/iguana-run.jar
-                    mode: "u=rwx,g=rx,o=r"
+    - name: CHeck Java
+      command: java -version
+      register: version
+      ignore_errors: True
+      
+    - name: install Java
+      apt: name=default-jdk state=present update_cache=yes force=yes
+      when: "version != 0"
 
-          - name: Create benchmarking workspace.
-            file:
-                    path: /home/dss/testingAnsible/continuousBM/bmWorkSpace/
-                    state: directory
-                    mode: "u=rwx,g=rwx,o=rx"
+    - name: Install git
+      apt: name=git state=present update_cache=yes
 
-          - name: Create results directory.
-            file:
-                    path: /home/dss/testingAnsible/continuousBM/results/
-                    state: directory
-                    mode: "u=rwx,g=rwx,o=rx"
+    - name: Download Basilisk.
+      git:
+        repo: https://github.com/ranjithmasthikatte/Basilisk.git
+        dest: /BasiliskSourceRepository
+        version: feature/DockerHook
+                  
+    - name: Maven build.
+      shell: "mvn clean install"
+      register: mvn_result
+      args:
+        chdir: /BasiliskSourceRepository
 
-          - name: Create testdata directory.
-            file:
-                    path: /home/dss/testingAnsible/continuousBM/testDataSet/
-                    state: directory
-                    mode: "u=rwx,g=rwx,o=rx"
+    - name: Create Basilisk root directory
+      file:
+        path: /Basilisk
+        state: directory
 
-          - name: Create log directory.
-            file:
-                    path: /home/dss/testingAnsible/logs/
-                    state: directory
-                    mode: "u=rwx,g=rwx,o=rx"
-
-          - name: Maven build.
-            shell: "mvn clean package"
-            register: mvn_result
-            args:
-                    chdir: /home/dss/testingAnsible/
+    - name: Copy Basilisk jar file to root directory
+      copy:
+        src: /BasiliskSourceRepository/target/basilisk-1.0-SNAPSHOT.jar
+        dest: /Basilisk/
+        remote_src: yes
+        mode: '0655'
