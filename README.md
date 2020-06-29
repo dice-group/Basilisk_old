@@ -109,7 +109,8 @@ runs in background with the nohup command, because if the Basilisk CBP is kicked
 because Iguana runs benchmark for 1 hour for each version and for each version Basilisk
 runs benchmarking process with 5 different workers settings, therefore Basilisk
 runs almost more than 5 hours for each version. If you do not want Iguana to run 
-benchmarking process for 1 hour then check [iguanaonfig](#iguanaonfig).
+benchmarking process for 1 hour then check 
+[Iguana config file](./README.md#Iguana-configuration-template:-iguanaConfig.ftl).
 
 ```shell script
 nohup java -jar basilisk-1.0-SNAPSHOT.jar --admin-user-name <admin user name> --admin-pass <admin password> &
