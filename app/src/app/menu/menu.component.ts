@@ -1,11 +1,12 @@
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import axios from 'axios';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import * as c3 from 'c3';
 import { min, max } from 'd3';
 import { Options } from 'ng5-slider';
-import { element } from 'protractor';
-import { worker } from 'cluster';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { KickoffBenchmarkingComponent } from '../kickoff-benchmarking/kickoff-benchmarking.component';
+import { FormGroup } from '@angular/forms';
 
 
 @Component({
@@ -17,12 +18,18 @@ export class MenuComponent implements OnInit {
   allchecked: boolean;
   selectedValues: any;
 
-  constructor() { }
+  constructor(public dialog: MatDialog) { }
 
   allDatasets="http://131.234.28.165:3030/$/datasets";
   connectionString="http://131.234.28.165:3030";
   postConnectionString="/sparql?query=";
 
+  @ViewChild('verSelect', {static: false}) verSelect: ElementRef;
+  @ViewChild('xAxis', {static: false}) xAxis: ElementRef;
+  @ViewChild('yAxis', {static: false}) yAxis: ElementRef;
+  @ViewChild('graph', {static: false}) graph: ElementRef;
+
+  form: FormGroup;
   delay = ms => new Promise(res => setTimeout(res, ms));
   counter = 0;
   listOfAllDatasets=[]; //contains names of available datasets
@@ -35,7 +42,6 @@ export class MenuComponent implements OnInit {
   noOfClients=["1 client", "4 clients", "8 clients", "16 clients", "32 clients", "All"];
   queryId=[];  //contains all queryIds
   dataDictionary = {}; //contains all data
-  result_size=[1, 2, 3]
   selectedVersionsResultSize = [];
   selectedVersionsQueryTime = [];
   selectedVersionsNoOfWorkers = [];
@@ -207,8 +213,7 @@ export class MenuComponent implements OnInit {
    * @param {Array} data - data in the form of array for each triple store
    */
   sortData(data){
-    console.log(data)
-    var qm = []
+    var queryMixes = []
     var arr4d = [];
     var arr3d = [];
     var version;
@@ -219,32 +224,40 @@ export class MenuComponent implements OnInit {
     })
 
     data.forEach(item => {
+      //if the response object contains connection string
       if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "connection") {
         uniqueVersion = item.value.value.slice(item.value.value.lastIndexOf("/")+1);
       }
+      //if the response object contains QPS value
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queriesPerSecond") {
         var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
         arr3d[index][1].push(item.value.value)
       }
+      //if the response object contains total time
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "totalTime") {
         var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
         arr3d[index][2].push(item.value.value)
       }
+      //if the response object contains number of failed queries
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "failed") {
         var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
         arr3d[index][3].push(item.value.value)
       }
+      //if the response object contains wrong codes
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "wrongCodes") {
         var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
         arr3d[index][4].push(item.value.value)
       }
+      //if the response object contains result size
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "resultSize") {
         var index = parseInt(item.query.value.slice(item.query.value.lastIndexOf("l")+1));
         arr3d[index][5].push(item.value.value)
       }
+      //if the response object contains queryMixes
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "queryMixes") {
-        qm.push(item.value.value)
+        queryMixes.push(item.value.value)
       }
+      //if the response object contains number of workers
       else if(item.property.value.slice(item.property.value.lastIndexOf("/")+1) == "noOfWorkers") {
         var worker = item.value.value;
         if(worker == "1") version = uniqueVersion + this.listOfWorkers[0];
@@ -256,7 +269,7 @@ export class MenuComponent implements OnInit {
       }
     });
 
-    arr4d.push(qm);
+    arr4d.push(queryMixes);
     arr4d.push(arr3d);
     this.dataDictionary[version] = arr4d;
   }
@@ -345,7 +358,6 @@ export class MenuComponent implements OnInit {
    */
   waitForData = async () => {
     await this.delay(100);
-    console.log("Waited 0.1s");
     if(Object.keys(this.dataDictionary).length == this.selectedVersions.length*5){
       this.sortDataForGraphs();
     }
@@ -405,7 +417,6 @@ export class MenuComponent implements OnInit {
       }
       else if(this.selectedOptions[0].slice(0, 6) == "sparql"){
         var selectedQueryID = parseInt(this.selectedOptions[0].slice(6));
-        console.log(selectedQueryID);
         this.listOfWorkers.forEach(worker => {
           keys.push(version+worker);
         });
@@ -466,7 +477,6 @@ export class MenuComponent implements OnInit {
             if(indexAvgQmph[1] == true){
               avgConcatenated = this.getAvg(concatenated);
               allClientsData.push(avgConcatenated);
-              //console.log(resultSize, allClientsData)
               allResultSize.push(resultSize);
             }
           }
@@ -474,7 +484,6 @@ export class MenuComponent implements OnInit {
       }
       if(allClientsData.length != 0){
         this.allVersionsSelectedData.push(allClientsData);
-        console.log(this.allVersionsSelectedData)
         this.selectedVersionsResultSize.push(allResultSize);
         this.selectedVersionsQueryTime.push(allQueryTime);
         this.selectedVersionsNoOfWorkers.push(allWorkers);
@@ -494,7 +503,6 @@ export class MenuComponent implements OnInit {
 
     if(!this.sliderMoved) this.getSliderMinMax();
     this.selectGraph();
-    console.log(this.dataDictionary);
   }
 
   /**
@@ -633,6 +641,7 @@ export class MenuComponent implements OnInit {
    */
   scatterPlot(xAxisVariable) {
 
+    //for number of clients the type of the x-axis should be category
     if(xAxisVariable == "noOfClients") {
       this.scatterChart = c3.generate({
         size: {
@@ -668,6 +677,7 @@ export class MenuComponent implements OnInit {
 
     });
     }
+    //for other values the type of the x-axis should be normal
     else {
       this.scatterChart = c3.generate({
         size: {
@@ -706,6 +716,7 @@ export class MenuComponent implements OnInit {
 
   for(var i=0; i<this.allVersionsSelectedData.length; i++){
 
+    //check id the selected radio button is Query Time
     if(xAxisVariable == "queryTime"){
       var x = this.allVersionsSelectedData[i][0];
       this.scatterChart.load({
@@ -720,6 +731,7 @@ export class MenuComponent implements OnInit {
       this.scatterChart.axis.labels({x: 'Total Query Time', y: 'Query Per Second'});
     }
 
+    //check id the selected radio button is No. Of Clients
     else if(xAxisVariable == "noOfClients"){
       var x = this.allVersionsSelectedData[i][0];
       this.scatterChart.load({
@@ -735,6 +747,7 @@ export class MenuComponent implements OnInit {
       this.scatterChart.axis.labels({x: 'Number of Clients', y: 'Query Per Second'});
     }
 
+    //check id the selected radio button is Results size
     else if(xAxisVariable == "resultSize") {
       var x = this.allVersionsSelectedData[i][0];
       this.scatterChart.load({
@@ -792,6 +805,7 @@ export class MenuComponent implements OnInit {
   if(this.selectedOptions[1] == 'QPS') chart.axis.labels({x: 'Number Of Clients', y: 'Query Per Second'});
   else chart.axis.labels({x: 'Number Of Clients', y: this.selectedOptions[1]});
 
+  //push all the columns one by one
   data.forEach(col => {
     chart.load({
       columns: [
@@ -837,9 +851,11 @@ export class MenuComponent implements OnInit {
       }
   });
 
+  //select the labels of the graphs
   if(this.selectedOptions[1] == 'QPS') chart.axis.labels({x: 'Number Of Clients', y: 'Query Per Second'});
   else chart.axis.labels({x: 'Number Of Clients', y: this.selectedOptions[1]});
 
+  //push all the columns one by one
   data.forEach(col => {
     chart.load({
       columns: [
@@ -882,8 +898,24 @@ getSliderMinMax(){
    */
   onChangeSlider = async () => {
     this.sliderMoved = true;
-    //await this.delay(100);
     this.sortDataForGraphs();
+  }
+
+  /**
+   * refresh the window to delete all selected data
+   */
+  clearAll() {
+    location.reload();
+  }
+
+  /**
+   * Open kick off benchmarking dialog when button is clicked
+   */
+  RunBenchmarking() {
+    let dialogRef = this.dialog.open(KickoffBenchmarkingComponent, {
+      height: '370px',
+      width: '600px',
+    });
   }
 }
 

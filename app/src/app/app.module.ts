@@ -11,15 +11,20 @@ import { MenuComponent } from './menu/menu.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { Ng5SliderModule } from 'ng5-slider';
+import { KickoffBenchmarkingComponent } from './kickoff-benchmarking/kickoff-benchmarking.component';
 
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    MenuComponent
+    MenuComponent,
+    KickoffBenchmarkingComponent
+  ],
+  entryComponents: [
+    KickoffBenchmarkingComponent
   ],
   imports: [
     BrowserModule,
@@ -35,7 +40,7 @@ import { Ng5SliderModule } from 'ng5-slider';
     MatDialogModule,
     Ng5SliderModule
   ],
-  providers: [],
+  providers: [{provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: {hasBackdrop: false}}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

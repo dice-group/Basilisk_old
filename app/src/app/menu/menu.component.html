@@ -12,7 +12,7 @@
           <div class="form-group" id="selectVersionDiv" style="position: absolute;">
             <mat-form-field style="margin-left: 1px; width: 400px; border-radius: 4px; font-size: 15px; height: 50px; background-color: white;">
              <mat-label style="margin-left: 10px;">Triplestore version</mat-label>
-             <mat-select id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
+             <mat-select #verSelect id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
                     style="width: 336px; border-radius: 4px; font-size: 15px; height: 50px; margin-left: 40px;" multiple>
               <!-- Get the list of avilable versions from listOfUniqueVersions -->
               <mat-option #matOption *ngFor="let version of listOfUniqueVersions"
@@ -34,7 +34,7 @@
         <div class="col-6" style=" display:inline-block;">
 
           <!-- Allow user to select x-axis of the graphs -->
-          <select mat-button id="xAxisVal" (change)="xAxisSelected($event.target.value)"
+          <select #xAxis mat-button id="xAxisVal" (change)="xAxisSelected($event.target.value)"
             style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
             <option value="Select X-axis" selected>Select X-axis</option>
             <optgroup class= "" label= "No. of Clients" style="font-size: 12px;">
@@ -49,17 +49,17 @@
           &nbsp;&nbsp;
 
           <!-- Allow User to select y-axis on the graphs -->
-          <select mat-button id="yAxisVal" (change)="yAxisSelected($event.target.value)"
+          <select #yAxis mat-button id="yAxisVal" (change)="yAxisSelected($event.target.value)"
           style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
             <option value="Select Y-axis" selected>Select Y-axis</option>
-            <optgroup class= "" style="font-size: 12px;">
-              <option *ngFor="let yaxis of metrices" >{{yaxis}}</option>
-            </optgroup>
+            <!-- <optgroup class= "" style="font-size: 12px;"> -->
+              <option *ngFor="let yaxis of metrices" style="font-size: 12px;" >{{yaxis}}</option>
+            <!-- </optgroup> -->
           </select>
 
           <!-- Allow user to select the graph that he/she wants to display data on -->
           <div>
-            <select mat-button id="graphVal" (change)="graphSelected($event.target.value)"
+            <select #graph mat-button id="graphVal" (change)="graphSelected($event.target.value)"
             style="border-radius: 4px; height: 30px; width: 380px; margin-top: 20px; background-color: white; font-size: 15px;">
               <option value="Select Graph" style="left:100px " selected>Select Graph</option>
               <option style="font-size: 12px;">Area-Chart</option>
@@ -74,7 +74,7 @@
           <div>
               <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 175px; font-weight:inherit" (click)="onSubmit()">Submit</button>
               &nbsp;&nbsp;&nbsp;&nbsp;
-              <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 175px; font-weight:inherit" onClick="">Clear all</button>
+              <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 175px; font-weight:inherit" (click)="clearAll()">Clear all</button>
           </div>
         </div>
       </div>
@@ -84,12 +84,13 @@
       <div class="menu-2" style="padding-left: 20px;">
         <table style=" padding: 10px 10px 10px 10px;">
           <tr style="height: 0px">
+            <button mat-raised-button (click)="RunBenchmarking()" style="height: 45px; width: 100%; margin-bottom: 65px;">Kick Off Benchmarking</button>
           </tr>
-          <tr>
-            <td class="color1">Download Results: &nbsp;
-                <label class="btn btn-sm" style="margin-left: 0px; font-weight:inherit" onclick="">RDF Format</label>
-                &nbsp;&nbsp;
-                <label class="btn btn-sm" style="font-weight:inherit" onclick="">CSV Format</label>
+          <tr style="margin-top: 30px">
+            <td class="color1" >
+                <button class="btn btn-sm" style="height: 25px; font-size: 14px; width: 170px;" onclick=""><span>Download RDF Format</span></button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn btn-sm" style="height: 25px; font-size: 14px; width: 170px; " onclick="">Download CSV Format</button>
             </td>
           </tr>
         </table>
