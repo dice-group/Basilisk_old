@@ -1,7 +1,6 @@
 # Basilisk
 
-<img src = "https://raw.githubusercontent.com/ranjithmasthikatte/BasiliskLogo/master/10.png" alt = "Basilisk Logo" width = "400" align = "center">
-
+![B logo](BasiliskLogo.png)
 ## What is Basilisk?
 
 Basilisk is a web application to run the continuous benchmarking
@@ -14,12 +13,79 @@ of Basilisk runs CBP on Git and Docker hook.
 In Git hook, Basilisk runs CBP on Tentris and Fuseki triple stores and
 in Docker hook, runs CBP on Tentris and Virtuoso triple stores.
 
+## Fuseki server setup
+
+First we need to set up the Fuseki server to store the results of 
+benchmarking process. Download the Fuseki server using the below command.
+
+```shell script
+wget https://downloads.apache.org/jena/binaries/apache-jena-fuseki-3.15.0.zip
+```
+
+Unzip the downloaded file.
+
+```shell script
+unzip apache-jena-fuseki-3.15.0.zip
+```
+
+Place the settings file for Fuseki server
+
+```shell script
+cd apache-jena-fuseki-3.15.0
+mkdir run
+cd run
+touch shiro.ini
+
+# Write the below content into the shiro.ini file
+
+[main]
+# Development
+ssl.enabled = false
+
+plainMatcher=org.apache.shiro.authc.credential.SimpleCredentialsMatcher
+#iniRealm=org.apache.shiro.realm.text.IniRealm
+iniRealm.credentialsMatcher = $plainMatcher
+
+[users]
+# Implicitly adds "iniRealm =  org.apache.shiro.realm.text.IniRealm"
+admin=pw
+
+[roles]
+
+[urls]
+## Control functions open to anyone
+/$/status  = anon
+/$/ping    = anon
+/$/metrics = anon
+/$/** = anon
+/**=anon 
+```
+
+
+Run the Fuseki server
+
+```shell script
+cd apache-jena-fuseki-3.15.0
+nohup ./fuseki-server --update -mem /ds2 &
+```
+
+Create below three datasets in the Fuseki server.
+- fuseki
+- tentris
+- virtuoso
+
+```shell script
+curl -X POST "http://0.0.0.0:3030/$/datasets?dbType=tdb2&dbName=fuseki"
+curl -X POST "http://0.0.0.0:3030/$/datasets?dbType=tdb2&dbName=tentris"
+curl -X POST "http://0.0.0.0:3030/$/datasets?dbType=tdb2&dbName=virtuoso"
+```
+
 ## How to build and run Basilisk?
 
 Download the Basilisk maven project from the git repository.
 
 ```shell script
-git clone https://github.com/ranjithmasthikatte/Basilisk.git
+git clone https://github.com/dice-group/Basilisk.git
 ```
 
 Build the maven project.
@@ -28,17 +94,53 @@ Build the maven project.
 mvn clean install
 ```
 
-Run Basilisk using maven command.
+Run Basilisk using maven command. The options --admin-user-name and --admin-pass
+are mandatory options, these options will be used by Basilisk and sets up the
+admin account. These credentials are necessary, later to kick off 
+the benchmarking process.
 
 ```shell script
 mvn exec:java -Dexec.args="--admin-user-name <admin user name> --admin-pass <admin password>"
 ```
 
-If you want to run Basilisk using the jar, use the below command.
+If you want to run Basilisk using the jar, use the below command. The below command
+runs in background with the nohup command, because if the Basilisk CBP is kicked off then it might take more than 
+2 weeks to complete the run if there are more versions to benchmark. This is
+because Iguana runs benchmark for 1 hour for each version and for each version Basilisk
+runs benchmarking process with 5 different workers settings, therefore Basilisk
+runs almost more than 5 hours for each version. If you do not want Iguana to run 
+benchmarking process for 1 hour then check [iguanaonfig](#iguanaonfig).
 
 ```shell script
-java -jar basilisk-1.0-SNAPSHOT.jar --admin-user-name <admin user name> --admin-pass <admin password>
+nohup java -jar basilisk-1.0-SNAPSHOT.jar --admin-user-name <admin user name> --admin-pass <admin password> &
 ```
+
+To monitor the Basilisk application that started in background, use the below command.
+The above command creates a file called nohup.out in the current directory.
+
+```shell script
+tail -f nohup.out
+```
+
+To kickoff the continuous benchmarking process, use the below command or open the link in a browser.
+
+```shell script
+curl "http://localhost:8080/runbenchmark?userName=<admin user name>&password=<admin password>&hook=<hook value>"
+```
+
+\<admin user name> and \<admin password> are the one that is used in the 
+--admin-user-name and --admin-pass options while running the Basilisk application.
+
+The hook key is an optional, and it can have below three integer values.
+By default, hook value is 3.
+
+- 1 - kickoff benchmark on Git hook
+- 2 - kickoff benchmark on Docker hook
+- 3 - kickoff benchmark on both Git and Docker  hook
+
+Once the benchmarking process is done by the Basilisk, results will be uploaded in 
+to Fuseki server and results in nt file will be stored in results directory.
+
 
 ## Understanding the Basilisk runtime environment
 
@@ -54,21 +156,25 @@ structure in the directory where the application is ran.
         ├── DockerMetaData.yml              # Information of the triple stores in Docker hook
         ├── DockerBenchmarkedAttempted.yml  # List of all the triple stores in Docker hook and its version that already benchmarked
         └── GitBenchmarkedAttempted.yml     # List of all the triple stores in Git hook and its version that already benchmarked
-    ├── results                             # Benchmarked result file as nt file
-    ├── runStat                             # Basilisk statistics file of a single run
-    └── logs                                # Basilisk log
+    ├── results/                            # Benchmarked result file as nt file
+    ├── runStat/                            # Basilisk statistics file of a single run
+    └── logs/                               # Basilisk log
 
 ### Things to remember
 
 - **iguana/**
 
-Please place all the test SPARQL queries(txt file) in this directory. The remaining 
+Please place all the test SPARQL queries(txt file) in this directory. 
+If the test query files are not present in this directory, Basilisk will throw an exception.
+The remaining 
 files like Iguana jar file and related files will be downloaded by the Basilisk into this folder.
 
 - **testDataSet/**
 
 Please place all the test data set(nt, n3 etc.) to be loaded into the triple store for benchmarking process
 into this directory.
+If the test dataset are not present in this directory, then docker might fail
+to run the container.
 
 - **GitMetaData.yml**
 
@@ -101,7 +207,6 @@ For example, To change the port on tentris, you must change the value
 of port key in this file.
 
 ```yaml
-GitMetaData:
 DockerMetaData:
 - name: tentris
   repositoryName: dicegroup/tentris_server
@@ -127,7 +232,7 @@ a particular version of a triple store again, remove that version's hash
 from this file.
 
 Example file looks like below. Please neglect initialTempKickOffData, this is
-created by Basilisk to avoid exception.
+created by Basilisk to avoid yaml exception.
 
 ```yaml
 DockerBenchmarkedAttempted:
@@ -152,7 +257,7 @@ a particular version of a triple store again in Git hook, remove that version's 
 from this file.
 
 Example file looks like below. Please neglect initialTempKickOffData, this is
-created by Basilisk to avoid exception.
+created by Basilisk to avoid yaml exception.
 
 ```yaml
 GitBenchmarkedAttempted:
@@ -169,5 +274,25 @@ GitBenchmarkedAttempted:
   - db794b97df9a28a021d994132dd9bbf929e59057
 ```
 
-### iguanaConfig.ftl
-This is the configuration file(Basilisk/src/main/resources/iguanaConfig.ftl) which is used as a template for running benchmarking using Iguana. Make modifications here in case you want to make changes like the number of clients used for benchmarking, etc.
+# Basilisk run's statistics file
+
+Once the Basilisk completes a benchmark process kicked off by the user,
+it creates a statistics file in runStat directory. This file contains the 
+informations like counts and list of all triple stores, version,
+its hash and status.
+
+Status can be :
+- Success
+- Fail
+- Already ran benchmark on this version
+
+# Iguana configuration template: iguanaConfig.ftl
+The file iguanaConfig.ftl in the Basilisk's resource is a template used by the Basilisk during runtime to 
+create an Iguana configuration file for each version.
+If you want to modify the Iguana configuration file then please update this template.
+
+For example, If you want to run the Iguana for 1 minute, then modify the value of timeLimit in this file as shown below.
+ 
+```shell script
+task0x.timeLimit = 60000   # Time in miliseconds
+```
