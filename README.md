@@ -110,7 +110,7 @@ because Iguana runs benchmark for 1 hour for each version and for each version B
 runs benchmarking process with 5 different workers settings, therefore Basilisk
 runs almost more than 5 hours for each version. If you do not want Iguana to run 
 benchmarking process for 1 hour then check 
-[Iguana config file](./README.md#Iguana-configuration-template:-iguanaConfig.ftl).
+[Iguana config file](#iguana-configuration).
 
 ```shell script
 nohup java -jar basilisk-1.0-SNAPSHOT.jar --admin-user-name <admin user name> --admin-pass <admin password> &
@@ -287,7 +287,7 @@ Status can be :
 - Fail
 - Already ran benchmark on this version
 
-# Iguana configuration template: iguanaConfig.ftl
+## Iguana Configuration
 The file iguanaConfig.ftl in the Basilisk's resource is a template used by the Basilisk during runtime to 
 create an Iguana configuration file for each version.
 If you want to modify the Iguana configuration file then please update this template.
