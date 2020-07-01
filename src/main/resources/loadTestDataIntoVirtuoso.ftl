@@ -1,0 +1,1 @@
+docker exec ${containerId} isql 1111 dba mysecret exec="DELETE FROM DB.DBA.RDF_QUAD;DELETE FROM DB.DBA.LOAD_LIST;ld_dir( '/usr/share/proj', '${testDataset}', 'http://localhost:${port}/' );RDF_LOADER_RUN();"
