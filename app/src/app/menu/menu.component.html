@@ -1,0 +1,117 @@
+<!-- Contains the whole menu -->
+<div class="menu" id="menuId">
+    <!-- Constains logo of the app -->
+    <div class="logo" style="width: 100px; margin-left: 20px;">
+      <img src=".\assets\Images\logo11.png" height="135" width="160" />
+    </div>
+
+      <!-- Contains all the UI widgets used to select data to display on the graphs -->
+      <div class="row menu-1" style="margin-bottom: 20px;">
+        <!-- Contains select versions drop down -->
+        <div class="col-6" style="padding: 10px 10px; display: flex; position: relative;">
+          <div class="form-group" id="selectVersionDiv" style="position: absolute;">
+            <mat-form-field style="margin-left: 1px; width: 400px; border-radius: 4px; font-size: 15px; height: 50px; background-color: white;">
+             <mat-label style="margin-left: 10px;">Triplestore version</mat-label>
+             <mat-select #verSelect id="selectVersion" name="selectVersion" (change)="versionSelected($event.target.value)"
+                    style="width: 336px; border-radius: 4px; font-size: 15px; height: 50px; margin-left: 40px;" multiple>
+              <!-- Get the list of avilable versions from listOfUniqueVersions -->
+              <mat-option #matOption *ngFor="let version of listOfUniqueVersions"
+                          (click)="updateVersion(matOption.value, matOption.selected)" value="{{version}}">
+                          {{version}}
+              </mat-option>
+             </mat-select>
+            </mat-form-field>
+          </div>
+          <!-- Contains the list of selected versions as an unordered list-->
+          <div class="row" style="margin-top:23px; position: absolute; left: 419px;">
+            <ul cdkDropList (cdkDropListDropped)="dragDrop($event)" id="myList" class="list-group" >
+              <li cdkDrag class="list-group-item" *ngFor="let version of selectedVersions">
+                {{version}}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-6" style=" display:inline-block;">
+
+          <!-- Allow user to select x-axis of the graphs -->
+          <select #xAxis mat-button id="xAxisVal" (change)="xAxisSelected($event.target.value)"
+            style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
+            <option value="Select X-axis" selected>Select X-axis</option>
+            <optgroup class= "" label= "No. of Clients" style="font-size: 12px;">
+              <option *ngFor="let client of noOfClients" >{{client}}</option>
+            </optgroup>
+            <optgroup class= "" label= "Query-Id" style="font-size: 12px;">
+              <option *ngFor="let query of queryId">{{query}}</option>
+            </optgroup>
+          </select>
+
+
+          &nbsp;&nbsp;
+
+          <!-- Allow User to select y-axis on the graphs -->
+          <select #yAxis mat-button id="yAxisVal" (change)="yAxisSelected($event.target.value)"
+          style="width: 180px; border-radius: 4px; height: 30px; background-color: white; font-size: 15px;">
+            <option value="Select Y-axis" selected>Select Y-axis</option>
+            <!-- <optgroup class= "" style="font-size: 12px;"> -->
+              <option *ngFor="let yaxis of metrices" style="font-size: 12px;" >{{yaxis}}</option>
+            <!-- </optgroup> -->
+          </select>
+
+          <!-- Allow user to select the graph that he/she wants to display data on -->
+          <div>
+            <select #graph mat-button id="graphVal" (change)="graphSelected($event.target.value)"
+            style="border-radius: 4px; height: 30px; width: 380px; margin-top: 20px; background-color: white; font-size: 15px;">
+              <option value="Select Graph" style="left:100px " selected>Select Graph</option>
+              <option style="font-size: 12px;">Area-Chart</option>
+              <option  style="font-size: 12px;">Bar-Chart</option>
+              <option  style="font-size: 12px;">Line-Chart</option>
+              <option  style="font-size: 12px;">Scatter-Plot</option>
+            </select>
+          </div>
+
+
+          <!-- Contains Submit button to submit the selected and clear all button to clear all the selected data -->
+          <div>
+              <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 175px; font-weight:inherit" (click)="onSubmit()">Submit</button>
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              <button class="btn btn-sm" style="height: 26px; margin-top: 30px; width: 175px; font-weight:inherit" (click)="clearAll()">Clear all</button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Allow user to Download results in the form of RDF and CSV format -->
+      <div class="menu-2" style="padding-left: 20px;">
+        <table style=" padding: 10px 10px 10px 10px;">
+          <tr style="height: 0px">
+            <button mat-raised-button (click)="RunBenchmarking()" style="height: 45px; width: 100%; margin-bottom: 65px;">Kick Off Benchmarking</button>
+          </tr>
+          <tr style="margin-top: 30px">
+            <td class="color1" >
+                <button class="btn btn-sm" style="height: 25px; font-size: 14px; width: 170px;" onclick=""><span>Download RDF Format</span></button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn btn-sm" style="height: 25px; font-size: 14px; width: 170px; " onclick="">Download CSV Format</button>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+<!-- Contains the side menu -->
+  <div *ngIf="displaySideMenu" id="sidemenu">
+    <!-- Display side menu only if 'displaySideMenu' is true -->
+    <div style="margin-top: 40px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <label style="color: aliceblue; font-size: medium; margin-left: -30px;">Result Size:</label>
+      <ng5-slider class="slider" [(value)]="value" [(highValue)]="highValue" [options]="options" (valueChange)="onChangeSlider()"></ng5-slider>
+      <!-- Display these radio buttons only for the scatterPlot graphs -->
+      <div *ngIf="disPlayScatterPlot" style="margin-top: 40px;">
+        <label style="color: aliceblue; font-size: medium; margin-left: -20px;">Change x-axis:</label>
+        <form class="color1">
+          <input class="rad" type="radio" value="clients" name="rad" (click)="scatterPlot('noOfClients')" checked>No. of Clients<br>
+          <input class="rad" type="radio" value="result" name="rad" (click)="scatterPlot('resultSize')">Result Size<br>
+        </form>
+      </div>
+    </div>
+
+  </div>
+<!--   All the graphs will be displayed inside this div element -->
+  <div id="chart" style="margin:30px 300px;"></div>
