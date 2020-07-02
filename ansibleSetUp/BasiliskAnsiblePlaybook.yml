@@ -1,0 +1,139 @@
+---
+- hosts: basilisk
+  become: true
+  tasks:
+    - name: Update and upgrade of apt package.
+      shell: apt update
+
+    - name: Install latest version of maven.
+      apt:
+        name: maven
+        state: latest
+        update_cache: 'True'
+
+    - name: Check Java
+      command: java -version
+      register: version
+      ignore_errors: True
+      
+    - name: install Java
+      apt: name=default-jdk state=present update_cache=yes force=yes
+      when: "version != 0"
+
+    - name: Install git
+      apt: name=git state=present update_cache=yes
+
+    - name: Download Basilisk.
+      git:
+        repo: https://github.com/ranjithmasthikatte/Basilisk.git
+        dest: BasiliskResource/BasiliskSourceRepository
+        version: feature/DockerHook
+                  
+    - name: Maven build.
+      shell: "mvn clean install"
+      register: mvn_result
+      args:
+        chdir: BasiliskResource/BasiliskSourceRepository
+
+    - name: Create Basilisk root directory
+      file:
+        path: Basilisk
+        state: directory
+
+    - name: Copy Basilisk jar file to root directory
+      copy:
+        src: BasiliskResource/BasiliskSourceRepository/target/basilisk-1.0-SNAPSHOT.jar
+        dest: Basilisk/basilisk.jar
+        remote_src: yes
+        mode: '0776'
+
+    - name: Run Basilisk
+      shell: nohup java -jar  basilisk.jar --admin-user-name admin --admin-pass admin &
+      args:
+        chdir: Basilisk/
+
+    - name: Change persmission
+      file:
+        path: Basilisk/
+        mode: u=rwx,g=rwx,o=rx
+        recurse: yes
+
+    - name: Create directory for Fuseki
+      file:
+        path: BasiliskResource/apache/
+        state: directory
+
+    - name: Download Fuseki server
+      get_url:
+        url: https://downloads.apache.org/jena/binaries/apache-jena-fuseki-3.15.0.zip
+        dest: BasiliskResource/apache/apache-jena-fuseki-3.15.0.zip
+        mode: '0655'
+
+    - name: Unzip fuseki
+      unarchive:
+        src: BasiliskResource/apache/apache-jena-fuseki-3.15.0.zip
+        dest: BasiliskResource/apache/
+        remote_src: yes
+
+    - name: Create Run directory for fuseki server
+      file:
+        path: BasiliskResource/apache/apache-jena-fuseki-3.15.0/run
+        state: directory
+
+    - name: Create shiro.ini for Fuseki server
+      copy:
+        dest: "BasiliskResource/apache/apache-jena-fuseki-3.15.0/run/shiro.ini"
+        content: |
+          [main]
+          ssl.enabled = false
+
+          plainMatcher=org.apache.shiro.authc.credential.SimpleCredentialsMatcher
+          iniRealm.credentialsMatcher = $plainMatcher
+
+          [users]
+          admin=pw
+
+          [roles]
+
+          [urls]
+          /$/status = anon
+          /$/ping = anon
+          /$/metrics = anon
+          /$/** = anon
+          /** = anon
+
+    - name: Run Fuseki server
+      shell: nohup ./fuseki-server --update -mem /ds2 &
+      args:
+        chdir: BasiliskResource/apache/apache-jena-fuseki-3.15.0/
+
+    - name: Pause for 15 seconds for Fuseki server to come up
+      pause:
+        seconds: 15
+
+    - name: Creating fuseki dataset in Fuseki server
+      uri:
+        url: http://0.0.0.0:3030/$/datasets
+        method: POST
+        body_format: form-urlencoded
+        body:
+          - [ dbType, tdb2 ]
+          - [ dbName, fuseki ]
+
+    - name: Creating tentris dataset in Fuseki server
+      uri:
+        url: http://0.0.0.0:3030/$/datasets
+        method: POST
+        body_format: form-urlencoded
+        body:
+          - [ dbType, tdb2 ]
+          - [ dbName, tentris ]
+
+    - name: Creating virtuoso dataset in Fuseki server
+      uri:
+        url: http://0.0.0.0:3030/$/datasets
+        method: POST
+        body_format: form-urlencoded
+        body:
+          - [ dbType, tdb2 ]
+          - [ dbName, virtuoso ]
